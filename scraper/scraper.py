@@ -40,3 +40,6 @@ def scrape(keyword="software engineer", location="Remote", pages=5):
             time.sleep(2)  # be polite
 
         browser.close()
+
+if __name__ == "__main__":
+    scrape()

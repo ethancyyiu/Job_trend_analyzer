@@ -15,7 +15,7 @@ def save(posting):
 
 def scrape(keyword="software engineer", location="Remote", pages=5):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
 
         for i in range(pages):

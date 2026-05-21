@@ -26,3 +26,11 @@ def run():
     with DB.cursor() as cur:
         cur.execute("SELECT id, title FROM postings WHERE skills IS NULL OR skills = '{}'")
         rows = cur.fetchall()
+        print(f"Processing {len(rows)} postings...")
+
+            for row_id, title in rows:
+                found = extract_skills(title)
+                cur.execute(
+                    "UPDATE postings SET skills = %s WHERE id = %s",
+                    (found, row_id)
+                )

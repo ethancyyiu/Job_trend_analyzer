@@ -34,3 +34,9 @@ def run():
                     "UPDATE postings SET skills = %s WHERE id = %s",
                     (found, row_id)
                 )
+
+        DB.commit()
+        print("all done!")
+
+if __name__ == "__main__":
+    run()

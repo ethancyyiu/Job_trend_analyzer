@@ -48,9 +48,6 @@ def scrape(keyword="software engineer", location="Remote", pages = 20):
             page.wait_for_selector("div.job-card-container", timeout=10000)  
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
             page.wait_for_timeout(2000)  
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
 
             page.wait_for_selector("div.job-card-container", timeout=20000)
 

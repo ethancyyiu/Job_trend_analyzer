@@ -8,7 +8,7 @@ load_dotenv()
 DB = psycopg2.connect(os.environ["DATABASE_URL"])
 
 SKILLS = [
-    "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c"
+    "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c", "html", "css",
 
     "react", "vue", "angular", "node.js", "fastapi", "django", "flask",
 
@@ -30,12 +30,12 @@ def run():
         rows = cur.fetchall()
         print(f"Processing {len(rows)} postings...")
 
-            for row_id, title in rows:
-                found = extract_skills(title)
-                cur.execute(
-                    "UPDATE postings SET skills = %s WHERE id = %s",
-                    (found, row_id)
-                )
+        for row_id, title in rows:
+            found = extract_skills(title)
+            cur.execute(
+                "UPDATE postings SET skills = %s WHERE id = %s",
+                (found, row_id)
+            )
 
         DB.commit()
         print("all done!")

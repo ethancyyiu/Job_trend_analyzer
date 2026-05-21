@@ -22,4 +22,7 @@ def extract_skills(text):
     text = text.lower()
     return [skill for skill in SKILLS if re.search(rf"\b{re.escape(skill)}\b", text)]
 
-    
+def run():
+    with DB.cursor() as cur:
+        cur.execute("SELECT id, title FROM postings WHERE skills IS NULL OR skills = '{}'")
+        rows = cur.fetchall()

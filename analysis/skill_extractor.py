@@ -17,3 +17,9 @@ SKILLS = [
 
     "git", "github", "linux", "rest api", "graphql", "kafka", "fastapi"
 ]
+
+def extract_skills(text):
+    text = text.lower()
+    return [skill for skill in SKILLS if re.search(rf"\b{re.escape(skill)}\b", text)]
+
+    

@@ -29,7 +29,7 @@ def scrape(keyword="software engineer", location="Remote", pages=5):
                 f"?keywords={keyword}&location={location}&start={i * 25}"
             )
             page.goto(url)
-            page.wait_for_timeout(3000)  # let JS render
+            page.wait_for_timeout(3000)  
 
             cards = page.query_selector_all(".job-search-card")
             for card in cards:
@@ -42,7 +42,7 @@ def scrape(keyword="software engineer", location="Remote", pages=5):
                 except:
                     continue
 
-            time.sleep(2)  # be polite
+            time.sleep(2)  
 
         browser.close()
 

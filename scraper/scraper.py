@@ -21,28 +21,44 @@ def save(posting):
 def scrape(keyword="software engineer", location="Remote", pages=5):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        page = browser.new_page()
+        context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+        page = context.new_page()
+
+        page.goto("https://www.linkedin.com/login")
+        if page.locator("#username").count() > 0:
+            print("Logging in...")
+            page.fill("#username", os.environ["LI_EMAIL"])
+            page.fill("#password", os.environ["LI_PASSWORD"])
+            page.click("button[type=submit]")
+            page.wait_for_timeout(2000)
+        else:
+            print("Already logged in, skipping login")
 
         for i in range(pages):
             url = (
                 f"https://www.linkedin.com/jobs/search/"
                 f"?keywords={keyword}&location={location}&start={i * 25}"
             )
-            page.goto(url)
-            page.wait_for_timeout(3000)  
+            page.goto(url, timeout = 60000)
+            page.wait_for_selector("div[data-job-id]", timeout=10000)  
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
+            page.wait_for_timeout(2000)  
 
-            cards = page.query_selector_all(".job-search-card")
+            page.wait_for_selector("div[data-job-id]", timeout=20000)
+
+            cards = page.query_selector_all("div[data-job-id]")
+            print(f"Page {i+1}: found {len(cards)} cards")
             for card in cards:
                 try:
                     save({
-                        "title":    card.query_selector(".base-search-card__title").inner_text().strip(),
-                        "company":  card.query_selector(".base-search-card__subtitle").inner_text().strip(),
-                        "location": card.query_selector(".job-search-card__location").inner_text().strip(),
+                        "title":    card.query_selector(".job-card-list__title").inner_text().strip(),
+                        "company":  card.query_selector(".job-card-container__company-name").inner_text().strip(),
+                        "location": card.query_selector(".job-card-container__metadata-item").inner_text().strip(),
                     })
                 except:
                     continue
 
-            time.sleep(2)  
+            time.sleep(3)  
 
         browser.close()
 

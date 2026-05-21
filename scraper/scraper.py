@@ -2,8 +2,12 @@ from playwright.sync_api import sync_playwright
 import psycopg2
 from datetime import date
 import time
+import os
+from dotenv import load_dotenv
 
-DB = psycopg2.connect("postgresql://localhost/jobtrends")
+load_dotenv() 
+
+DB = psycopg2.connect(os.environ["DATABASE_URL"])
 
 def save(posting):
     with DB.cursor() as cur:

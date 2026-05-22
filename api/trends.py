@@ -45,10 +45,10 @@ def get_postings():
 
     answer = []
     for i in rows:
-        item = {"title": r[0], "company": r[1], "location": r[2], "date": str(r[3])}
+        item = {"title": i[0], "company": i[1], "location": i[2], "date": str(i[3])}
         answer.append(item)
 
-    return answer    
+    return answer
 
 @router.get("/")
 def home():

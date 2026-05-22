@@ -1,10 +1,9 @@
 fastapi==0.95.0
 uvicorn[standard]==0.22.0
 sqlalchemy==2.0.29
-greenlet==3.0.3
 alembic==1.11.1
 psycopg2-binary==2.9.12
-playwright==1.36.0
+playwright==1.42.0
 pandas==2.2.2
 scikit-learn==1.4.2
 httpx==0.24.1

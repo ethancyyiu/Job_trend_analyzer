@@ -11,3 +11,8 @@ load_dotenv()
 app.add_middleware(CORSMiddleware, allow_origins = ["*"], allow_methods = ["*"], allow_headers = ["*"],)
 
 DB = psycopg2.connect(os.environ["DATABASE_URL"])
+
+def query(sql, params=None):
+    with DB.cursor() as cur:
+        cur.execute(sql, params)
+        return cur.fetchall()

@@ -5,6 +5,14 @@ import {skills_view} from "./pages/skills_view"
 export default function App() {
   const [page, setPage] = useState("dashboard")
 
+  let showing_page
+  if (page === "dashboard") {
+    showing_page = <dashboard />
+  }
+  else {
+    showing_page = <skills_view />
+  }
+
   return (
     <div style = {{fontFamily: "sans-serif", padding: "20px", maxWidth: "1000px", margin: "0 auto"}}>
       <h1>Job Trend Analyzer</h1>
@@ -20,7 +28,7 @@ export default function App() {
           }
         }></button>
       </nav>
-
+        {showing_page}
     </div>
   )
 }

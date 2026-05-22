@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import {dashboard} from "./pages/dashboard"
-import {skills_view} from "./pages/skills_view"
+import {useState} from 'react'
+import {Dashboard} from "./pages/Dashboard"
+import {SkillsView} from "./pages/SkillsView"
 
 export default function App() {
-  const [page, setPage] = useState("dashboard")
+  const [page, setPage] = useState("Dashboard")
 
   let showing_page
-  if (page === "dashboard") {
-    showing_page = <dashboard />
+  if (page === "Dashboard") {
+    showing_page = <Dashboard />
   }
   else {
-    showing_page = <skills_view />
+    showing_page = <SkillsView />
   }
 
   return (
@@ -19,14 +19,14 @@ export default function App() {
       <nav style = {{marginBottom : "20px"}}>
         <button onClick = {
           function() {
-            setPage("dashboard")
+            setPage("Dashboard")
           }}
           style = {{marginRight: "10px"}}>Trends</button>
         <button onClick = {
           function() {
-            setPage("skills_view")
+            setPage("SkillsView")
           }
-        }></button>
+        }>Skills</button>
       </nav>
         {showing_page}
     </div>

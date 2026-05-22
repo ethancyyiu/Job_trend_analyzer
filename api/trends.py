@@ -13,7 +13,7 @@ def get_trends():
     answer = []
     for i in rows:
         item = {"date": str(i[0]), "count": i[1]}
-        result.append(item)
+        answer.append(item)
     
     return answer
 
@@ -21,7 +21,7 @@ def get_trends():
 def get_skills():
     rows = query("""SELECT unnest(skills) as skill, COUNT(*) as count
         FROM postings
-        WHERE skill IS NOT NULL
+        WHERE skills IS NOT NULL
         GROUP BY skill
         ORDER BY count DESC
         LIMIT 20

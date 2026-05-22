@@ -2,7 +2,7 @@ import {useEffect, useState} from "react"
 import axios from "axios"
 import {Bar, BarChart, XAxis, YAxis, ToolTip, CartesianGrid} from "recharts"
 
-export function dashboard() {
+export function skills_view() {
     const [data, setData] = useState([])
 
     useEffect(

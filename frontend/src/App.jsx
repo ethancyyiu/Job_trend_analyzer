@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {Dashboard} from "./pages/Dashboard"
 import {SkillsView} from "./pages/SkillsView"
+import {Postings} from "./pages/Postings"
 
 export default function App() {
   const [page, setPage] = useState("Dashboard")
@@ -9,8 +10,11 @@ export default function App() {
   if (page === "Dashboard") {
     showing_page = <Dashboard />
   }
-  else {
+  else if (page === "SkillsView") {
     showing_page = <SkillsView />
+  }
+  else {
+    showing_page = <Postings />
   }
 
   return (
@@ -27,6 +31,11 @@ export default function App() {
             setPage("SkillsView")
           }
         }>Skills</button>
+        <button onClick = {
+          function() {
+            setPage("Postings")
+          }
+        }>Postings</button>
       </nav>
         {showing_page}
     </div>

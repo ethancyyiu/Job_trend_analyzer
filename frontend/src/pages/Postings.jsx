@@ -1,14 +1,14 @@
 import {useEffect, useState} from "react"
 import axios from "axios"
 
-export function Posting() {
+export function Postings() {
     const[data, setData] = useState([])
 
     useEffect(
         function() {
             axios.get("http://localhost:8000/postings").then(
                 function(answer) {
-                    return (answer.data)
+                    setData(answer.data)
                 }
             )
         }, [])
@@ -16,7 +16,7 @@ export function Posting() {
     return(
         <div>
             <h2>Recent Postings</h2>
-            <table style = {{width = "100%", borderCollapse: "collapse"}}>
+            <table style = {{width: "100%", borderCollapse: "collapse"}}>
                 <thead>
                     <tr>
                         <th style = {{textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px"}}>Title</th>

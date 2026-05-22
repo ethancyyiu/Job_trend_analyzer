@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from api.db import query
 
-router = APIrouter()
+router = APIRouter()
 
 @router.get("/trends")
 def get_trends():
@@ -48,4 +48,8 @@ def get_postings():
         item = {"title": r[0], "company": r[1], "location": r[2], "date": str(r[3])}
         answer.append(item)
 
-    return answer        
+    return answer    
+
+@router.get("/")
+def home():
+    return {"message: Bello!!!"}

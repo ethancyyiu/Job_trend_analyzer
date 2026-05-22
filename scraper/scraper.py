@@ -4,10 +4,17 @@ from datetime import date
 import time
 import os
 from dotenv import load_dotenv
+import random
 
 load_dotenv() 
 
 DB = psycopg2.connect(os.environ["DATABASE_URL"])
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+]
 
 def save(posting):
     with DB.cursor() as cur:
@@ -21,7 +28,10 @@ def save(posting):
 def scrape(keyword = "software engineer", location = "Remote", pages = 5):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+        context = browser.new_context(
+            user_agent=random.choice(USER_AGENTS), 
+            storage_state = "session.json" if os.path.exists("session.json") else None
+        )
         page = context.new_page()
 
         page.goto("https://www.linkedin.com/login")
@@ -36,8 +46,13 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
             page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
             page.click("button[type=submit]")
             page.wait_for_url("**/feed/**", timeout=15000) 
+            context.storage_state(path = "session.json")
         else:
             print("Already logged in, skipping login")
+
+        # page.goto("https://www.linkedin.com/jobs/")
+        # page.wait_for_timeout(3000)
+        # print("Jobs URL:", page.url)
 
         for i in range(pages):
             url = (
@@ -45,14 +60,13 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
                 f"?keywords={keyword}&location={location}&start={i * 25}"
             )
             page.goto(url, timeout = 60000)
-            page.wait_for_selector("div.job-card-container", timeout=10000)  
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)") 
-            page.wait_for_timeout(2000)  
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_selector("div.job-card-container", timeout = 10000) 
+            
+            for _ in range(10):
+                page.evaluate("window.scrollBy(0, 2000)")
+                page.wait_for_timeout(800)
 
-            page.wait_for_selector("div.job-card-container", timeout=20000)
+            page.wait_for_timeout(5000)
 
             cards = page.query_selector_all("div.job-card-container")
             print(f"Page {i+1}: found {len(cards)} cards")
@@ -66,7 +80,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
                     continue
 
                 card.click()
-                page.wait_for_timeout(2000)
+                page.wait_for_timeout(random.randint(1500, 3000))
 
                 desc_el = page.query_selector(".jobs-description__content")
                 description = desc_el.inner_text().strip() if desc_el else ""
@@ -81,7 +95,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
                 # print(card.inner_html()[:2000])
                 # break
 
-            time.sleep(3)  
+            time.sleep(random.uniform(4, 8)) 
 
         browser.close()
 

@@ -2,4 +2,6 @@
 .env
 node_modules/
 session.json
+__pycache__/
+*.pyc
 

@@ -22,7 +22,7 @@ export function Postings() {
                         <th style = {{textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px"}}>Title</th>
                         <th style={{ textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px" }}>Company</th>
                         <th style={{ textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px" }}>Location</th>
-                        <th style={{ textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px" }}>Date</th>
+                        <th style={{ textAlign: "left", borderBottom: "1px solid #ccc", padding: "8px" }}>Date Posted</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -39,9 +39,9 @@ def get_skills():
 @router.get("/postings")
 def get_postings():
     rows = query("""
-        SELECT title, company, location, date_scraped
+        SELECT title, company, location, date_posted
         FROM postings
-        ORDER BY date_scraped DESC
+        ORDER BY date_posted DESC
         LIMIT 100
     """)
 

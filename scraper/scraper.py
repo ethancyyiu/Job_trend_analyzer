@@ -25,7 +25,7 @@ def save(posting):
         """, (posting['title'], posting['company'], posting['location'], posting['description'], date.today()))
     DB.commit()
 
-def scrape(keyword = "software engineer", location = "Remote", pages = 5):
+def scrape(keyword = "software engineer", location = "Remote", pages = 3):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         context = browser.new_context(
@@ -39,7 +39,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
         page.wait_for_timeout(6000)
         print("Current URL:", page.url) 
 
-        if page.url == "https://www.linkedin.com/login" or "login" in page.url:
+        if page.url == "https://www.linkedin.com/login" or "login" in page.url.lower():
             print("Logging in...")
             # page.wait_for_selector("#username", timeout=10000)
             page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
@@ -61,9 +61,51 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
             )
             page.goto(url, timeout = 60000)
             page.wait_for_selector("div.job-card-container", timeout = 10000) 
+
+            # result = page.evaluate("""
+            #     (() => {
+            #         const all = document.querySelectorAll('*');
+            #             for (const el of all) {
+            #             const style = getComputedStyle(el);
+            #             if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 50) {
+            #                 return {
+            #                     tag: el.tagName,
+            #                     class: el.className.substring(0, 100),
+            #                     testid: el.getAttribute('data-testid'),
+            #                     scrollHeight: el.scrollHeight,
+            #                     clientHeight: el.clientHeight
+            #                 };
+            #             }
+            #         }
+            #         return 'none found';
+            #     })();
+            # """)
+            # print("Scrollable element:", result)
+
             
-            for _ in range(10):
-                page.evaluate("window.scrollBy(0, 2000)")
+            # for _ in range(10):
+            #     page.evaluate("""
+            #             const el = document.querySelector('[data-testid="lazy-column"]') || document.querySelector('.scaffold-layout__list');
+            #         if (el) el.scrollBy(0, 500);
+            #     """)
+            #     page.wait_for_timeout(800)
+            # for hello in range(10):
+            #     page.evaluate("window.scrollBy(0, 3000)")
+            #     print("scrolling")
+            #     page.wait_for_timeout(800)
+            for hello in range(10):
+                page.evaluate("""
+                    (() => {
+                        const all = document.querySelectorAll('*');
+                        for (const el of all) {
+                            const style = getComputedStyle(el);
+                            if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && 
+                                el.scrollHeight > el.clientHeight + 50) {el.scrollBy(0, 500);
+                                return;
+                            }
+                        }
+                    })();
+                """)
                 page.wait_for_timeout(800)
 
             page.wait_for_timeout(5000)
@@ -95,7 +137,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 5):
                 # print(card.inner_html()[:2000])
                 # break
 
-            time.sleep(random.uniform(4, 8)) 
+            time.sleep(random.uniform(10, 20)) 
 
         browser.close()
 

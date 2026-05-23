@@ -5,6 +5,8 @@ import time
 import os
 from dotenv import load_dotenv
 import random
+from analysis.date_parser import parse_date
+import re
 
 load_dotenv() 
 
@@ -13,10 +15,10 @@ DB = psycopg2.connect(os.environ["DATABASE_URL"])
 def save(posting):
     with DB.cursor() as cur:
         cur.execute("""
-            INSERT INTO postings (title, company, location, description, date_scraped)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO postings (title, company, location, description, date_scraped, date_posted)
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING
-        """, (posting['title'], posting['company'], posting['location'], posting['description'], date.today()))
+        """, (posting['title'], posting['company'], posting['location'], posting['description'], date.today(), posting.get('date_posted')))
     DB.commit()
 
 def scrape(keyword = "software engineer", location = "Remote", pages = 3):
@@ -57,27 +59,6 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
             )
             page.goto(url, timeout = 60000)
             page.wait_for_selector("div.job-card-container", timeout = 10000) 
-
-            # result = page.evaluate("""
-            #     (() => {
-            #         const all = document.querySelectorAll('*');
-            #             for (const el of all) {
-            #             const style = getComputedStyle(el);
-            #             if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 50) {
-            #                 return {
-            #                     tag: el.tagName,
-            #                     class: el.className.substring(0, 100),
-            #                     testid: el.getAttribute('data-testid'),
-            #                     scrollHeight: el.scrollHeight,
-            #                     clientHeight: el.clientHeight
-            #                 };
-            #             }
-            #         }
-            #         return 'none found';
-            #     })();
-            # """)
-            # print("Scrollable element:", result)
-
             
             # for _ in range(10):
             #     page.evaluate("""
@@ -112,13 +93,35 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                 title_el    = card.query_selector(".job-card-list__title--link")
                 company_el  = card.query_selector(".artdeco-entity-lockup__subtitle")
                 location_el = card.query_selector(".artdeco-entity-lockup__caption")
-
+                
+                # posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or \
+                # page.query_selector("span:has-text('ago')")
+                # posted_text = posted_el.inner_text().strip() if posted_el else ""
+                # print(posted_text)
+                # date_posted = parse_date(posted_text)
+                
                 if not title_el or not company_el or not location_el:
                     print("Missing field — skipping")
                     continue
 
                 card.click()
                 page.wait_for_timeout(random.randint(1500, 3000))
+                
+                posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')")
+                
+                if posted_el:
+                    posted_text = posted_el.inner_text().strip()
+                else:
+                    posted_text = ""
+
+                match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
+                
+                if match:
+                    date_posted = parse_date(match.group(1)) 
+                else:
+                    None
+                    
+                print("date_posted:", date_posted)
 
                 desc_el = page.query_selector(".jobs-description__content")
                 description = desc_el.inner_text().strip() if desc_el else ""
@@ -128,6 +131,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                     "company":  company_el.inner_text().strip(),
                     "location": location_el.inner_text().strip(),
                     "description" : description,
+                    "date_posted": date_posted,
                 })
                 # print(card.inner_html()[:500])
                 # print(card.inner_html()[:2000])

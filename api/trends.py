@@ -5,10 +5,12 @@ router = APIRouter()
 
 @router.get("/trends")
 def get_trends():
-    rows = query("""SELECT date_scraped, COUNT(*) as count
+    rows = query("""
+        SELECT date_posted, COUNT(*) as count
         FROM postings
-        GROUP BY date_scraped
-        ORDER BY date_scraped""")
+        WHERE date_posted IS NOT NULL
+        GROUP BY date_posted
+        ORDER BY date_posted""")
     
     answer = []
     for i in rows:

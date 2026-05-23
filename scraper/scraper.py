@@ -10,12 +10,6 @@ load_dotenv()
 
 DB = psycopg2.connect(os.environ["DATABASE_URL"])
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
-]
-
 def save(posting):
     with DB.cursor() as cur:
         cur.execute("""
@@ -28,9 +22,11 @@ def save(posting):
 def scrape(keyword = "software engineer", location = "Remote", pages = 3):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
+        AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
         context = browser.new_context(
-            user_agent=random.choice(USER_AGENTS), 
-            storage_state = "session.json" if os.path.exists("session.json") else None
+            user_agent = AGENT,  
+            storage_state="session.json" if os.path.exists("session.json") else None
         )
         page = context.new_page()
 

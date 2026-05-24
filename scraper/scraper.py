@@ -32,21 +32,42 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
         )
         page = context.new_page()
 
-        page.goto("https://www.linkedin.com/login")
+        page.goto("https://www.linkedin.com/feed/")
          
-        page.wait_for_timeout(6000)
+        page.wait_for_timeout(12000)
+        input("Click Enter when ready")
+        
+        context.storage_state(path="session.json")
         print("Current URL:", page.url) 
 
-        if page.url == "https://www.linkedin.com/login" or "login" in page.url.lower():
-            print("Logging in...")
-            # page.wait_for_selector("#username", timeout=10000)
-            page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
-            page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
-            page.click("button[type=submit]")
-            page.wait_for_url("**/feed/**", timeout=15000) 
-            context.storage_state(path = "session.json")
+        # if "login" in page.url.lower():
+        #     print("Logging in...")
+        #     # page.wait_for_selector("#username", timeout=10000)
+        #     page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
+        #     page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
+        #     page.click("button[type=submit]")
+        #     page.wait_for_url("**/feed/**", timeout=15000) 
+        #     context.storage_state(path = "session.json")
+        # else:
+        #     print("Already logged in, skipping login")
+        
+        if "login" in page.url.lower() or "welcome" in page.url.lower():
+            print("Clicking account...")
+            account = page.query_selector("button[aria-label='Login as Johnny Chen']")
+            if account:
+                account.click()
+                page.wait_for_url("**/feed/**", timeout=15000)
+                context.storage_state(path="session.json")
+            else:
+                # fall back to full login
+                print("Logging in...")
+                page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
+                page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
+                page.click("button[type=submit]")
+                page.wait_for_url("**/feed/**", timeout=15000)
+                context.storage_state(path="session.json")
         else:
-            print("Already logged in, skipping login")
+            print("Already logged in")
 
         # page.goto("https://www.linkedin.com/jobs/")
         # page.wait_for_timeout(3000)
@@ -83,7 +104,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                         }
                     })();
                 """)
-                page.wait_for_timeout(800)
+                page.wait_for_timeout(random.randint(500, 1200))
 
             page.wait_for_timeout(5000)
 
@@ -119,7 +140,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                 if match:
                     date_posted = parse_date(match.group(1)) 
                 else:
-                    None
+                    date_posted = None
                     
                 print("date_posted:", date_posted)
 

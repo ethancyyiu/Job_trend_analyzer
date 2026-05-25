@@ -1,0 +1,106 @@
+:root{
+  --sky-50: #e6f7ff;
+  --sky-100: #bfeeff;
+  --sky: #87CEEB;
+  --sky-600: #38bdf8;
+  --bg: #ffffff;
+  --text: #0f172a;
+  --muted: #6b7280;
+}
+
+.home-root{
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--sky-50) 100%);
+  min-height: 100vh;
+  padding: 32px 20px;
+}
+
+.home-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  max-width:1200px;
+  margin:0 auto 24px auto;
+}
+
+.logo-wrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor: pointer;
+}
+
+.logo{flex:0 0 48px}
+.brand-title{font-weight:700; font-size:18px; display:block}
+.brand-sub{font-size:12px; color:var(--muted)}
+
+.home-nav button{
+  background:transparent;
+  border:1px solid transparent;
+  padding:8px 12px;
+  margin-left:8px;
+  border-radius:8px;
+  cursor:pointer;
+  color:var(--text);
+}
+.home-nav button:hover{background:var(--sky-50)}
+
+.intro{
+  max-width:960px;
+  margin:8px auto 32px auto;
+  text-align:center;
+}
+.intro h1{font-size:28px; margin-bottom:8px}
+.intro p{color:var(--muted); font-size:16px}
+
+.features-grid{
+  max-width:1200px;
+  margin:0 auto 40px auto;
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:24px;
+}
+
+.feature{
+  background:linear-gradient(180deg, rgba(255,255,255,0.9), var(--bg));
+  border-radius:14px;
+  padding:28px;
+  box-shadow:0 6px 18px rgba(16,24,40,0.06);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:180px;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.feature:hover{transform:translateY(-6px); box-shadow:0 18px 40px rgba(16,24,40,0.09)}
+.feature h3{margin:0 0 8px 0}
+.feature p{color:var(--muted); margin:0 0 16px 0}
+
+.feature-btn{
+  align-self:flex-start;
+  background:linear-gradient(90deg, var(--sky) 0%, var(--sky-600) 100%);
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.contact{
+  max-width:960px;
+  margin:0 auto;
+  background:transparent;
+  text-align:center;
+  padding:28px 12px;
+  color:var(--muted);
+}
+.contact a{color:var(--sky-600); text-decoration:none}
+
+@media (max-width:900px){
+  .features-grid{grid-template-columns:1fr; padding:0 12px}
+  .home-header{flex-direction:column; align-items:flex-start}
+  .home-nav{width:100%; display:flex; gap:8px; flex-wrap:wrap}
+}

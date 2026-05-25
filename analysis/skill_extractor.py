@@ -10,7 +10,7 @@ DB = psycopg2.connect(os.environ["DATABASE_URL"])
 SKILLS = [
     "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c", "html", "css",
 
-    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nestjs"
+    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nestjs",
 
     "sql", "postgresql", "mysql", "mongodb", "redis",
     "pandas", "numpy", "scikit-learn", "tensorflow", "pytorch",

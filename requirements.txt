@@ -11,3 +11,4 @@ python-dotenv==1.0.0
 python-multipart==0.0.6
 pydantic==2.9.2
 gunicorn==21.2.0
+APScheduler==3.10.4

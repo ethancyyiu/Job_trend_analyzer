@@ -9,24 +9,14 @@ export default function App() {
   const [page, setPage] = useState("Home")
 
   let showing_page
-  if (page === "Home") {
-    showing_page = <Home setPage={setPage} />
-  }
-  else if (page === "Dashboard") {
-    showing_page = <Dashboard />
-  }
-  else if (page === "SkillsView") {
-    showing_page = <SkillsView />
-  }
-  else if (page === "Salary"){
-    showing_page = <Salary />
-  }
-  else {
-    showing_page = <Postings />
-  }
+  if (page === "Home") showing_page = <Home setPage={setPage} page={page} />
+  else if (page === "Dashboard") showing_page = <Dashboard setPage={setPage} page={page} />
+  else if (page === "SkillsView") showing_page = <SkillsView setPage={setPage} page={page} />
+  else if (page === "Salary") showing_page = <Salary setPage={setPage} page={page} />
+  else showing_page = <Postings setPage={setPage} page={page} />
 
   return (
-    <div style = {{fontFamily: "Inter, sans-serif", padding: "20px", maxWidth: "1200px", margin: "0 auto"}}>
+    <div style = {{fontFamily: "Inter, sans-serif", padding: "0", width: "100%"}}>
       {showing_page}
     </div>
   )

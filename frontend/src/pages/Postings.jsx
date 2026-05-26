@@ -28,7 +28,7 @@ export function Postings({ setPage, page }) {
 
             <div className="page-panel-row">
                 <div className="metric-card">
-                    <span>Total postings</span>
+                    <span>Most Recent Postings</span>
                     <strong>{totalPostings}</strong>
                     <p>Records in the current postings dataset.</p>
                 </div>

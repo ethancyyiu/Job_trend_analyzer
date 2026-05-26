@@ -1,56 +1,61 @@
 import React from "react"
 import "./Home.css"
-import Nav from "../components/Nav"
 
-export function Home({setPage, page}) {
+export default function Home({ setPage, page }) {
   return (
-    <div className="page-root home-root">
-      <Nav page={page} setPage={setPage} />
+    <div className="card">
 
-      <section className="intro">
-        <h1>Understand Job Market Trends at a Glance</h1>
-        <p>Visualize postings, discover top skills, and monitor salary trends to make 
-            data‑driven career and hiring decisions. randome stuff randome stuff randome stuff randome stuff
-            randome stuffrandome stuffrandome stuffrandome stuffrandome stuff randome stuff
-            randome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuff
-            randome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuff
-            randome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuff
-            randome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuffrandome stuff
-            randome stuffrandome stuffrandome stuffrandome stuff</p>
-      </section>
+      <div className="page-header">
+        <h2>Welcome</h2>
+        <p>Overview of the site: visualize trends, explore top skills, recent postings, and salary insights.</p>
+      </div>
 
-      <section className="features-grid page-content">
-        <article className="feature">
+      <div className="grid-2">
+        <div className="card">
           <h3>Dashboard</h3>
-          <p>Interactive time series showing job postings and trends across roles and locations.</p>
-          <button onClick={() => setPage("Dashboard")} className="feature-btn">Explore Dashboard</button>
-        </article>
+          <p>Interactive time series showing job postings and trends.</p>
+          <button onClick={() => setPage("Dashboard")} className="feature-btn">
+            Explore Dashboard
+          </button>
+        </div>
 
-        <article className="feature">
+        <div className="card">
           <h3>Skills</h3>
           <p>See which skills are most in demand and how their popularity changes over time.</p>
-          <button onClick={() => setPage("SkillsView")} className="feature-btn">View Skills</button>
-        </article>
+          <button onClick={() => setPage("SkillsView")} className="feature-btn">
+            View Skills
+          </button>
+        </div>
+      </div>
 
-        <article className="feature">
+      <div style={{ height: 18 }} />
+
+      <div className="grid-2">
+        <div className="card">
           <h3>Postings</h3>
           <p>Browse recent job postings and analyze hiring activity by company and region.</p>
-          <button onClick={() => setPage("Postings")} className="feature-btn">Browse Postings</button>
-        </article>
+          <button onClick={() => setPage("Postings")} className="feature-btn">
+            Browse Postings
+          </button>
+        </div>
 
-        <article className="feature">
+        <div className="card">
           <h3>Salary / Pay</h3>
-          <p>Monitor salary ranges and compensation trends across roles (coming soon).</p>
-          <button onClick={() => setPage("Salary")} className="feature-btn">Salary Insights</button>
-        </article>
-      </section>
+          <p>Monitor salary ranges and compensation trends across roles.</p>
+          <button onClick={() => setPage("Salary")} className="feature-btn">
+            Salary Insights
+          </button>
+        </div>
+      </div>
 
       <footer className="contact">
         <h4>Contact Me</h4>
-        <p>Questions, feedback or data requests? Email <a href="mailto:hello@example.com">hello@example.com</a>.</p>
+        <p>
+          Questions, feedback or data requests? Email{" "}
+          <a href="mailto:hello@example.com">hello@example.com</a>.
+        </p>
       </footer>
+
     </div>
   )
 }
-
-export default Home

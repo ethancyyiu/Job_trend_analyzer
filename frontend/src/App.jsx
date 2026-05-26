@@ -2,8 +2,9 @@ import {useState} from 'react'
 import {Dashboard} from "./pages/Dashboard"
 import {SkillsView} from "./pages/SkillsView"
 import {Postings} from "./pages/Postings"
-import {Home} from "./pages/Home"
+import Home from "./pages/Home"
 import {Salary} from "./pages/Salary"
+import Layout from "./components/Layout"
 
 export default function App() {
   const [page, setPage] = useState("Home")
@@ -17,7 +18,7 @@ export default function App() {
 
   return (
     <div style = {{fontFamily: "Inter, sans-serif", padding: "0", width: "100%"}}>
-      {showing_page}
+      <Layout page={page} setPage={setPage}>{showing_page}</Layout>
     </div>
   )
 }

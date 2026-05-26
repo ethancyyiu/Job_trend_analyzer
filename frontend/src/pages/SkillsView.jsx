@@ -1,8 +1,6 @@
 import {useEffect, useState} from "react"
 import axios from "axios"
 import {Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer} from "recharts"
-import Nav from "../components/Nav"
-
 export function SkillsView({setPage, page}) {
         const [data, setData] = useState([])
 
@@ -13,14 +11,13 @@ export function SkillsView({setPage, page}) {
         }, [])
 
         return (
-                <div className="page-root">
-                    <Nav page={page} setPage={setPage} />
+                <div className="card">
                     <div className="page-header">
                         <h2>Skills</h2>
                         <p>Track the most requested skills to guide hiring, training, and career planning.</p>
                     </div>
 
-                    <main className="page-content" style={{height:420}}>
+                    <div style={{height:420}}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data}>
                                 <XAxis dataKey="skill" />
@@ -30,7 +27,7 @@ export function SkillsView({setPage, page}) {
                                 <Bar dataKey="count" fill="#06B6D4" />
                             </BarChart>
                         </ResponsiveContainer>
-                    </main>
+                    </div>
                 </div>
         )
 }

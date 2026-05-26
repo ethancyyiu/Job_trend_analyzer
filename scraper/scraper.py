@@ -23,7 +23,7 @@ def save(posting):
 
 def scrape(keyword = "software engineer", location = "Remote", pages = 3):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=False) # need to be true later for deployment
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
         context = browser.new_context(
@@ -35,7 +35,17 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
         page.goto("https://www.linkedin.com/feed/")
          
         page.wait_for_timeout(12000)
-        input("Click Enter when ready")
+        # input("Click Enter when ready")
+        
+        account = page.query_selector("button[aria-label='Login as Adrian Chen']")
+        if account:
+            print("Clicking sign in button...")
+            account.click()
+            page.wait_for_url("**/feed/**", timeout=15000)
+            
+        if "feed" not in page.url.lower():
+            print("Not on feed, something's wrong. URL:", page.url)
+            raise Exception("Session expired or login required")
         
         context.storage_state(path="session.json")
         print("Current URL:", page.url) 
@@ -51,27 +61,23 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
         # else:
         #     print("Already logged in, skipping login")
         
-        if "login" in page.url.lower() or "welcome" in page.url.lower():
-            print("Clicking account...")
-            account = page.query_selector("button[aria-label='Login as Johnny Chen']")
-            if account:
-                account.click()
-                page.wait_for_url("**/feed/**", timeout=15000)
-                context.storage_state(path="session.json")
-            else:
-                # fall back to full login
-                print("Logging in...")
-                page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
-                page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
-                page.click("button[type=submit]")
-                page.wait_for_url("**/feed/**", timeout=15000)
-                context.storage_state(path="session.json")
-        else:
-            print("Already logged in")
-
-        # page.goto("https://www.linkedin.com/jobs/")
-        # page.wait_for_timeout(3000)
-        # print("Jobs URL:", page.url)
+        # if "login" in page.url.lower() or "welcome" in page.url.lower():
+        #     print("Clicking account...")
+        #     account = page.query_selector("button[aria-label='Login as Johnny Chen']")
+        #     if account:
+        #         account.click()
+        #         page.wait_for_url("**/feed/**", timeout=15000)
+        #         context.storage_state(path="session.json")
+        #     else:
+        #         # fall back to full login
+        #         print("Logging in...")
+        #         page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
+        #         page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
+        #         page.click("button[type=submit]")
+        #         page.wait_for_url("**/feed/**", timeout=15000)
+        #         context.storage_state(path="session.json")
+        # else:
+        #     print("Already logged in")
 
         for i in range(pages):
             url = (
@@ -81,16 +87,6 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
             page.goto(url, timeout = 60000)
             page.wait_for_selector("div.job-card-container", timeout = 10000) 
             
-            # for _ in range(10):
-            #     page.evaluate("""
-            #             const el = document.querySelector('[data-testid="lazy-column"]') || document.querySelector('.scaffold-layout__list');
-            #         if (el) el.scrollBy(0, 500);
-            #     """)
-            #     page.wait_for_timeout(800)
-            # for hello in range(10):
-            #     page.evaluate("window.scrollBy(0, 3000)")
-            #     print("scrolling")
-            #     page.wait_for_timeout(800)
             for hello in range(10):
                 page.evaluate("""
                     (() => {
@@ -114,12 +110,6 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                 title_el    = card.query_selector(".job-card-list__title--link")
                 company_el  = card.query_selector(".artdeco-entity-lockup__subtitle")
                 location_el = card.query_selector(".artdeco-entity-lockup__caption")
-                
-                # posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or \
-                # page.query_selector("span:has-text('ago')")
-                # posted_text = posted_el.inner_text().strip() if posted_el else ""
-                # print(posted_text)
-                # date_posted = parse_date(posted_text)
                 
                 if not title_el or not company_el or not location_el:
                     print("Missing field — skipping")

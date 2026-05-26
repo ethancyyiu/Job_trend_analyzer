@@ -39,35 +39,83 @@ export default function Home({ setPage, page }) {
 
         <section className="home-features">
           <div className="feature-row feature-row-1">
-            <div>
-              <h3>Dashboard</h3>
-              <p>See hiring momentum, posting volume, and time trends in one polished view so you can spot shifts before they become a problem.</p>
+            <div className="feature-row-copy">
+              <span className="home-eyebrow">Dashboard</span>
+              <h3>See where hiring momentum is accelerating.</h3>
+              <p>Understand posting volume and trend direction at a glance, with a centralized view that keeps your team aligned.</p>
             </div>
-            <button className="feature-btn" onClick={() => setPage("Dashboard")}>Open Dashboard</button>
+            <div className="feature-row-illustration">
+              <div className="illustration-block">
+                <div className="illustration-pill large"></div>
+                <div className="illustration-pill medium"></div>
+                <div className="illustration-grid">
+                  <div className="illustration-bar tall" />
+                  <div className="illustration-bar medium" />
+                  <div className="illustration-bar short" />
+                  <div className="illustration-bar medium-light" />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="feature-row feature-row-2">
-            <div>
-              <h3>Skills</h3>
-              <p>Discover the skills employers are demanding most, ranked by growth and volume, so you can prioritize training and sourcing.</p>
+            <div className="feature-row-copy">
+              <span className="home-eyebrow">Skills</span>
+              <h3>Highlight the skills employers are chasing right now.</h3>
+              <p>Spot rising talent demand and skill gaps with a visual experience designed for fast decision making.</p>
             </div>
-            <button className="feature-btn" onClick={() => setPage("SkillsView")}>View Skills</button>
+            <div className="feature-row-illustration">
+              <div className="illustration-block">
+                <div className="illustration-pill medium"></div>
+                <div className="illustration-pill small"></div>
+                <div className="illustration-grid skill-mode">
+                  <div className="illustration-dot" />
+                  <div className="illustration-dot active" />
+                  <div className="illustration-dot" />
+                  <div className="illustration-line" />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="feature-row feature-row-3">
-            <div>
-              <h3>Postings</h3>
-              <p>Browse recently indexed roles with company, location, and date context to understand where hiring activity is concentrated.</p>
+            <div className="feature-row-copy">
+              <span className="home-eyebrow">Postings</span>
+              <h3>Browse the freshest roles with hiring context.</h3>
+              <p>Surface recent job postings quickly so you can capture demand signals where they matter most.</p>
             </div>
-            <button className="feature-btn" onClick={() => setPage("Postings")}>Browse Postings</button>
+            <div className="feature-row-illustration">
+              <div className="illustration-block">
+                <div className="illustration-pill medium"></div>
+                <div className="illustration-pill tall"></div>
+                <div className="illustration-grid posting-mode">
+                  <div className="illustration-chip" />
+                  <div className="illustration-chip" />
+                  <div className="illustration-chip" />
+                  <div className="illustration-chip" />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="feature-row feature-row-4">
-            <div>
-              <h3>Salary</h3>
-              <p>Track compensation trends across roles so you can align offers with market movement and stay competitive.</p>
+            <div className="feature-row-copy">
+              <span className="home-eyebrow">Salary</span>
+              <h3>Understand compensation trends across the market.</h3>
+              <p>Track how pay ranges are moving so your offers stay competitive and aligned to current demand.</p>
             </div>
-            <button className="feature-btn" onClick={() => setPage("Salary")}>See Salary</button>
+            <div className="feature-row-illustration">
+              <div className="illustration-block">
+                <div className="illustration-pill medium"></div>
+                <div className="illustration-pill small"></div>
+                <div className="illustration-grid salary-mode">
+                  <div className="illustration-bar short" />
+                  <div className="illustration-bar medium" />
+                  <div className="illustration-bar tall" />
+                  <div className="illustration-circle" />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </div>

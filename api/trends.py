@@ -42,7 +42,7 @@ def get_postings():
         SELECT title, company, location, date_posted
         FROM postings
         ORDER BY date_posted DESC
-        LIMIT 100
+        LIMIT 50
     """)
 
     answer = []

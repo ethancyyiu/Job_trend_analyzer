@@ -1,5 +1,5 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from scraper.scraper import scrape
 import logging
 
@@ -8,11 +8,11 @@ log = logging.getLogger(__name__)
 
 scheduler = BlockingScheduler()
 
-@scheduler.scheduled_job(CronTrigger(day_of_week="mon", hour=9, minute=0))
+@scheduler.scheduled_job(IntervalTrigger(days=3))
 def weekly_scrape():
     log.info("Starting weekly scrape...")
-    scrape(keyword="software engineer", location="Remote", pages=5)
-    scrape(keyword="data engineer", location="Remote", pages=3)
+    scrape(keyword = "software engineer", location = "Remote", pages = 3)
+    scrape(keyword = "data engineer", location = "Remote", pages = 3)
     log.info("Weekly scrape complete.")
 
 if __name__ == "__main__":

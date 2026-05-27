@@ -11,7 +11,7 @@ export function Dashboard({ setPage, page }) {
         }).catch(function () {
             setData([])
         })
-    }, [])
+    }, []) 
 
     let latest;
     if (data.length > 0) {

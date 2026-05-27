@@ -5,7 +5,7 @@ export function SkillsView({ setPage, page }) {
     const [data, setData] = useState([])
 
     useEffect(function () {
-        axios.get("https://market-pulse-wk2n.onrender.com").then(function (answer) {
+        axios.get(`${import.meta.env.VITE_API_URL}/trends`).then(function (answer) {
             return setData(answer.data)
         })
     }, [])

@@ -5,7 +5,7 @@ export function Dashboard({ setPage, page }) {
     const [data, setData] = useState([])
 
     useEffect(function () {
-        axios.get("http://localhost:8000/trends").then(function (answer) {
+        axios.get("https://market-pulse-wk2n.onrender.com").then(function (answer) {
             return setData(answer.data)
         })
     }, [])

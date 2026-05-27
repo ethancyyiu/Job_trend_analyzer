@@ -40,6 +40,7 @@ Building this has taught me way more than any course so far.
 
 ## End-to-End Pipeline
 Fully automated from scrape > extract > store > serve > visualize.
+Everything is automated and deployed.
 
 # Tech Stack
 - Scraper: Playwright
@@ -47,7 +48,7 @@ Fully automated from scrape > extract > store > serve > visualize.
 - Database: PostgreSQL
 - Frontend: React + Recharts
 - ML (coming soon): scikit-learn
-- Deployment: Railway (soon)
+- Deployment: Vercel (frontend), Render (backend), Supabase (DB)
 
 # Architecture
 Playwright Scraper > PostgreSQL > FastAPI > React Dashboard
@@ -65,7 +66,7 @@ npm install
 Create a .env file for your scraper + backend.
 
 ## Run the scraper
-python scraper/scraper.py
+python -m scraper.scraper
 
 ## Start the backend
 uvicorn api.main:app --reload
@@ -76,10 +77,10 @@ npm run dev
 
 # Roadmap
 - Make the frontend look better
-- Deploy on Railway
 - Add ML models to predict hiring trends
 - Salary/pay extraction
 - Better skill extraction (NLP instead of keyword matching)
 
 # Contributions
-If you have ideas or suggestions, I’m always down to learn. Please message me :)
+If you have ideas or suggestions, I’m always down to learn. My linkedin: https://www.linkedin.com/in/ethan-yiu-74668b315  
+Message me anytime :)

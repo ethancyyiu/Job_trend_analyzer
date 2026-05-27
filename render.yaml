@@ -1,8 +1,7 @@
 services:
   - type: web
     name: job-trend-api
-    runtime: python
-    pythonVersion: "3.12" 
+    runtime: python3.12 
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:

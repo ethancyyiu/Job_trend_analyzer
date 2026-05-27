@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts"
+const API_BASE = import.meta.env.VITE_API_URL || ''
 export function Dashboard({ setPage, page }) {
     const [data, setData] = useState([])
 
     useEffect(function () {
-        axios.get(`${import.meta.env.VITE_API_URL}/trends`).then(function (answer) {
+        axios.get(`${API_BASE}/trends`).then(function (answer) {
             return setData(answer.data)
+        }).catch(function () {
+            setData([])
         })
     }, [])
 

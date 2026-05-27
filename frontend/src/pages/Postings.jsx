@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+const API_BASE = import.meta.env.VITE_API_URL || ''
 export function Postings({ setPage, page }) {
     const [data, setData] = useState([])
 
     useEffect(function () {
-        axios.get(`${import.meta.env.VITE_API_URL}/trends`).then(function (answer) {
+        axios.get(`${API_BASE}/postings`).then(function (answer) {
             setData(answer.data)
+        }).catch(function () {
+            setData([])
         })
     }, [])
 

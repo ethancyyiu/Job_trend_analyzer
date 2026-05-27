@@ -6,7 +6,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-scheduler = BlockingScheduler() 
+scheduler = BlockingScheduler()
 
 @scheduler.scheduled_job(IntervalTrigger(days=3))
 def weekly_scrape():

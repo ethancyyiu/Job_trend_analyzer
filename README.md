@@ -81,6 +81,6 @@ npm run dev
 - Salary/pay extraction
 - Better skill extraction (NLP instead of keyword matching)
 
-# Contributions
+# Contact + Suggestions
 If you have ideas or suggestions, I’m always down to learn. My linkedin: https://www.linkedin.com/in/ethan-yiu-74668b315  
 Message me anytime :)

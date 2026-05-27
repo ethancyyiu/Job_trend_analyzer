@@ -1,10 +1,10 @@
 import {useState} from 'react'
-import {Dashboard} from "./pages/Dashboard.jsx"
-import {SkillsView} from "./pages/SkillsView.jsx"
-import {Postings} from "./pages/Postings.jsx"
-import Home from "./pages/Home.jsx"
-import {Salary} from "./pages/Salary.jsx"
-import Layout from "./components/Layout.jsx"
+import {Dashboard} from "../pages/Dashboard.jsx"
+import {SkillsView} from "../pages/SkillsView.jsx"
+import {Postings} from "../pages/Postings.jsx"
+import Home from "../pages/Home.jsx"
+import {Salary} from "../pages/Salary.jsx"
+import Layout from "../components/Layout.jsx"
 
 export default function App() {
   const [page, setPage] = useState("Home")

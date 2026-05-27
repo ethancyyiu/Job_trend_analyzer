@@ -8,6 +8,8 @@ Scrape > Clean > Store > Analyze > Visualize.
 
 All automated. All built from scratch.
 
+Link to website: https://marketpulsepro.vercel.app/
+
 # Why I Built It
 I didn’t want another tutorial project. I wanted something that:
 - uses real data
@@ -41,6 +43,7 @@ Building this has taught me way more than any course so far.
 ## End-to-End Pipeline
 Fully automated from scrape > extract > store > serve > visualize.
 Everything is automated and deployed.
+Link to the website: https://marketpulsepro.vercel.app/
 
 # Tech Stack
 - Scraper: Playwright
@@ -49,6 +52,7 @@ Everything is automated and deployed.
 - Frontend: React + Recharts
 - ML (coming soon): scikit-learn
 - Deployment: Vercel (frontend), Render (backend), Supabase (DB)
+- Website link: https://marketpulsepro.vercel.app/
 
 # Architecture
 Playwright Scraper > PostgreSQL > FastAPI > React Dashboard

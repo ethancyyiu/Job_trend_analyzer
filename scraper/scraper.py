@@ -3,98 +3,115 @@ import psycopg2
 from datetime import date
 import time
 import os
+import json
+import tempfile
 from dotenv import load_dotenv
 import random
 from analysis.date_parser import parse_date
+from api.db import get_state, set_state
 import re
+import logging
 
-load_dotenv() 
+load_dotenv()
+log = logging.getLogger(__name__)
 
-DB = psycopg2.connect(os.environ["DATABASE_URL"])
+DB_URL = os.environ["DATABASE_URL"]
+
+def get_db():
+    return psycopg2.connect(DB_URL)
 
 def save(posting):
-    with DB.cursor() as cur:
+    db = get_db()
+    with db.cursor() as cur:
         cur.execute("""
             INSERT INTO postings (title, company, location, description, date_scraped, date_posted)
             VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING
-        """, (posting['title'], posting['company'], posting['location'], posting['description'], date.today(), posting.get('date_posted')))
-    DB.commit()
+        """, (
+            posting['title'], posting['company'], posting['location'],
+            posting['description'], date.today(), posting.get('date_posted')
+        ))
+    db.commit()
+    db.close()
 
-def scrape(keyword = "software engineer", location = "Remote", pages = 3):
+def load_session_to_file():
+    """Load session from DB into a temp file Playwright can read."""
+    session_json = get_state("linkedin_session")
+    if not session_json:
+        return None
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+    tmp.write(session_json)
+    tmp.close()
+    return tmp.name
+
+def save_session_from_file(path):
+    """Read session file and persist it to DB."""
+    with open(path, 'r') as f:
+        set_state("linkedin_session", f.read())
+
+def scrape(keyword="software engineer", location="Remote", pages=3):
+    session_file = load_session_to_file()
+
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) # need to be true later for deployment
+        browser = p.chromium.launch(headless=True)  # headless for server
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
         context = browser.new_context(
-            user_agent = AGENT,  
-            storage_state="session.json" if os.path.exists("session.json") else None
+            user_agent=AGENT,
+            storage_state=session_file if session_file else None
         )
         page = context.new_page()
 
-        page.goto("https://www.linkedin.com/feed/")
-         
-        page.wait_for_timeout(12000)
-        # input("Click Enter when ready")
-        
-        account = page.query_selector("button[aria-label='Login as Adrian Chen']")
-        if account:
-            print("Clicking sign in button...")
-            account.click()
-            page.wait_for_url("**/feed/**", timeout=15000)
-            
+        # Try to use existing session first
+        page.goto("https://www.linkedin.com/feed/", timeout=30000)
+        page.wait_for_timeout(5000)
+
+        # If we're not on the feed, we need to log in
         if "feed" not in page.url.lower():
-            print("Not on feed, something's wrong. URL:", page.url)
-            raise Exception("Session expired or login required")
-        
-        context.storage_state(path="session.json")
-        print("Current URL:", page.url) 
+            log.info("Session expired or missing — logging in...")
+            page.goto("https://www.linkedin.com/login")
+            page.wait_for_selector("input[name='session_key']", timeout=10000)
+            page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
+            page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
+            page.click("button[type=submit]")
 
-        # if "login" in page.url.lower():
-        #     print("Logging in...")
-        #     # page.wait_for_selector("#username", timeout=10000)
-        #     page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
-        #     page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
-        #     page.click("button[type=submit]")
-        #     page.wait_for_url("**/feed/**", timeout=15000) 
-        #     context.storage_state(path = "session.json")
-        # else:
-        #     print("Already logged in, skipping login")
-        
-        # if "login" in page.url.lower() or "welcome" in page.url.lower():
-        #     print("Clicking account...")
-        #     account = page.query_selector("button[aria-label='Login as Johnny Chen']")
-        #     if account:
-        #         account.click()
-        #         page.wait_for_url("**/feed/**", timeout=15000)
-        #         context.storage_state(path="session.json")
-        #     else:
-        #         # fall back to full login
-        #         print("Logging in...")
-        #         page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
-        #         page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
-        #         page.click("button[type=submit]")
-        #         page.wait_for_url("**/feed/**", timeout=15000)
-        #         context.storage_state(path="session.json")
-        # else:
-        #     print("Already logged in")
+            try:
+                page.wait_for_url("**/feed/**", timeout=20000)
+            except Exception:
+                log.error("Login failed — may need manual intervention or captcha")
+                browser.close()
+                return
 
+        # Save the fresh session back to DB
+        tmp_out = tempfile.NamedTemporaryFile(suffix='.json', delete=False)
+        tmp_out.close()
+        context.storage_state(path=tmp_out.name)
+        save_session_from_file(tmp_out.name)
+        log.info("Session saved to database.")
+
+        # Scrape pages
         for i in range(pages):
             url = (
                 f"https://www.linkedin.com/jobs/search/"
                 f"?keywords={keyword}&location={location}&start={i * 25}"
             )
-            page.goto(url, timeout = 60000)
-            page.wait_for_selector("div.job-card-container", timeout = 10000) 
-            
-            for hello in range(10):
+            page.goto(url, timeout=60000)
+
+            try:
+                page.wait_for_selector("div.job-card-container", timeout=10000)
+            except Exception:
+                log.warning(f"No job cards found on page {i+1}, skipping")
+                continue
+
+            for _ in range(10):
                 page.evaluate("""
                     (() => {
                         const all = document.querySelectorAll('*');
                         for (const el of all) {
                             const style = getComputedStyle(el);
-                            if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && 
-                                el.scrollHeight > el.clientHeight + 50) {el.scrollBy(0, 500);
+                            if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+                                el.scrollHeight > el.clientHeight + 50) {
+                                el.scrollBy(0, 500);
                                 return;
                             }
                         }
@@ -103,54 +120,43 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 3):
                 page.wait_for_timeout(random.randint(500, 1200))
 
             page.wait_for_timeout(5000)
-
             cards = page.query_selector_all("div.job-card-container")
-            print(f"Page {i+1}: found {len(cards)} cards")
+            log.info(f"Page {i+1}: found {len(cards)} cards")
+
             for card in cards:
                 title_el    = card.query_selector(".job-card-list__title--link")
                 company_el  = card.query_selector(".artdeco-entity-lockup__subtitle")
                 location_el = card.query_selector(".artdeco-entity-lockup__caption")
-                
+
                 if not title_el or not company_el or not location_el:
-                    print("Missing field — skipping")
                     continue
 
                 card.click()
                 page.wait_for_timeout(random.randint(1500, 3000))
-                
-                posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')")
-                
-                if posted_el:
-                    posted_text = posted_el.inner_text().strip()
-                else:
-                    posted_text = ""
 
+                posted_el = (
+                    page.query_selector(".jobs-unified-top-card__posted-date")
+                    or page.query_selector("span:has-text('ago')")
+                )
+                posted_text = posted_el.inner_text().strip() if posted_el else ""
                 match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
-                
-                if match:
-                    date_posted = parse_date(match.group(1)) 
-                else:
-                    date_posted = None
-                    
-                print("date_posted:", date_posted)
+                date_posted = parse_date(match.group(1)) if match else None
 
                 desc_el = page.query_selector(".jobs-description__content")
                 description = desc_el.inner_text().strip() if desc_el else ""
 
                 save({
-                    "title":    title_el.inner_text().strip(),
-                    "company":  company_el.inner_text().strip(),
-                    "location": location_el.inner_text().strip(),
-                    "description" : description,
+                    "title":       title_el.inner_text().strip(),
+                    "company":     company_el.inner_text().strip(),
+                    "location":    location_el.inner_text().strip(),
+                    "description": description,
                     "date_posted": date_posted,
                 })
-                # print(card.inner_html()[:500])
-                # print(card.inner_html()[:2000])
-                # break
 
-            time.sleep(random.uniform(10, 20)) 
+            time.sleep(random.uniform(10, 20))
 
         browser.close()
+        log.info("Scrape complete.")
 
 if __name__ == "__main__":
     scrape()

@@ -21,6 +21,4 @@ services:
         sync: false
       - key: LI_PASSWORD
         sync: false
-      - key: SESSION_COOKIE
-        sync: false
     autoDeploy: true

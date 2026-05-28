@@ -53,7 +53,7 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
     session_file = load_session_to_file()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)  # headless for server
+        browser = p.chromium.launch(headless = False)  
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
         context = browser.new_context(
@@ -64,15 +64,21 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
 
         # Try to use existing session first
         page.goto("https://www.linkedin.com/feed/", timeout=30000)
+        print("feed")
         page.wait_for_timeout(5000)
 
         # If we're not on the feed, we need to log in
-        if "feed" not in page.url.lower():
+        # Check for authenticated elements (profile menu) instead of just URL
+        is_authenticated = page.query_selector("[data-test-id='profile-menu-trigger']") is not None
+        
+        if not is_authenticated:
             log.info("Session expired or missing — logging in...")
+            print("not logged in")
             page.goto("https://www.linkedin.com/login")
-            page.wait_for_selector("input[name='session_key']", timeout=10000)
-            page.fill("input[name='session_key']", os.environ["LI_EMAIL"])
-            page.fill("input[name='session_password']", os.environ["LI_PASSWORD"])
+            # page.wait_for_selector("input[name='session_key']", timeout=10000)
+            page.fill("input[type='email']", os.environ["LI_EMAIL"])
+            page.fill("input[autocomplete='current-password']", os.environ["LI_PASSWORD"])
+
             page.click("button[type=submit]")
 
             try:
@@ -87,6 +93,7 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
         tmp_out.close()
         context.storage_state(path=tmp_out.name)
         save_session_from_file(tmp_out.name)
+        print("save")
         log.info("Session saved to database.")
 
         # Scrape pages

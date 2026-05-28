@@ -28,3 +28,24 @@ def query(sql, params=None):
     finally:
         if conn is not None:
             p.putconn(conn)
+            
+            
+def get_state(key: str):
+    rows = query("SELECT value FROM app_state WHERE key = %s", (key,))
+    return rows[0][0] if rows else None
+
+def set_state(key: str, value: str):
+    p = _get_pool()
+    conn = None
+    try:
+        conn = p.getconn()
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO app_state (key, value, updated_at)
+                VALUES (%s, %s, NOW())
+                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+            """, (key, value))
+        conn.commit()
+    finally:
+        if conn is not None:
+            p.putconn(conn)

@@ -9,3 +9,18 @@ services:
         sync: false
     autoDeploy: true  
  
+   - type: worker           
+    name: job-trend-scheduler
+    runtime: python
+    buildCommand: pip install -r requirements.txt && playwright install chromium && playwright install-deps
+    startCommand: python -m scraper.scheduler
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: LI_EMAIL
+        sync: false
+      - key: LI_PASSWORD
+        sync: false
+      - key: SESSION_COOKIE
+        sync: false
+    autoDeploy: true

@@ -63,6 +63,10 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                 try:
                     card.click()
                     page.wait_for_timeout(random.randint(1800, 3000))
+                    
+                    print("escaping from login")
+                    page.keyboard.press("Escape")
+                    page.wait_for_timeout(random.randint(3000, 5000))
 
                     title_el = page.query_selector("h2.top-card-layout__title")
                     company_el = page.query_selector(".topcard__org-name-link")

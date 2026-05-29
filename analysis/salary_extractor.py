@@ -12,6 +12,7 @@ def extract_salary(text):
 
     def get_type(s):
         s = s.lower()
+        print(s)
 
         cleaned = re.sub(r'[$£€,]', '', s)
 

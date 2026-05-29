@@ -33,48 +33,6 @@ def save(db, posting):
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
-
-# def close_signin_modal(page):
-#     """
-#     Try several selectors to close LinkedIn's sign-in modal reliably.
-#     Returns True if any action succeeded, False otherwise.
-#     """
-#     selectors = [
-#         "button.contextual-sign-in-modal__close",
-#         "button.contextual-sign-in-modal__sign-in-with-email-cta",
-#         "button.artdeco-modal__dismiss",
-#         'button[aria-label="Dismiss"]',
-#         'button[aria-label="Close"]',
-#         'button[aria-label="Dismiss dialog"]',
-#         'button[aria-label="Close dialog"]',
-#         'button[data-control-name="dismiss"]',
-#     ]
-#     for sel in selectors:
-#         try:
-#             page.wait_for_selector(sel, timeout=1500)
-#             page.locator(sel).first.click(force=True, timeout=3000)
-#             print(f"    Closed modal via selector: {sel}")
-#             return True
-#         except Exception:
-#             continue
-#     # Fallback: try clicking the modal overlay or pressing Escape
-#     try:
-#         # Click an overlay or dismiss area if present
-#         overlay_selectors = ["div.artdeco-modal__dismiss", "div.artdeco-modal__overlay"]
-#         for o_sel in overlay_selectors:
-#             try:
-#                 page.wait_for_selector(o_sel, timeout=1000)
-#                 page.locator(o_sel).first.click(force=True, timeout=2000)
-#                 print(f"    Closed modal via overlay: {o_sel}")
-#                 return True
-#             except Exception:
-#                 continue
-#         page.keyboard.press("Escape")
-#         print("    Sent Escape key to page to dismiss modal")
-#         return True
-#     except Exception:
-#         return False
-
 def scrape(keyword="software engineer", location="Remote", pages=3):
     db = get_db()
 
@@ -93,37 +51,10 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
             page.goto(url, timeout=60000)
             page.wait_for_timeout(6000)
             
-            # Close the LinkedIn sign‑in popup if it appears
+            # close login page 
             print("escaping from login")
             page.keyboard.press("Escape")
-            # try:
-            #     closed = close_signin_modal(page)
-            #     if not closed:
-            #         # hell mary this
-            #         try:
-            #             print("hell mary")
-            #             page.locator("button.contextual-sign-in-modal__sign-in-with-email-cta").first.click(force=True, timeout=3000)
-            #         except Exception:
-            #             pass
-            # except Exception as e:
-            #     print(f"    Error closing modal: {e}")
-
-
-
-            
             page.wait_for_timeout(random.randint(3000, 5000))
-
-
-            # # Scroll the left panel to load all cards
-            # for _ in range(5):
-            #     page.evaluate("""
-            #         (() => {
-            #             const panel = document.querySelector('.jobs-search-results-list') ||
-            #                           document.querySelector('ul.jobs-search__results-list');
-            #             if (panel) panel.scrollBy(0, 600);
-            #         })();
-            #     """)
-            #     page.wait_for_timeout(random.randint(600, 1200))
 
             cards = page.query_selector_all("a.base-card__full-link")
             print(f"  Found {len(cards)} job cards")
@@ -133,11 +64,6 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                     card.click()
                     page.wait_for_timeout(random.randint(1800, 3000))
 
-                    # # Wait for the right panel to load
-                    # page.wait_for_selector(
-                    #     ".jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title",
-                    #     timeout=8000
-                    # )
                     title_el = page.query_selector("h2.top-card-layout__title")
                     company_el = page.query_selector(".topcard__org-name-link")
                     location_el = page.query_selector(".topcard__flavor--bullet")

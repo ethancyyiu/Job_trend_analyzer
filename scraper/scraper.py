@@ -79,7 +79,6 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                 print(f"  Visiting: {href}")
                 page.goto(href, timeout=30000)
                 page.wait_for_timeout(random.randint(2000, 3500))
-                dismiss_modal(page)
 
                 # title
                 title_el = (
@@ -109,6 +108,7 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                 )
                 description = desc_el.inner_text().strip() if desc_el else ""
                 print(f"    description length: {len(description)} chars")
+                page.wait_for_timeout(random.randint(2000, 3500))
                 
                 salary_el = page.query_selector(".jobs-unified-top-card__job-insight span") or page.query_selector("span:has-text('$')")
                 if salary_el:
@@ -120,7 +120,8 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                     salary_min, salary_max, salary_type = extract_salary(salary_text)
                 else:
                     salary_min, salary_max, salary_type = None, None, None
-                    
+                
+                page.wait_for_timeout(random.randint(2000, 3500))
                 print(f"salary_text: {salary_text}")
                 print(f"min: {salary_min}, max: {salary_max}, type:{salary_type}")
 

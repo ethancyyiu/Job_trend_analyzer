@@ -8,6 +8,7 @@ import random
 from analysis.date_parser import parse_date
 import re
 import logging
+from analysis.salary_extractor import extract_salary
 
 load_dotenv()
 log = logging.getLogger(__name__)
@@ -33,22 +34,22 @@ def dismiss_modal(page):
 def get_db():
     return psycopg2.connect(DB_URL)
 
-def save(posting):
-    db = get_db()
+def save(db, posting):
     with db.cursor() as cur:
         cur.execute("""
-            INSERT INTO postings (title, company, location, description, date_scraped, date_posted)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO postings (title, company, location, description, date_scraped, date_posted, salary_min, salary_max, salary_type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING
         """, (
             posting['title'], posting['company'], posting['location'],
-            posting['description'], date.today(), posting.get('date_posted')
+            posting['description'], date.today(), posting.get('date_posted'), posting.get('salary_min'),
+            posting.get('salary_max'), posting.get('salary_type')
         ))
     db.commit()
-    db.close()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
 def scrape(keyword="software engineer", location="Remote", pages=3):
+    db = get_db()
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -144,17 +145,34 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                 )
                 description = desc_el.inner_text().strip() if desc_el else ""
                 print(f"    description length: {len(description)} chars")
+                
+                salary_el = page.query_selector(".jobs-unified-top-card__job-insight span") or page.query_selector("span:has-text('$')")
+                if salary_el:
+                    salary_text = salary_el.inner_text().strip()
+                else:
+                    salary_text = ""
+                    
+                if salary_text:
+                    salary_min, salary_max, salary_type = extract_salary(salary_text)
+                else:
+                    salary_min, salary_max, salary_type = None, None, None
+                    
+                print(f"salary_text: {salary_text}")
+                print(f"min: {salary_min}, max: {salary_max}, type:{salary_type}")
 
                 if not title:
                     print("    No title found — skipping")
                     continue
 
-                save({
+                save(db, {
                     "title":       title,
                     "company":     company,
                     "location":    location,
                     "description": description,
                     "date_posted": date_posted,
+                    "salary_min":  salary_min,
+                    "salary_max":  salary_max,
+                    "salary_type": salary_type, 
                 })
 
                 time.sleep(random.uniform(2, 5))
@@ -162,6 +180,7 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
             time.sleep(random.uniform(10, 20))
 
         browser.close()
+        db.close()
         print("\nScrape complete.")
 
 if __name__ == "__main__":

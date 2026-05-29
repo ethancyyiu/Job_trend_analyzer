@@ -46,6 +46,7 @@ def save(posting):
         ))
     db.commit()
     db.close()
+    print(f"  saved: {posting['title']} @ {posting['company']}")
 
 def scrape(keyword="software engineer", location="Remote", pages=3):
     with sync_playwright() as p:
@@ -60,71 +61,108 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                 f"https://www.linkedin.com/jobs/search/"
                 f"?keywords={keyword}&location={location}&start={i * 25}"
             )
+            print(f"\n--- Loading page {i+1} ---")
             page.goto(url, timeout=60000)
+            page.wait_for_timeout(3000)
 
-            try:
-                page.wait_for_selector("div.job-card-container", timeout=10000)
-            except Exception:
-                log.warning(f"No job cards found on page {i+1}, skipping")
-                continue
-            
-            if i == 0:
-                dismiss_modal(page)
+            # if i == 0:
+            #     dismiss_modal(page)
 
-            for _ in range(10):
-                page.evaluate("""
-                    (() => {
-                        const all = document.querySelectorAll('*');
-                        for (const el of all) {
-                            const style = getComputedStyle(el);
-                            if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-                                el.scrollHeight > el.clientHeight + 50) {
-                                el.scrollBy(0, 500);
-                                return;
-                            }
-                        }
-                    })();
-                """)
-                page.wait_for_timeout(random.randint(500, 1200))
+            # scroll to load all cards
+            # for _ in range(10):
+            #     print("scrolling")
+            #     page.evaluate("""
+            #         (() => {
+            #             const all = document.querySelectorAll('*');
+            #             for (const el of all) {
+            #                 const style = getComputedStyle(el);
+            #                 if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+            #                     el.scrollHeight > el.clientHeight + 50) {
+            #                     el.scrollBy(0, 500);
+            #                     return;
+            #                 }
+            #             }
+            #         })();
+            #     """)
+            #     page.wait_for_timeout(random.randint(500, 1200))
 
-            page.wait_for_timeout(5000)
-            cards = page.query_selector_all("div.job-card-container")
-            log.info(f"Page {i+1}: found {len(cards)} cards")
+            page.wait_for_timeout(3000)
 
+            # collect all job URLs and basic info from the listing page first
+            cards = page.query_selector_all("div.base-card")
+            print(f"Page {i+1}: found {len(cards)} cards")
+
+            job_links = []
             for card in cards:
-                title_el    = card.query_selector(".job-card-list__title--link")
-                company_el  = card.query_selector(".artdeco-entity-lockup__subtitle")
-                location_el = card.query_selector(".artdeco-entity-lockup__caption")
+                link_el     = card.query_selector("a.base-card__full-link")
+                company_el  = card.query_selector(".base-search-card__subtitle")
+                location_el = card.query_selector(".job-search-card__location")
 
-                if not title_el or not company_el or not location_el:
+                if not link_el or not company_el or not location_el:
+                    print("  Missing field on card — skipping")
                     continue
 
-                card.click()
-                page.wait_for_timeout(random.randint(1500, 3000))
+                href = link_el.get_attribute("href").split("?")[0]
+                company  = company_el.inner_text().strip()
+                location = location_el.inner_text().strip()
+                job_links.append((href, company, location))
 
+            print(f"  Collected {len(job_links)} valid job links")
+
+            # now visit each job page individually
+            for href, company, location in job_links:
+                print(f"  Visiting: {href}")
+                page.goto(href, timeout=30000)
+                page.wait_for_timeout(random.randint(2000, 3500))
+                dismiss_modal(page)
+
+                # title
+                title_el = (
+                    page.query_selector("h1.top-card-layout__title") or
+                    page.query_selector("h1.t-24") or
+                    page.query_selector("h1")
+                )
+                title = title_el.inner_text().strip() if title_el else ""
+
+                # date posted
                 posted_el = (
-                    page.query_selector(".jobs-unified-top-card__posted-date")
-                    or page.query_selector("span:has-text('ago')")
+                    page.query_selector("span.posted-time-ago__text") or
+                    page.query_selector("span.job-search-card__listdate") or
+                    page.query_selector("time") or
+                    page.query_selector("span:has-text('ago')")
                 )
                 posted_text = posted_el.inner_text().strip() if posted_el else ""
                 match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
                 date_posted = parse_date(match.group(1)) if match else None
+                print(f"    date_posted: {date_posted} (raw: '{posted_text}')")
 
-                desc_el = page.query_selector(".jobs-description__content")
+                # description
+                desc_el = (
+                    page.query_selector(".show-more-less-html__markup") or
+                    page.query_selector(".description__text") or
+                    page.query_selector(".jobs-description__content")
+                )
                 description = desc_el.inner_text().strip() if desc_el else ""
+                print(f"    description length: {len(description)} chars")
+
+                if not title:
+                    print("    No title found — skipping")
+                    continue
 
                 save({
-                    "title":       title_el.inner_text().strip(),
-                    "company":     company_el.inner_text().strip(),
-                    "location":    location_el.inner_text().strip(),
+                    "title":       title,
+                    "company":     company,
+                    "location":    location,
                     "description": description,
                     "date_posted": date_posted,
                 })
 
+                time.sleep(random.uniform(2, 5))
+
             time.sleep(random.uniform(10, 20))
 
         browser.close()
-        log.info("Scrape complete.")
+        print("\nScrape complete.")
 
 if __name__ == "__main__":
     scrape()

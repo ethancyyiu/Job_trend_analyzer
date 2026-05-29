@@ -9,6 +9,7 @@ from analysis.date_parser import parse_date
 import re
 import logging
 from analysis.salary_extractor import extract_salary
+from analysis.skill_extractor import extract_skills, run
 
 load_dotenv()
 log = logging.getLogger(__name__)
@@ -185,3 +186,4 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
 
 if __name__ == "__main__":
     scrape()
+    run()

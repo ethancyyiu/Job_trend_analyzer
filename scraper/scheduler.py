@@ -11,8 +11,8 @@ scheduler = BlockingScheduler()
 @scheduler.scheduled_job(IntervalTrigger(days=3))
 def weekly_scrape():
     log.info("Starting weekly scrape...")
-    scrape(keyword = "software engineer", location = "Remote", pages = 3)
-    scrape(keyword = "data engineer", location = "Remote", pages = 3)
+    scrape(keyword = "software engineer", location = "Remote", pages = 2)
+    scrape(keyword = "data engineer", location = "Remote", pages = 2)
     log.info("Weekly scrape complete.")
 
 if __name__ == "__main__":

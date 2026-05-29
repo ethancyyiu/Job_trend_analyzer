@@ -34,6 +34,47 @@ def save(db, posting):
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
 
+# def close_signin_modal(page):
+#     """
+#     Try several selectors to close LinkedIn's sign-in modal reliably.
+#     Returns True if any action succeeded, False otherwise.
+#     """
+#     selectors = [
+#         "button.contextual-sign-in-modal__close",
+#         "button.contextual-sign-in-modal__sign-in-with-email-cta",
+#         "button.artdeco-modal__dismiss",
+#         'button[aria-label="Dismiss"]',
+#         'button[aria-label="Close"]',
+#         'button[aria-label="Dismiss dialog"]',
+#         'button[aria-label="Close dialog"]',
+#         'button[data-control-name="dismiss"]',
+#     ]
+#     for sel in selectors:
+#         try:
+#             page.wait_for_selector(sel, timeout=1500)
+#             page.locator(sel).first.click(force=True, timeout=3000)
+#             print(f"    Closed modal via selector: {sel}")
+#             return True
+#         except Exception:
+#             continue
+#     # Fallback: try clicking the modal overlay or pressing Escape
+#     try:
+#         # Click an overlay or dismiss area if present
+#         overlay_selectors = ["div.artdeco-modal__dismiss", "div.artdeco-modal__overlay"]
+#         for o_sel in overlay_selectors:
+#             try:
+#                 page.wait_for_selector(o_sel, timeout=1000)
+#                 page.locator(o_sel).first.click(force=True, timeout=2000)
+#                 print(f"    Closed modal via overlay: {o_sel}")
+#                 return True
+#             except Exception:
+#                 continue
+#         page.keyboard.press("Escape")
+#         print("    Sent Escape key to page to dismiss modal")
+#         return True
+#     except Exception:
+#         return False
+
 def scrape(keyword="software engineer", location="Remote", pages=3):
     db = get_db()
 
@@ -50,18 +91,39 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
             )
             print(f"\n--- Loading page {page_num + 1} ---")
             page.goto(url, timeout=60000)
-            page.wait_for_timeout(3000)
+            page.wait_for_timeout(6000)
+            
+            # Close the LinkedIn sign‑in popup if it appears
+            print("escaping from login")
+            page.keyboard.press("Escape")
+            # try:
+            #     closed = close_signin_modal(page)
+            #     if not closed:
+            #         # hell mary this
+            #         try:
+            #             print("hell mary")
+            #             page.locator("button.contextual-sign-in-modal__sign-in-with-email-cta").first.click(force=True, timeout=3000)
+            #         except Exception:
+            #             pass
+            # except Exception as e:
+            #     print(f"    Error closing modal: {e}")
 
-            # Scroll the left panel to load all cards
-            for _ in range(5):
-                page.evaluate("""
-                    (() => {
-                        const panel = document.querySelector('.jobs-search-results-list') ||
-                                      document.querySelector('ul.jobs-search__results-list');
-                        if (panel) panel.scrollBy(0, 600);
-                    })();
-                """)
-                page.wait_for_timeout(random.randint(600, 1200))
+
+
+            
+            page.wait_for_timeout(random.randint(3000, 5000))
+
+
+            # # Scroll the left panel to load all cards
+            # for _ in range(5):
+            #     page.evaluate("""
+            #         (() => {
+            #             const panel = document.querySelector('.jobs-search-results-list') ||
+            #                           document.querySelector('ul.jobs-search__results-list');
+            #             if (panel) panel.scrollBy(0, 600);
+            #         })();
+            #     """)
+            #     page.wait_for_timeout(random.randint(600, 1200))
 
             cards = page.query_selector_all("a.base-card__full-link")
             print(f"  Found {len(cards)} job cards")
@@ -90,25 +152,7 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                     date_posted = parse_date(match.group(1)) if match else None
                     print(f"    date_posted: {date_posted} (raw: '{posted_text}')")
 
-                    # --- Salary (from the right panel insights, NOT similar jobs) ---
-                    # The salary insight is inside the top card area, before the description
-                    salary_text = ""
-                    insight_els = page.query_selector_all(
-                        ".job-details-jobs-unified-top-card__job-insight span, "
-                        ".jobs-unified-top-card__job-insight span"
-                    )
-                    for el in insight_els:
-                        text = el.inner_text().strip()
-                        if "$" in text or "/yr" in text or "/hr" in text:
-                            salary_text = text
-                            break
 
-                    salary_min, salary_max, salary_type = (
-                        extract_salary(salary_text) if salary_text else (None, None, None)
-                    )
-                    print(f"    salary_text: '{salary_text}' → min={salary_min}, max={salary_max}, type={salary_type}")
-
-                    # --- Description (right panel only, not similar jobs section) ---
                     desc_el = (
                         page.query_selector(".jobs-description__content .jobs-description-content__text") or
                         page.query_selector(".jobs-description__content") or
@@ -120,6 +164,13 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
                     if not title or not company:
                         print("    Missing title or company — skipping")
                         continue
+                    
+                    if description:
+                            salary_min, salary_max, salary_type = extract_salary(description)
+                    else :
+                           salary_min, salary_max, salary_type = None, None, None
+                           
+                    print(f"min={salary_min}, max={salary_max}, type={salary_type}")
 
                     save(db, {
                         "title":    title,

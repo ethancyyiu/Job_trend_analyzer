@@ -27,126 +27,125 @@ def save(db, posting):
             ON CONFLICT DO NOTHING
         """, (
             posting['title'], posting['company'], posting['location'],
-            posting['description'], date.today(), posting.get('date_posted'), posting.get('salary_min'),
-            posting.get('salary_max'), posting.get('salary_type')
+            posting['description'], date.today(), posting.get('date_posted'),
+            posting.get('salary_min'), posting.get('salary_max'), posting.get('salary_type')
         ))
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
+
 def scrape(keyword="software engineer", location="Remote", pages=3):
     db = get_db()
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
 
-        for i in range(pages):
+        for page_num in range(pages):
             url = (
                 f"https://www.linkedin.com/jobs/search/"
-                f"?keywords={keyword}&location={location}&start={i * 25}"
+                f"?keywords={keyword}&location={location}&start={page_num * 25}"
             )
-            print(f"\n--- Loading page {i+1} ---")
+            print(f"\n--- Loading page {page_num + 1} ---")
             page.goto(url, timeout=60000)
             page.wait_for_timeout(3000)
 
-            page.wait_for_timeout(3000)
+            # Scroll the left panel to load all cards
+            for _ in range(5):
+                page.evaluate("""
+                    (() => {
+                        const panel = document.querySelector('.jobs-search-results-list') ||
+                                      document.querySelector('ul.jobs-search__results-list');
+                        if (panel) panel.scrollBy(0, 600);
+                    })();
+                """)
+                page.wait_for_timeout(random.randint(600, 1200))
 
-            # collect all job URLs and basic info from the listing page first
-            cards = page.query_selector_all("div.base-card")
-            print(f"Page {i+1}: found {len(cards)} cards")
+            cards = page.query_selector_all("a.base-card__full-link")
+            print(f"  Found {len(cards)} job cards")
 
-            job_links = []
             for card in cards:
-                link_el     = card.query_selector("a.base-card__full-link")
-                company_el  = card.query_selector(".base-search-card__subtitle")
-                location_el = card.query_selector(".job-search-card__location")
+                try:
+                    card.click()
+                    page.wait_for_timeout(random.randint(1800, 3000))
 
-                if not link_el or not company_el or not location_el:
-                    print("  Missing field on card — skipping")
-                    continue
+                    # # Wait for the right panel to load
+                    # page.wait_for_selector(
+                    #     ".jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title",
+                    #     timeout=8000
+                    # )
+                    title_el = page.query_selector("h2.top-card-layout__title")
+                    company_el = page.query_selector(".topcard__org-name-link")
+                    location_el = page.query_selector(".topcard__flavor--bullet")
 
-                href = link_el.get_attribute("href").split("?")[0]
-                company  = company_el.inner_text().strip()
-                location = location_el.inner_text().strip()
-                job_links.append((href, company, location))
-
-            print(f"  Collected {len(job_links)} valid job links")
-
-            # now visit each job page individually
-            for href, company, location in job_links:
-                print(f"  Visiting: {href}")
-                page.goto(href, timeout=30000)
-                page.wait_for_timeout(random.randint(2000, 3500))
-
-                # title
-                title_el = (
-                    page.query_selector("h1.top-card-layout__title") or
-                    page.query_selector("h1.t-24") or
-                    page.query_selector("h1")
-                )
-                title = title_el.inner_text().strip() if title_el else ""
-
-                # date posted
-                posted_el = (
-                    page.query_selector("span.posted-time-ago__text") or
-                    page.query_selector("span.job-search-card__listdate") or
-                    page.query_selector("time") or
-                    page.query_selector("span:has-text('ago')")
-                )
-                posted_text = posted_el.inner_text().strip() if posted_el else ""
-                match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
-                date_posted = parse_date(match.group(1)) if match else None
-                print(f"    date_posted: {date_posted} (raw: '{posted_text}')")
-
-                # description
-                desc_el = (
-                    page.query_selector(".show-more-less-html__markup") or
-                    page.query_selector(".description__text") or
-                    page.query_selector(".jobs-description__content")
-                )
-                description = desc_el.inner_text().strip() if desc_el else ""
-                print(f"    description length: {len(description)} chars")
-                page.wait_for_timeout(random.randint(2000, 3500))
-                
-                salary_el = page.query_selector(".jobs-unified-top-card__job-insight span") or page.query_selector("span:has-text('$')")
-                if salary_el:
-                    salary_text = salary_el.inner_text().strip()
-                else:
-                    salary_text = ""
+                    title = title_el.inner_text().strip() if title_el else None
+                    company = company_el.inner_text().strip() if company_el else None
+                    location = location_el.inner_text().strip() if location_el else None
                     
-                if salary_text:
-                    salary_min, salary_max, salary_type = extract_salary(salary_text)
-                else:
-                    salary_min, salary_max, salary_type = None, None, None
-                
-                page.wait_for_timeout(random.randint(2000, 3500))
-                print(f"salary_text: {salary_text}")
-                print(f"min: {salary_min}, max: {salary_max}, type:{salary_type}")
+                    posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')")
+                    posted_text = posted_el.inner_text().strip() if posted_el else ""
+                    match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
+                    date_posted = parse_date(match.group(1)) if match else None
+                    print(f"    date_posted: {date_posted} (raw: '{posted_text}')")
 
-                if not title:
-                    print("    No title found — skipping")
+                    # --- Salary (from the right panel insights, NOT similar jobs) ---
+                    # The salary insight is inside the top card area, before the description
+                    salary_text = ""
+                    insight_els = page.query_selector_all(
+                        ".job-details-jobs-unified-top-card__job-insight span, "
+                        ".jobs-unified-top-card__job-insight span"
+                    )
+                    for el in insight_els:
+                        text = el.inner_text().strip()
+                        if "$" in text or "/yr" in text or "/hr" in text:
+                            salary_text = text
+                            break
+
+                    salary_min, salary_max, salary_type = (
+                        extract_salary(salary_text) if salary_text else (None, None, None)
+                    )
+                    print(f"    salary_text: '{salary_text}' → min={salary_min}, max={salary_max}, type={salary_type}")
+
+                    # --- Description (right panel only, not similar jobs section) ---
+                    desc_el = (
+                        page.query_selector(".jobs-description__content .jobs-description-content__text") or
+                        page.query_selector(".jobs-description__content") or
+                        page.query_selector(".show-more-less-html__markup")
+                    )
+                    description = desc_el.inner_text().strip() if desc_el else ""
+                    print(f"    description: {len(description)} chars")
+
+                    if not title or not company:
+                        print("    Missing title or company — skipping")
+                        continue
+
+                    save(db, {
+                        "title":    title,
+                        "company":  company,
+                        "location": location,
+                        "description": description,
+                        "date_posted": date_posted,
+                        "salary_min":  salary_min,
+                        "salary_max":  salary_max,
+                        "salary_type": salary_type,
+                    })
+
+                    time.sleep(random.uniform(1.5, 3.5))
+
+                except Exception as e:
+                    print(f"    Error on card: {e}")
                     continue
-
-                save(db, {
-                    "title":       title,
-                    "company":     company,
-                    "location":    location,
-                    "description": description,
-                    "date_posted": date_posted,
-                    "salary_min":  salary_min,
-                    "salary_max":  salary_max,
-                    "salary_type": salary_type, 
-                })
-
-                time.sleep(random.uniform(2, 5))
+                
+                time.sleep(random.uniform(3, 10))
 
             time.sleep(random.uniform(10, 20))
 
         browser.close()
         db.close()
         print("\nScrape complete.")
+
 
 if __name__ == "__main__":
     scrape()

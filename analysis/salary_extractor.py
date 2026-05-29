@@ -12,22 +12,19 @@ def extract_salary(text):
 
     def get_type(s):
         s = s.lower()
-        print(s)
 
-        if re.search(r'\b(per\s*year|yearly|/yr|yr|year)\b', s):
+        cleaned = re.sub(r'[$£€,]', '', s)
+
+        numbers = re.findall(r'\d+(?:\.\d+)?', cleaned)
+        if not numbers:
+            return None
+
+        value = float(numbers[0])
+
+        if value >= 5000:
             return 'yearly'
+        return 'hourly'
 
-        if re.search(r'\b(per\s*hour|hourly|/hr|hr|hour)\b', s):
-            return 'hourly'
-
-        numbers = re.findall(r'\d+', s)
-        if numbers:
-            # any number >= 10000 
-            if any(int(n) >= 10000 for n in numbers):
-                return 'yearly'
-            return 'hourly'
-
-        return None
 
 
     

@@ -14,6 +14,22 @@ log = logging.getLogger(__name__)
 
 DB_URL = os.environ["DATABASE_URL"]
 
+def dismiss_modal(page):
+    """Close the login/signup modal if it appears."""
+    try:
+        close_btn = (
+            page.query_selector("button.modal__dismiss") or
+            page.query_selector("button[aria-label='Dismiss']") or
+            page.query_selector("button[aria-label='dismiss']") or
+            page.query_selector(".modal__dismiss")
+        )
+        if close_btn:
+            close_btn.click()
+            log.info("Dismissed login modal.")
+            page.wait_for_timeout(500)
+    except Exception:
+        pass
+
 def get_db():
     return psycopg2.connect(DB_URL)
 
@@ -51,6 +67,9 @@ def scrape(keyword="software engineer", location="Remote", pages=3):
             except Exception:
                 log.warning(f"No job cards found on page {i+1}, skipping")
                 continue
+            
+            if i == 0:
+                dismiss_modal(page)
 
             for _ in range(10):
                 page.evaluate("""

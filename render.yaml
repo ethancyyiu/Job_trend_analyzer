@@ -7,9 +7,9 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-    autoDeploy: true  
- 
-   - type: worker           
+    autoDeploy: true
+
+  - type: worker
     name: job-trend-scheduler
     runtime: python
     buildCommand: pip install -r requirements.txt && playwright install chromium && playwright install-deps

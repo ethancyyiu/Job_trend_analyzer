@@ -1,34 +1,39 @@
 import re
 
 def extract_salary(text):
+    print(text)
+    input("enter")
     if not text:
         return None, None, None  # min, max, type
     
-    pattern = r'[$£€][\d,]+(?:\.\d+)?(?:\s*/\s*(?:yr|hour|hr))?'
+    pattern = r'[$£€][\d,]+(?:\.\d+)?[kK]?(?:\s*/\s*(?:yr|year|annual|hour|hr|h))?'
     matches = re.findall(pattern, text.lower())
 
     def parse(s):
-        return float(re.sub(r'[^\d.]', '', s))
+        s = re.sub(r'[$£€,]', '', s.strip())
+    
+        m = re.match(r'([\d.]+)([kK]?)', s)
+        if not m:
+            return None
+
+        value = float(m.group(1))
+        if m.group(2).lower() == 'k':
+            value *= 1000
+        return value
 
     def get_type(s):
         s = s.lower()
-        print(s)
-
-        cleaned = re.sub(r'[$£€,]', '', s)
-
-        numbers = re.findall(r'\d+(?:\.\d+)?', cleaned)
+        if re.search(r'/\s*(?:yr|year|annual)', s):
+            return 'yearly'
+        
+        if re.search(r'/\s*(?:hr|hour|h)\b', s):
+            return 'hourly'
+        
+        numbers = re.findall(r'\d+(?:\.\d+)?', re.sub(r'[$£€,]', '', s))
         if not numbers:
             return None
+        return 'yearly' if float(numbers[0]) >= 5000 else 'hourly'
 
-        value = float(numbers[0])
-
-        if value >= 5000:
-            return 'yearly'
-        return 'hourly'
-
-
-
-    
     def usd(value, s):
         s = s.strip()
         if s.startswith('£'):

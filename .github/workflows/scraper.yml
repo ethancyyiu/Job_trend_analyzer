@@ -2,8 +2,8 @@ name: Scrape LinkedIn Jobs
 
 on:
   schedule:
-    - cron: '0 6 */3 * *'  
-  workflow_dispatch:    
+    - cron: '0 6 */3 * *'
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -22,12 +22,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
-      - name: Install Playwright browsers
-        run: pip install playwright
-        run: playwright install chromium --with-deps
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
 
       - name: Run scraper
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          python -m scraper.scraper
+        run: python -m scraper.scraper

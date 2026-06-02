@@ -28,9 +28,9 @@
 .home-hero-copy h1 {
   font-family: var(--font-display);
   font-size: 2.6rem;
-  font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-weight: var(--font-weight-display);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   color: var(--text-primary);
   margin-bottom: 18px;
 }
@@ -94,7 +94,7 @@
 .home-hero-panel-card h3 {
   font-family: var(--font-display);
   font-size: 17px;
-  font-weight: 400;
+  font-weight: var(--font-weight-subhead);
   color: var(--text-primary);
   margin-bottom: 10px;
   letter-spacing: -0.01em;
@@ -112,7 +112,7 @@
 .home-value-copy h2 {
   font-family: var(--font-display);
   font-size: 1.85rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-heading);
   letter-spacing: -0.02em;
   color: var(--text-primary);
   margin-bottom: 14px;

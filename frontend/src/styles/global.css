@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700;800&display=swap');
 
 :root {
   /* — Core palette — */
@@ -25,9 +25,15 @@
   --border-strong:  hsl(32, 12%, 78%);
 
   /* — Typography — */
-  --font-display: 'Inter', sans-serif;
-  --font-body:    'Inter', sans-serif;
-  --font-mono:    ui-monospace, 'Cascadia Code', monospace;
+  --sans:          'Inter', system-ui, sans-serif;
+  --heading:       'Inter', system-ui, sans-serif;
+  --font-display:  'Inter', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     ui-monospace, 'Cascadia Code', monospace;
+  --font-weight-body: 450;
+  --font-weight-heading: 700;
+  --font-weight-display: 800;
+  --font-weight-subhead: 600;
 
   /* — Radii — */
   --radius-sm: 6px;
@@ -54,12 +60,20 @@ html, body, #root { height: 100%; }
 
 body {
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: var(--font-weight-body);
   background: var(--bg);
   color: var(--text-primary);
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-heading);
+  letter-spacing: -0.01em;
 }
 
 /* ── Utility classes ── */

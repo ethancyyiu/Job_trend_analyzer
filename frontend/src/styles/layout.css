@@ -32,7 +32,7 @@
 
 .brand-name {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: var(--font-weight-subhead);
   font-size: 16px;
   color: hsl(36, 20%, 90%);
   letter-spacing: -0.01em;
@@ -118,7 +118,7 @@
 .page-header h2 {
   font-family: var(--font-display);
   font-size: 24px;
-  font-weight: 400;
+  font-weight: var(--font-weight-heading);
   color: var(--text-primary);
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -196,7 +196,7 @@
 .chart-card-header h3 {
   font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 400;
+  font-weight: var(--font-weight-subhead);
   color: var(--text-primary);
   letter-spacing: -0.01em;
   margin-bottom: 4px;
@@ -229,7 +229,7 @@
 .salary-hero h3 {
   font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 400;
+  font-weight: var(--font-weight-heading);
   color: var(--text-primary);
   margin-bottom: 8px;
 }

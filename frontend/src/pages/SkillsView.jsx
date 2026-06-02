@@ -60,7 +60,7 @@ export function SkillsView({ setPage, page }) {
                             <YAxis />
                             <Tooltip />
                             <CartesianGrid strokeDasharray="3 3" />
-                            <Bar dataKey="count" fill="#06B6D4" />
+                            <Bar dataKey="count" fill="#C86541" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

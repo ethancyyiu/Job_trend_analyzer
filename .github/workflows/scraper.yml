@@ -1,13 +1,6 @@
-name: Scrape LinkedIn Jobs
-
-on:
-  schedule:
-    - cron: '0 6 */3 * *'
-  workflow_dispatch:
-
 jobs:
   scrape:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest  # Changed from ubuntu-22.04
     timeout-minutes: 30
 
     steps:
@@ -30,17 +23,17 @@ jobs:
       - name: Install common system libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get install -y --no-install-recommends \
             libnss3 libatk1.0-0 libatk-bridge2.0-0 libx11-xcb1 \
             libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 \
-            libpangocairo-1.0-0 libcups2 libxss1 libgtk-3-0
+            libpangocairo-1.0-0 libcups2 libxss1 libgtk-3-0 || \
+            sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0
 
       - name: Install Python dependencies
         run: pip install -r requirements-dev.txt
 
       - name: Install Playwright browsers and system deps via npx
         run: |
-          # ensure playwright python package is present (optional if in requirements)
           pip install playwright || true
           npx playwright install --with-deps
 

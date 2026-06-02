@@ -1,23 +1,24 @@
-import React from 'react'
+// Layout.jsx
+import React, { useState } from 'react'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import '../styles/layout.css'
 
-export function Layout({page, setPage, children}){
+export function Layout({ page, setPage, children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <div className="app-shell">
-      <aside className="app-sidebar">
-        <Sidebar page={page} setPage={setPage} />
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside className={`app-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+        <Sidebar page={page} setPage={(p) => { setPage(p); setSidebarOpen(false) }} />
       </aside>
-
       <div className="app-main">
-        <TopBar />
-        <div className="app-content">
-          {children}
-        </div>
+        <TopBar onMenuClick={() => setSidebarOpen(o => !o)} />
+        <div className="app-content">{children}</div>
       </div>
     </div>
   )
 }
-
-export default Layout

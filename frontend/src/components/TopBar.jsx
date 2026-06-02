@@ -1,13 +1,11 @@
 import React from 'react'
 
-export function TopBar(){
+export function TopBar({ onMenuClick }) {
   return (
     <div className="topbar-root">
       <div className="topbar-inner">
-        {/* Empty placeholder for future controls */}
+        <button className="menu-btn" onClick={onMenuClick}>☰</button>
       </div>
     </div>
   )
 }
-
-export default TopBar

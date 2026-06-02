@@ -282,13 +282,41 @@
   background: var(--accent);
 }
 
-/* ── Responsive ── */
 @media (max-width: 900px) {
-  .app-sidebar { width: 64px; padding: 14px 10px; }
-  .brand-name { display: none; }
-  .nav-item { padding: 10px; font-size: 0; justify-content: center; }
-  .nav-item.active::before { display: none; }
+  .app-sidebar {
+    position: fixed;
+    left: -240px;
+    top: 0; bottom: 0;
+    z-index: 100;
+    transition: left 0.25s ease;
+    width: 240px;
+  }
+  .app-sidebar.sidebar-open { left: 0; }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+  }
+
+  .menu-btn {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-primary);
+    margin-right: auto;
+  }
+
   .page-panel-row { grid-template-columns: 1fr; }
   .salary-hero { grid-template-columns: 1fr; }
   .app-content { padding: 20px 16px; }
+}
+
+/* Hide menu button on desktop */
+@media (min-width: 901px) {
+  .menu-btn { display: none; }
+  .sidebar-overlay { display: none; }
 }

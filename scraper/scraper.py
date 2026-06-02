@@ -33,7 +33,7 @@ def save(db, posting):
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
-def scrape(keyword = "software engineer", location = "Remote", pages = 3):
+def scrape(keyword = "software engineer", location = "Remote", pages = 1):
     db = get_db()
 
     with sync_playwright() as p:

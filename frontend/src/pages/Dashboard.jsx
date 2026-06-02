@@ -81,7 +81,7 @@ export function Dashboard({ setPage, page }) {
                         <LineChart data={data}>
                             <XAxis dataKey="date" />
                             <YAxis />
-                            <Line type="monotone" dataKey="count" stroke="#06B6D4" strokeWidth={2} />
+                            <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} />
                             <CartesianGrid strokeDasharray="3 3" />
                             <Tooltip />
                         </LineChart>

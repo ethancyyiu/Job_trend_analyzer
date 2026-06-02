@@ -62,7 +62,7 @@ def scrape(keyword, location, pages):
             for card in cards:
                 try:
                     card.click()
-                    page.wait_for_timeout(random.randint(1800, 3000))
+                    page.wait_for_timeout(random.randint(300, 600))
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")
@@ -112,13 +112,11 @@ def scrape(keyword, location, pages):
                         "salary_type": salary_type,
                     })
 
-                    time.sleep(random.uniform(1.5, 3.5))
+                    time.sleep(random.uniform(0.2, 0.5))
 
                 except Exception as e:
                     print(f"    Error on card: {e}")
                     continue
-                
-                time.sleep(random.uniform(3, 7))
 
             time.sleep(random.uniform(3, 7))
 
@@ -128,6 +126,6 @@ def scrape(keyword, location, pages):
 
 
 if __name__ == "__main__":
-    scrape("software engineer", "remote", 1)
-    # scrape("data analyst", "remote", 2)
+    # scrape("software engineer", "remote", 1)
+    scrape("data analyst", "remote", 1)
     run()

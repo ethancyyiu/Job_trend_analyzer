@@ -33,7 +33,7 @@ def save(db, posting):
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
-def scrape(keyword = "software engineer", location = "Remote", pages = 1):
+def scrape(keyword, location, pages):
     db = get_db()
 
     with sync_playwright() as p:
@@ -48,7 +48,7 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 1):
                 f"?keywords={keyword}&location={location}&start={page_num * 25}"
             )
             print(f"\n--- Loading page {page_num + 1} ---")
-            page.goto(url, timeout=60000)
+            page.goto(url, timeout=30000)
             page.wait_for_timeout(6000)
             
             # close login page 
@@ -66,7 +66,6 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 1):
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")
-                    page.wait_for_timeout(random.randint(3000, 5000))
 
                     title_el = page.query_selector("h2.top-card-layout__title")
                     company_el = page.query_selector(".topcard__org-name-link")
@@ -119,9 +118,9 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 1):
                     print(f"    Error on card: {e}")
                     continue
                 
-                time.sleep(random.uniform(3, 10))
+                time.sleep(random.uniform(3, 7))
 
-            time.sleep(random.uniform(10, 20))
+            time.sleep(random.uniform(3, 7))
 
         browser.close()
         db.close()
@@ -129,5 +128,6 @@ def scrape(keyword = "software engineer", location = "Remote", pages = 1):
 
 
 if __name__ == "__main__":
-    scrape()
+    scrape("software engineer", "remote", 1)
+    # scrape("data analyst", "remote", 2)
     run()

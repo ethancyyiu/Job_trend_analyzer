@@ -22,20 +22,20 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install common system libraries
+      - name: Install system libraries (Ubuntu 24.04 compatible)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-          libnss3 libatk1.0-0 libatk-bridge2.0-0 libx11-xcb1 \
-          libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 \
-          libpangocairo-1.0-0 libcups2 libxss1 libgtk-3-0 \
-          fonts-liberation libu2f-udev xdg-utils
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libx11-xcb1 \
+            libxcomposite1 libxdamage1 libxrandr2 libgbm1 \
+            libasound2t64 libpangocairo-1.0-0 libcups2 libxss1 \
+            libgtk-3-0 fonts-liberation libu2f-udev xdg-utils
           echo "System libraries installed successfully"
 
       - name: Upgrade pip and build tools
         run: python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install Playwright browsers and system deps
+      - name: Install Playwright + browser deps
         run: |
           pip install playwright
           npx playwright install-deps chromium

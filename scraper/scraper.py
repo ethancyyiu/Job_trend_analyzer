@@ -33,11 +33,11 @@ def save(db, posting):
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}")
 
-def scrape(keyword="software engineer", location="Remote", pages=3):
+def scrape(keyword = "software engineer", location = "Remote", pages = 3):
     db = get_db()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless = True)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()

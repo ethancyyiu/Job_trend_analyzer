@@ -1,57 +1,69 @@
-:root{
-  --navy: #0A1A2F;
-  --slate: #334155;
-  --soft-white: #F8FAFC;
-  --accent: #06B6D4;
-  --muted: #94a3b8;
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* — Core palette — */
+  --bg:           hsl(36, 25%, 97%);
+  --surface:      hsl(38, 20%, 99%);
+  --surface-2:    hsl(34, 12%, 93%);
+
+  --text-primary:   hsl(30, 10%, 12%);
+  --text-secondary: hsl(30, 6%, 40%);
+  --text-muted:     hsl(30, 6%, 58%);
+
+  --accent:         hsl(16, 55%, 52%);
+  --accent-light:   hsl(16, 55%, 95%);
+  --accent-mid:     hsl(16, 45%, 70%);
+  --accent-dark:    hsl(16, 55%, 38%);
+
+  --green:          hsl(145, 25%, 45%);
+  --green-light:    hsl(145, 25%, 94%);
+
+  --amber:          hsl(36, 70%, 55%);
+  --amber-light:    hsl(36, 70%, 94%);
+
+  --border:         hsl(32, 12%, 88%);
+  --border-strong:  hsl(32, 12%, 78%);
+
+  /* — Typography — */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Code', monospace;
+
+  /* — Radii — */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* — Shadows — */
+  --shadow-sm: 0 1px 3px hsla(30,10%,12%,0.06), 0 1px 2px hsla(30,10%,12%,0.04);
+  --shadow-md: 0 4px 12px hsla(30,10%,12%,0.08), 0 2px 4px hsla(30,10%,12%,0.04);
+  --shadow-lg: 0 12px 32px hsla(30,10%,12%,0.10), 0 4px 8px hsla(30,10%,12%,0.06);
+
+  /* — Sidebar specific — */
+  --sidebar-bg:      hsl(30, 8%, 12%);
+  --sidebar-text:    hsl(36, 15%, 75%);
+  --sidebar-active:  hsl(16, 55%, 52%);
+  --sidebar-hover:   hsla(36,15%,75%,0.08);
+  --sidebar-border:  hsl(30, 6%, 20%);
 }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: var(--soft-white);
-  color:var(--navy);
-  -webkit-font-smoothing:antialiased;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Ensure full-height app */
 html, body, #root { height: 100%; }
 
-.top-nav{
-  width:100%;
-  background: linear-gradient(90deg, var(--navy), var(--slate));
-  color:var(--soft-white);
-  box-shadow: 0 6px 18px rgba(10,26,47,0.12);
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
-.nav-inner{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:16px; padding:14px 20px; max-width:1600px; margin:0 auto;
-}
-.nav-brand{display:flex; align-items:center; gap:12px; cursor:pointer}
-.nav-logo{width:36px; height:36px; flex:0 0 36px}
-.nav-title{font-weight:700; font-size:16px}
-.nav-links button{
-  background:transparent; border:0; color:var(--soft-white); padding:8px 12px; margin-left:6px; border-radius:8px; cursor:pointer; font-weight:600
-}
-.nav-links button.active, .nav-links button:hover{background:rgba(255,255,255,0.06)}
 
-.page-root{width:100%; padding:28px 24px}
-.page-header{max-width:1400px; margin:18px auto 24px auto;}
-.page-header h2{margin:0; color:var(--navy)}
-.page-header p{margin:8px 0 0 0; color:var(--muted)}
-
-.page-content{max-width:1400px; margin:18px auto; display:block}
-
-/* Feature cards compatible with Home.css but overriding colors */
-.features-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:20px}
-.feature{background:linear-gradient(180deg, #ffffff, #fbfdff); border-radius:12px; padding:24px; box-shadow: 0 8px 20px rgba(10,26,47,0.06)}
-.feature h3{color:var(--navy)}
-.feature p{color:var(--muted)}
-.feature-btn{background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:10px; cursor:pointer}
-
-/* Full width behavior on small screens */
-@media (max-width:900px){
-  .features-grid{grid-template-columns:1fr}
-  .nav-inner{padding:12px}
+/* ── Utility classes ── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }

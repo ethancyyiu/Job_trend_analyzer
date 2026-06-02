@@ -17,7 +17,7 @@ export default function Sidebar({ page, setPage }) {
                     </div>
 
                 </div>
-                <div className="brand-name">Job Trend</div>
+                <div className="brand-name">Market Pulse</div>
             </div>
 
             <nav className="sidebar-nav">

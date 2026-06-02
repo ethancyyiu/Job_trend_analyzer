@@ -126,6 +126,6 @@ def scrape(keyword, location, pages):
 
 
 if __name__ == "__main__":
-    # scrape("software engineer", "remote", 1)
-    scrape("data analyst", "remote", 1)
+    scrape("software engineer", "remote", 2)
+    scrape("data analyst", "remote", 2)
     run()

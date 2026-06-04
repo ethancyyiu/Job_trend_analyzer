@@ -58,10 +58,10 @@ def get_salary():
 
 @router.get("/health")
 def health():
-    return {"message": "Hello!!!"}
+    return {"message": "Bello!!!"}
 
 @router.get("/")
 def home():
-    return {"message": "Welcome to Job Trend Analyzer API"}
+    return {"message": "Welcome to Market Pulse API"}
 
 

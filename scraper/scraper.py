@@ -35,9 +35,10 @@ def save(db, posting):
 
 def scrape(keyword, location, pages):
     db = get_db()
+    
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
@@ -63,6 +64,8 @@ def scrape(keyword, location, pages):
                 try:
                     card.click()
                     page.wait_for_timeout(random.randint(3500, 4000))
+                    input("enter")
+                    #page.wait_for_timeout(random.randint(10000, 12000))
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")
@@ -70,16 +73,21 @@ def scrape(keyword, location, pages):
                     title_el = page.query_selector("h2.top-card-layout__title")
                     company_el = page.query_selector(".topcard__org-name-link")
                     location_el = page.query_selector(".topcard__flavor--bullet")
+                    location_el = page.query_selector(".topcard__flavor--bullet")
 
                     title = title_el.inner_text().strip() if title_el else None
                     company = company_el.inner_text().strip() if company_el else None
                     location = location_el.inner_text().strip() if location_el else None
                     
-                    posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')")
+                    
+                    posted_el = page.query_selector(".jobs-unified-top-card__posted-date") \
+                        or page.query_selector(".posted-time-ago__text")
+                    # posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')") or page.query_selector(".posted-time-ago__text")
                     posted_text = posted_el.inner_text().strip() if posted_el else ""
                     match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
                     date_posted = parse_date(match.group(1)) if match else None
                     print(f"    date_posted: {date_posted} (raw: '{posted_text}')")
+                    print(f"location: {location}")
 
 
                     desc_el = (
@@ -126,6 +134,7 @@ def scrape(keyword, location, pages):
 
 
 if __name__ == "__main__":
-    scrape("software engineer", "remote", 2)
-    scrape("data analyst", "remote", 2)
+    #scrape("software engineer", "remote", 2)
+    #scrape("data engineer", "remote", 2)
+    scrape("machine learning engineer", "remote", 2)
     run()

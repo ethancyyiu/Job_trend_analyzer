@@ -19,7 +19,11 @@ SKILLS = [
 
     "git", "github", "linux", "rest api", "graphql", "kafka", "fastapi", "fast api", "restapi", "nosql",
     
-    "r", "tableau", "excel", "machine learning"
+    "r", "tableau", "excel", "machine learning", "ci/cd", "cicd", "jenkins", "github actions", 
+    
+    "spark", "snowflake", "databricks", "langchain", "xgboost", "lightgbm", "springboot", 
+    
+    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting"
 ]
 
 def extract_skills(text):

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 export function SkillsView({ setPage, page }) {
     const [data, setData] = useState([])
@@ -60,7 +60,11 @@ export function SkillsView({ setPage, page }) {
                             <YAxis />
                             <Tooltip />
                             <CartesianGrid strokeDasharray="3 3" />
-                            <Bar dataKey="count" fill="#C86541" />
+                            <Bar dataKey="count" fill="#C86541">
+                                {data.map((entry, index) => (
+                                  <Cell key={`cell-${entry.skill}`} fill={index < 5 ? 'var(--accent)' : 'var(--accent-mid)'} />
+                                ))}
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

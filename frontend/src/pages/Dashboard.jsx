@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts"
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 export function Dashboard({ setPage, page }) {
     const [data, setData] = useState([])
@@ -45,6 +45,8 @@ export function Dashboard({ setPage, page }) {
         changeLabel = "—";
     }
 
+    const trendSymbol = change > 0 ? '▲' : change < 0 ? '▼' : '—'
+    const markerDate = data.length > 0 ? data[data.length - 1].date : null
 
     return (
         <div className="card">
@@ -61,7 +63,12 @@ export function Dashboard({ setPage, page }) {
                 </div>
                 <div className="metric-card">
                     <span>Momentum</span>
-                    <strong>{changeLabel}</strong>
+                    <strong>
+                      {changeLabel}
+                      <span className={`trend-pill ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`}>
+                        {trendSymbol}
+                      </span>
+                    </strong>
                     <p>Change from the prior period, so you know if demand is accelerating.</p>
                 </div>
                 <div className="metric-card">
@@ -82,6 +89,9 @@ export function Dashboard({ setPage, page }) {
                             <XAxis dataKey="date" />
                             <YAxis />
                             <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} />
+                            {markerDate ? (
+                              <ReferenceLine x={markerDate} stroke="var(--accent-mid)" strokeDasharray="4 4" label={{ value: 'Latest', position: 'insideTopRight', fill: '#bf7a67', fontSize: 12 }} />
+                            ) : null}
                             <CartesianGrid strokeDasharray="3 3" />
                             <Tooltip />
                         </LineChart>

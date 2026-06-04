@@ -9,12 +9,15 @@ export function Salary({setPage, page}) {
 
       <div className="salary-hero">
         <div>
+          <div className="salary-badge">Coming soon</div>
           <h3>Salary insights for modern talent teams</h3>
           <p>Get a smarter, simpler look at compensation movement so you can benchmark offers and keep pace with market demand.</p>
         </div>
         <div className="salary-hero-visual">
-          <div className="salary-graphic">
-            <div className="salary-dot" />
+          <div className="salary-preview-wireframe">
+            <div className="salary-bar short"></div>
+            <div className="salary-bar medium"></div>
+            <div className="salary-bar tall"></div>
           </div>
         </div>
       </div>

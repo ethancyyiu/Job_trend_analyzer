@@ -23,6 +23,20 @@ export default function Home({ setPage, page }) {
               <p className="home-hero-panel-label">Live product overview</p>
               <h3>One dashboard to monitor trends, talent demand, postings, and compensation.</h3>
               <p>Everything teams need to spot high-growth roles, skill gaps, and salary pressure without switching between reports.</p>
+              <div className="home-hero-panel-stats">
+                <div className="hero-stat">
+                  <strong>2,400+</strong>
+                  <span>Postings indexed</span>
+                </div>
+                <div className="hero-stat">
+                  <strong>40+</strong>
+                  <span>Skills tracked</span>
+                </div>
+                <div className="hero-stat">
+                  <strong>Every 3 days</strong>
+                  <span>Updated automatically</span>
+                </div>
+              </div>
             </div>
           </aside>
         </section>
@@ -45,14 +59,17 @@ export default function Home({ setPage, page }) {
               <p>Understand posting volume and trend direction at a glance, with a centralized view that keeps your team aligned.</p>
             </div>
             <div className="feature-row-illustration">
-              <div className="illustration-block">
-                <div className="illustration-pill large"></div>
-                <div className="illustration-pill medium"></div>
-                <div className="illustration-grid">
-                  <div className="illustration-bar tall" />
-                  <div className="illustration-bar medium" />
-                  <div className="illustration-bar short" />
-                  <div className="illustration-bar medium-light" />
+              <div className="feature-preview mini-chart">
+                <div className="sparkline">
+                  <div className="spark-bar short"></div>
+                  <div className="spark-bar medium"></div>
+                  <div className="spark-bar tall"></div>
+                  <div className="spark-bar medium"></div>
+                  <div className="spark-bar tall"></div>
+                </div>
+                <div className="preview-labels">
+                  <span>Posting momentum</span>
+                  <strong>+12%</strong>
                 </div>
               </div>
             </div>
@@ -65,15 +82,11 @@ export default function Home({ setPage, page }) {
               <p>Spot rising talent demand and skill gaps with a visual experience designed for fast decision making.</p>
             </div>
             <div className="feature-row-illustration">
-              <div className="illustration-block">
-                <div className="illustration-pill medium"></div>
-                <div className="illustration-pill small"></div>
-                <div className="illustration-grid skill-mode">
-                  <div className="illustration-dot" />
-                  <div className="illustration-dot active" />
-                  <div className="illustration-dot" />
-                  <div className="illustration-line" />
-                </div>
+              <div className="feature-preview skill-chips">
+                <div className="skill-chip">React</div>
+                <div className="skill-chip">Python</div>
+                <div className="skill-chip">SQL</div>
+                <div className="skill-chip">Power BI</div>
               </div>
             </div>
           </div>
@@ -85,15 +98,9 @@ export default function Home({ setPage, page }) {
               <p>Surface recent job postings quickly so you can capture demand signals where they matter most.</p>
             </div>
             <div className="feature-row-illustration">
-              <div className="illustration-block">
-                <div className="illustration-pill medium"></div>
-                <div className="illustration-pill tall"></div>
-                <div className="illustration-grid posting-mode">
-                  <div className="illustration-chip" />
-                  <div className="illustration-chip" />
-                  <div className="illustration-chip" />
-                  <div className="illustration-chip" />
-                </div>
+              <div className="feature-preview mini-table">
+                <div className="table-row"><span>UX Designer</span><span>Remote</span></div>
+                <div className="table-row"><span>Data Analyst</span><span>Berlin</span></div>
               </div>
             </div>
           </div>
@@ -105,14 +112,14 @@ export default function Home({ setPage, page }) {
               <p>Track how pay ranges are moving so your offers stay competitive and aligned to current demand.</p>
             </div>
             <div className="feature-row-illustration">
-              <div className="illustration-block">
-                <div className="illustration-pill medium"></div>
-                <div className="illustration-pill small"></div>
-                <div className="illustration-grid salary-mode">
-                  <div className="illustration-bar short" />
-                  <div className="illustration-bar medium" />
-                  <div className="illustration-bar tall" />
-                  <div className="illustration-circle" />
+              <div className="feature-preview salary-range">
+                <div className="range-row">
+                  <span>$65k</span>
+                  <span>$115k</span>
+                </div>
+                <div className="range-bar">
+                  <div className="range-fill"></div>
+                  <div className="range-pin"></div>
                 </div>
               </div>
             </div>

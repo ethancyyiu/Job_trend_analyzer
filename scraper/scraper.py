@@ -65,7 +65,6 @@ def scrape(keyword, location, pages):
                     card.click()
                     page.wait_for_timeout(random.randint(3500, 4000))
                     # input("enter")
-                    # page.wait_for_timeout(random.randint(10000, 12000))
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")
@@ -82,7 +81,7 @@ def scrape(keyword, location, pages):
                     
                     posted_el = page.query_selector(".jobs-unified-top-card__posted-date") \
                         or page.query_selector(".posted-time-ago__text")
-                    # posted_el = page.query_selector(".jobs-unified-top-card__posted-date") or page.query_selector("span:has-text('ago')") or page.query_selector(".posted-time-ago__text")
+                    # page.query_selector("span:has-text('ago')") 
                     posted_text = posted_el.inner_text().strip() if posted_el else ""
                     match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
                     date_posted = parse_date(match.group(1)) if match else None

@@ -47,21 +47,21 @@ def get_postings():
 
     answer = []
     for i in rows:
-        item = {"title": i[0], "company": i[1], "location": i[2], "date": str(i[3])}
+        item = {"title": i[0], "company": i[1], "location": i[2], "date_posted": str(i[3]) if i[3] else None}
         answer.append(item)
 
     return answer
 
 @router.get("/salary")
 def get_salary():
-    return {"message: salary not yet able to be query"}
+    return {"message": "Salary extraction coming soon"}
 
 @router.get("/health")
 def health():
-    return {"message: Bello!!!"}
+    return {"message": "Hello!!!"}
 
 @router.get("/")
 def home():
-    return {"message: Bello!!!"}
+    return {"message": "Welcome to Job Trend Analyzer API"}
 
 

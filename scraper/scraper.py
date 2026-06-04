@@ -37,7 +37,7 @@ def scrape(keyword, location, pages):
     db = get_db()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
@@ -54,7 +54,7 @@ def scrape(keyword, location, pages):
             # close login page 
             print("escaping from login")
             page.keyboard.press("Escape")
-            page.wait_for_timeout(random.randint(3000, 5000))
+            page.wait_for_timeout(random.randint(3500, 5000))
 
             cards = page.query_selector_all("a.base-card__full-link")
             print(f"  Found {len(cards)} job cards")
@@ -62,7 +62,7 @@ def scrape(keyword, location, pages):
             for card in cards:
                 try:
                     card.click()
-                    page.wait_for_timeout(random.randint(300, 600))
+                    page.wait_for_timeout(random.randint(3500, 4000))
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")

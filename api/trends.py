@@ -56,6 +56,8 @@ def get_postings():
 def get_salary():
     return {"message: salary not yet able to be query"}
 
-@router.get("/")
-def home():
+@router.get("/health")
+def health():
     return {"message: Bello!!!"}
+
+

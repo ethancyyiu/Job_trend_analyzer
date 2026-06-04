@@ -21,13 +21,6 @@ export function Postings({ setPage, page }) {
 
     let companyCount = uniqueCompanies.size;
 
-    const formatAge = (value) => {
-        if (!value) return '';
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        const elapsed = Math.floor((Date.now() - date.getTime()) / 86400000);
-        return `${elapsed} day${elapsed === 1 ? '' : 's'} ago`;
-    }
 
     return (
         <div className="card">
@@ -60,25 +53,23 @@ export function Postings({ setPage, page }) {
                     <p>Scan the latest roles and hiring locations in a neutral table with better spacing and visual structure.</p>
                 </div>
                 <div style={{ overflowX: 'auto', marginTop: 20 }}>
-                    <table className="postings-table">
+                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
                         <thead>
                             <tr>
-                                <th>Title</th>
-                                <th>Company</th>
-                                <th>Location</th>
-                                <th>Date Posted</th>
+                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Title</th>
+                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Company</th>
+                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Location</th>
+                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Date Posted</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.map(function (row, i) {
-                                const dateValue = row.date_posted || row.date || ''
-                                const ageLabel = formatAge(dateValue)
                                 return (
-                                    <tr key={i}>
-                                        <td>{row.title}</td>
-                                        <td>{row.company}</td>
-                                        <td>{row.location}</td>
-                                        <td>{dateValue} {ageLabel ? `· ${ageLabel}` : ''}</td>
+                                    <tr key={i} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                        <td style={{ padding: "12px" }}>{row.title}</td>
+                                        <td style={{ padding: "12px" }}>{row.company}</td>
+                                        <td style={{ padding: "12px" }}>{row.location}</td>
+                                        <td style={{ padding: "12px" }}>{row.date}</td>
                                     </tr>
                                 )
                             })}

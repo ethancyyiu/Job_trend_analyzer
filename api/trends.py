@@ -60,4 +60,8 @@ def get_salary():
 def health():
     return {"message: Bello!!!"}
 
+@router.get("/")
+def home():
+    return {"message: Bello!!!"}
+
 

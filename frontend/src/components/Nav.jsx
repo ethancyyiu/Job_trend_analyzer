@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function Nav({page, setPage}){
+export default function Nav({page, setPage}){
   const items = [
     {key:'Home', label:'Home'},
     {key:'Dashboard', label:'Dashboard'},
@@ -23,5 +23,3 @@ export function Nav({page, setPage}){
     </div>
   )
 }
-
-export default Nav

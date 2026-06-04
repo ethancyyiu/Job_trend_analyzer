@@ -4,7 +4,7 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import '../styles/layout.css'
 
-export function Layout({ page, setPage, children }) {
+export default function Layout({ page, setPage, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function TopBar({ onMenuClick }) {
+export default function TopBar({ onMenuClick }) {
   return (
     <div className="topbar-root">
       <div className="topbar-inner">

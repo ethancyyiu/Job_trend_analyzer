@@ -1,7 +1,7 @@
 /* ── Home page ── */
 
 .page-root { width: 100%; }
-.page-content { max-width: 960px; }
+.page-content { max-width: 100%; margin: 0 auto; padding: 0 32px; }
 
 /* Hero */
 .home-hero {

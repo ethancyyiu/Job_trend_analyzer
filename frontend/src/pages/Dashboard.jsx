@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
 const API_BASE = import.meta.env.VITE_API_URL || ''
-export function Dashboard({ setPage, page }) {
+export function DailyTrends({ setPage, page }) {
     const [data, setData] = useState([])
 
     useEffect(function () {
@@ -51,7 +51,7 @@ export function Dashboard({ setPage, page }) {
     return (
         <div className="card">
             <div className="page-header">
-                <h2>Dashboard</h2>
+                <h2>Daily Trends</h2>
                 <p>Explore posting trends over time to identify hiring momentum and market shifts.</p>
             </div>
 

@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {Dashboard} from "./pages/Dashboard.jsx"
+import {DailyTrends} from "./pages/DailyTrends.jsx"
 import {SkillsView} from "./pages/SkillsView.jsx"
 import {Postings} from "./pages/Postings.jsx"
 import Home from "./pages/Home.jsx"
@@ -11,7 +11,7 @@ export default function App() {
 
   let showing_page
   if (page === "Home") showing_page = <Home setPage={setPage} page={page} />
-  else if (page === "Dashboard") showing_page = <Dashboard setPage={setPage} page={page} />
+  else if (page === "DailyTrends") showing_page = <DailyTrends setPage={setPage} page={page} />
   else if (page === "SkillsView") showing_page = <SkillsView setPage={setPage} page={page} />
   else if (page === "Salary") showing_page = <Salary setPage={setPage} page={page} />
   else showing_page = <Postings setPage={setPage} page={page} />

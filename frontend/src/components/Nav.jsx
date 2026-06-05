@@ -3,7 +3,7 @@ import React from 'react'
 export default function Nav({page, setPage}){
   const items = [
     {key:'Home', label:'Home'},
-    {key:'Dashboard', label:'Dashboard'},
+    {key:'DailyTrends', label:'Daily Trends'},
     {key:'SkillsView', label:'Skills'},
     {key:'Postings', label:'Postings'},
     {key:'Salary', label:'Salary'},

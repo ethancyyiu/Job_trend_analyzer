@@ -13,7 +13,7 @@ export default function Home({ setPage, page }) {
               Track the latest posting momentum, skill demand, and salary movement in one clean product experience. Job Trend Analyzer helps talent teams stay ahead of market shifts so they can hire faster, smarter, and with confidence.
             </p>
             <div className="home-hero-actions">
-              <button className="feature-btn" onClick={() => setPage("Dashboard")}>View Dashboard</button>
+              <button className="feature-btn" onClick={() => setPage("DailyTrends")}>View Daily Trends</button>
               <button className="feature-btn feature-btn-secondary" onClick={() => setPage("SkillsView")}>Explore Skills</button>
             </div>
           </div>
@@ -21,7 +21,7 @@ export default function Home({ setPage, page }) {
           <aside className="home-hero-panel">
             <div className="home-hero-panel-card">
               <p className="home-hero-panel-label">Live product overview</p>
-              <h3>One dashboard to monitor trends, talent demand, postings, and compensation.</h3>
+              <h3>One daily trends view to monitor talent demand, postings, and compensation.</h3>
               <p>Everything teams need to spot high-growth roles, skill gaps, and salary pressure without switching between reports.</p>
               <div className="home-hero-panel-stats">
                 <div className="hero-stat">
@@ -46,7 +46,7 @@ export default function Home({ setPage, page }) {
             <span className="home-value-eyebrow">Why it matters</span>
             <h2>Stop reacting to hiring noise. Start responding to real demand.</h2>
             <p>
-              Many teams rely on outdated spreadsheets and disconnected reports. Job Trend Analyzer brings the job market into a single, modern dashboard so hiring decisions happen with clarity and speed.
+              Many teams rely on outdated spreadsheets and disconnected reports. Job Trend Analyzer brings the job market into a single, modern daily trends view so hiring decisions happen with clarity and speed.
             </p>
           </div>
         </section>
@@ -54,7 +54,7 @@ export default function Home({ setPage, page }) {
         <section className="home-features">
           <div className="feature-row feature-row-1">
             <div className="feature-row-copy">
-              <span className="home-eyebrow">Dashboard</span>
+              <span className="home-eyebrow">Daily Trends</span>
               <h3>See where hiring momentum is accelerating.</h3>
               <p>Understand posting volume and trend direction at a glance, with a centralized view that keeps your team aligned.</p>
             </div>

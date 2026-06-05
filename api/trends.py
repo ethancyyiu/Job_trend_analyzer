@@ -41,6 +41,7 @@ def get_postings():
     rows = query("""
         SELECT title, company, location, date_posted
         FROM postings
+        WHERE date_posted IS NOT NULL
         ORDER BY date_posted DESC
         LIMIT 50
     """)

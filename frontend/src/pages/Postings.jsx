@@ -53,23 +53,25 @@ export function Postings({ setPage, page }) {
                     <p>Scan the latest roles and hiring locations in a neutral table with better spacing and visual structure.</p>
                 </div>
                 <div style={{ overflowX: 'auto', marginTop: 20 }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
+                    <table className="postings-table">
                         <thead>
                             <tr>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Title</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Company</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Location</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "12px" }}>Date Posted</th>
+                                <th>Title</th>
+                                <th>Company</th>
+                                <th>Location</th>
+                                <th className="postings-date-header">Date Posted</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.map(function (row, i) {
                                 return (
-                                    <tr key={i} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                                        <td style={{ padding: "12px" }}>{row.title}</td>
-                                        <td style={{ padding: "12px" }}>{row.company}</td>
-                                        <td style={{ padding: "12px" }}>{row.location}</td>
-                                        <td style={{ padding: "12px" }}>{row.date}</td>
+                                    <tr key={i} className="postings-row">
+                                        <td className="postings-cell title-cell">
+                                            <div className="job-title">{row.title}</div>
+                                        </td>
+                                        <td className="postings-cell">{row.company}</td>
+                                        <td className="postings-cell">{row.location}</td>
+                                        <td className="postings-cell postings-date">{row.date_posted || row.date}</td>
                                     </tr>
                                 )
                             })}

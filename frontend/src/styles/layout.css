@@ -168,8 +168,8 @@
 .metric-card strong {
   display: block;
   font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 400;
+  font-size: 32px;
+  font-weight: 650;
   color: var(--accent);
   line-height: 1;
   margin-bottom: 8px;
@@ -206,6 +206,64 @@
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.55;
+}
+
+.postings-table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.postings-table th,
+.postings-table td {
+  padding: 16px 14px;
+  vertical-align: middle;
+}
+
+.postings-table th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.postings-table th:not(.postings-date-header),
+.postings-table td {
+  text-align: left;
+}
+
+.postings-table th.postings-date-header,
+.postings-table td.postings-date {
+  text-align: right;
+}
+
+.postings-table td {
+  border-bottom: 2px solid hsla(30, 12%, 80%, 0.35);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.postings-row:hover td {
+  background: hsla(36, 12%, 94%, 1);
+}
+
+.postings-row:last-child td {
+  border-bottom: none;
+}
+
+.job-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.title-cell {
+  padding-right: 14px;
 }
 
 /* ── Section note ── */

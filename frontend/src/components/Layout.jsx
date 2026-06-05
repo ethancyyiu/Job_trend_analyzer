@@ -16,7 +16,7 @@ export default function Layout({ page, setPage, children }) {
         <Sidebar page={page} setPage={(p) => { setPage(p); setSidebarOpen(false) }} />
       </aside>
       <div className="app-main">
-        <TopBar onMenuClick={() => setSidebarOpen(o => !o)} />
+        <TopBar page={page} onMenuClick={() => setSidebarOpen(o => !o)} />
         <div className="app-content">{children}</div>
       </div>
     </div>

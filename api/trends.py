@@ -55,7 +55,39 @@ def get_postings():
 
 @router.get("/salary")
 def get_salary():
-    return {"message": "Salary extraction coming soon"}
+    sample = query(""" 
+        SELECT salary_min, salary_max, salary_type
+        FROM postings
+        WHERE salary_min IS NOT NULL 
+        AND salary_max IS NOT NULL
+        AND salary_type IS NOT NULL
+        LIMIT 10; 
+    """)
+    
+    coverage = query(""" 
+        SELECT
+            COUNT(*) AS total,
+            COUNT(*) FILTER (WHERE salary_min IS NOT NULL 
+            AND salary_max IS NOT NULL 
+            AND salary_type IS NOT NULL) AS has_salary
+        FROM postings;
+    """)
+    
+    total = coverage[0]["total"]
+    has_salary = coverage[0]["has_salary"]
+    
+    coverage_percent = has_salary / total
+    
+    type_amount = query("""
+        SELECT salary_type, COUNT(*)
+        FROM postings
+        WHERE salary_type IS NOT NULL
+        GROUP BY salary_type                    
+    """)
+    
+    
+    
+    
 
 @router.api_route("/health", methods = ["GET", "HEAD"])
 def health():

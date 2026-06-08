@@ -8,7 +8,7 @@ export default function TopBar({ page, onMenuClick }) {
           <button className="menu-btn" onClick={onMenuClick}>☰</button>
           <div className="topbar-page">{page}</div>
         </div>
-        <div className="topbar-sync">synced every 2 days</div>
+        <div className="topbar-sync">Synced once a day</div>
       </div>
     </div>
   )

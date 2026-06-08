@@ -59,7 +59,7 @@ export function DailyTrends({ setPage, page }) {
                 <div className="metric-card">
                     <span>Recent volume</span>
                     <strong>{latest}</strong>
-                    <p>Latest posting count from the current data stream.</p>
+                    <p>Latest posting count from today's scrape</p>
                 </div>
                 <div className="metric-card">
                     <span>Momentum</span>

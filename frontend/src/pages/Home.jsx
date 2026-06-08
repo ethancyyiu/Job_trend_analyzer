@@ -33,7 +33,7 @@ export default function Home({ setPage, page }) {
                   <span>Skills tracked</span>
                 </div>
                 <div className="hero-stat">
-                  <strong>Every 2 days</strong>
+                  <strong>Once a day</strong>
                   <span>Updated automatically</span>
                 </div>
               </div>

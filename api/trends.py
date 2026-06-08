@@ -59,7 +59,7 @@ def get_salary():
 
 @router.get("/health")
 def health():
-    return {"message": "Bello!!!"}
+    return {"message": "Hello!!!"}
 
 @router.get("/")
 def home():

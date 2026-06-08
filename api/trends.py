@@ -57,9 +57,9 @@ def get_postings():
 def get_salary():
     return {"message": "Salary extraction coming soon"}
 
-@router.get("/health")
+@router.api_route("/health", methods = ["GET", "HEAD"])
 def health():
-    return {"message": "Hello!!!"}
+    return {"message": "Bello!!!"}
 
 @router.get("/")
 def home():

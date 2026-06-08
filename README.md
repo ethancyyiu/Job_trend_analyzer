@@ -52,6 +52,7 @@ Link to the website: https://marketpulsepro.vercel.app/
 - Frontend: React + Recharts
 - ML (coming soon): scikit-learn
 - Deployment: Vercel (frontend), Render (backend), Supabase (DB)
+- GitHub Actions: automatically scrapes linkedin postings once every 2 days
 - Website link: https://marketpulsepro.vercel.app/
 
 # Architecture

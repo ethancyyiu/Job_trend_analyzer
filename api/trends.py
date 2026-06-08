@@ -82,7 +82,21 @@ def get_salary():
         SELECT salary_type, COUNT(*)
         FROM postings
         WHERE salary_type IS NOT NULL
-        GROUP BY salary_type                    
+        GROUP BY salary_type;                    
+    """)
+    
+    hourly = type_amount[0]["hourly"]
+    yearly = type_amount[0]["yearly"]
+    
+    hourly_percent = hourly / (hourly + yearly)
+    yearly_percent = yearly / (hourly + yearly)
+    
+    median = query("""
+        SELECT 
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
+        FROM postings
+        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
     """)
     
     

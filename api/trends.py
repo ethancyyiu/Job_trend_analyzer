@@ -76,20 +76,36 @@ def get_salary():
     total = coverage[0]["total"]
     has_salary = coverage[0]["has_salary"]
     
-    coverage_percent = has_salary / total
+    if total and total > 0:
+        coverage_percent = has_salary / total
+    else:
+        coverage_percent = 0
     
     type_amount = query("""
-        SELECT salary_type, COUNT(*)
+        SELECT salary_type, COUNT(*) AS count 
         FROM postings
         WHERE salary_type IS NOT NULL
         GROUP BY salary_type;                    
     """)
     
-    hourly = type_amount[0]["hourly"]
-    yearly = type_amount[0]["yearly"]
+    type_dictionary = {}
+    for types in type_amount:
+        salary_type = types["salary_type"]
+        count = types["count"]
+        type_dictionary[salary_type] = count
+        
+    hourly = type_dictionary.get("hourly", 0)
+    yearly = type_dictionary.get("yearly", 0)
     
-    hourly_percent = hourly / (hourly + yearly)
-    yearly_percent = yearly / (hourly + yearly)
+    combined = hourly + yearly
+    
+    if combined > 0:
+        hourly_percentage = hourly / combined
+        yearly_percentage = yearly / combined
+    else:
+        hourly_percentage = 0
+        yearly_percentage = 0
+        
     
     median = query("""
         SELECT 
@@ -99,8 +115,15 @@ def get_salary():
         WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
     """)
     
+    median_max = median[0]["median_max"]
+    median_min = median[0]["median_min"]
     
-    
+    return {"sample": sample,
+            "median_min": median_min, 
+            "median_max": median_max,
+            "hourly_percentage": hourly_percentage, 
+            "yearly_percentage": yearly_percentage,
+            "coverage": coverage_percent}
     
 
 @router.api_route("/health", methods = ["GET", "HEAD"])

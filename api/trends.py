@@ -43,7 +43,7 @@ def get_postings():
         FROM postings
         WHERE date_posted IS NOT NULL
         ORDER BY date_posted DESC
-        LIMIT 50
+        LIMIT 50;
     """)
     
     result = query("""
@@ -52,14 +52,14 @@ def get_postings():
         WHERE date_posted IS NOT NULL;    
     """)
     
-    total_postings = result[0]["total"]
+    total_postings = result[0][0]
 
     answer = []
     for i in rows:
         item = {"title": i[0], "company": i[1], "location": i[2], "date_posted": str(i[3]) if i[3] else None}
         answer.append(item)
 
-    return {"total_postings": total_postings, "postings": answer}
+    return {"total_postings": int(total_postings), "postings": answer}
 
 @router.get("/salary")
 def get_salary():

@@ -72,9 +72,9 @@ export function DailyTrends({ setPage, page }) {
                     <p>Change from the prior period, so you know if demand is accelerating.</p>
                 </div>
                 <div className="metric-card">
-                    <span>Data points</span>
+                    <span>Number of Days</span>
                     <strong>{data.length}</strong>
-                    <p>Total days of posting trends available for analysis.</p>
+                    <p>Data points available for analysis.</p>
                 </div>
             </div>
 

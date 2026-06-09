@@ -45,13 +45,21 @@ def get_postings():
         ORDER BY date_posted DESC
         LIMIT 50
     """)
+    
+    result = query("""
+        SELECT COUNT(*) AS total
+        FROM postings
+        WHERE date_posted IS NOT NULL;    
+    """)
+    
+    total_postings = result[0]["total"]
 
     answer = []
     for i in rows:
         item = {"title": i[0], "company": i[1], "location": i[2], "date_posted": str(i[3]) if i[3] else None}
         answer.append(item)
 
-    return answer
+    return {"total_postings": total_postings, "postings": answer}
 
 @router.get("/salary")
 def get_salary():
@@ -122,12 +130,18 @@ def get_salary():
     yearly_percentage_rounded = round(yearly_percentage, 3)
     coverage_percent_rounded = round(coverage_percent, 3)
     
-    return {"sample": sample,
-            "median_min": median_min, 
-            "median_max": median_max,
-            "hourly_percentage": hourly_percentage, 
-            "yearly_percentage": yearly_percentage,
-            "coverage": coverage_percent}
+    return {
+        "sample": sample,
+        "median_min": median_min,
+        "median_max": median_max,
+        "hourly_count": hourly,
+        "yearly_count": yearly,
+        "hourly_percentage": hourly_percentage_rounded,
+        "yearly_percentage": yearly_percentage_rounded,
+        "coverage_count": has_salary,
+        "total_postings": total,
+        "coverage_percentage": coverage_percent_rounded
+    }
     
 
 @router.api_route("/health", methods = ["GET", "HEAD"])

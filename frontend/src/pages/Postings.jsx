@@ -50,10 +50,6 @@ export function Postings({ setPage, page }) {
             </div>
 
             <div className="chart-card">
-                <div className="chart-card-header">
-                    <h3>Recent posting snapshot</h3>
-                    <p>Scan the latest roles and hiring locations in a neutral table with better spacing and visual structure.</p>
-                </div>
                 <div style={{ overflowX: 'auto', marginTop: 20 }}>
                     <table className="postings-table">
                         <thead>

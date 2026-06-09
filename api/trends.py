@@ -21,20 +21,42 @@ def get_trends():
 
 @router.get("/skills")
 def get_skills():
-    rows = query("""SELECT unnest(skills) as skill, COUNT(*) as count
+    concentration = query("""
+        SELECT unnest(skills) AS skill, COUNT(*) AS count
         FROM postings
-        WHERE skills IS NOT NULL
         GROUP BY skill
         ORDER BY count DESC
-        LIMIT 20
+        LIMIT 3;
     """)
+    
+    all_rows = query("""
+        SELECT unnest(skills) AS skill, COUNT(*) AS count
+        FROM postings
+        GROUP BY skill
+        ORDER BY count DESC;
+    """)
+    
+    rows = all_rows[:20]
+
+    total = 0
+    for i in rows:
+        total += rows[1]
+    
+    top_three = 0
+    for i in range(min(3, len(rows))):
+        top_three += concentration[i][1]
+    
+    if total > 0:
+        concentration_percent = top_three / total
+    else:
+        concentration_percent = 0
 
     answer = []
     for i in rows:
         item = {"skill": i[0], "count": i[1]}
         answer.append(item)
 
-    return answer
+    return {"skill": answer, "concentration": concentration_percent}
 
 @router.get("/postings")
 def get_postings():

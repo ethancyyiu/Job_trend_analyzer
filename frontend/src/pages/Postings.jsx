@@ -2,24 +2,26 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 export function Postings({ setPage, page }) {
-    const [data, setData] = useState([])
+    const [data, setData] = useState({ postings: [], total_postings: 0 })
 
     useEffect(function () {
         axios.get(`${API_BASE}/postings`).then(function (answer) {
             setData(answer.data)
         }).catch(function () {
-            setData([])
+            setData({ postings: [], total_postings: 0 })
         })
     }, [])
 
-    const totalPostings = data.length
-    let companies = data.map(function (row) {
+    const postings = data.postings;
+    const totalPostings = data.total_postings;
+
+    const recentPostings = postings.length
+    const companies = postings.map(function (row) {
         return row.company;
-    });
+    })
 
-    let uniqueCompanies = new Set(companies);
-
-    let companyCount = uniqueCompanies.size;
+    const uniqueCompanies = new Set(companies);
+    const companyCount = uniqueCompanies.size;
 
 
     return (
@@ -32,7 +34,7 @@ export function Postings({ setPage, page }) {
             <div className="page-panel-row">
                 <div className="metric-card">
                     <span>Most Recent Postings</span>
-                    <strong>{totalPostings}</strong>
+                    <strong>{recentPostings}</strong>
                     <p>Records in the current postings dataset.</p>
                 </div>
                 <div className="metric-card">
@@ -41,8 +43,8 @@ export function Postings({ setPage, page }) {
                     <p>Distinct employers represented in the latest postings.</p>
                 </div>
                 <div className="metric-card">
-                    <span>Focus</span>
-                    <strong>Recent & relevant</strong>
+                    <span>Total Postings</span>
+                    <strong>{totalPostings}</strong>
                     <p>Keep attention on the freshest roles driving hiring activity.</p>
                 </div>
             </div>
@@ -63,7 +65,7 @@ export function Postings({ setPage, page }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map(function (row, i) {
+                            {postings.map(function (row, i) {
                                 return (
                                     <tr key={i} className="postings-row">
                                         <td className="postings-cell title-cell">

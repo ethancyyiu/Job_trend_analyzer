@@ -1,18 +1,6 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
-const API_BASE = import.meta.env.VITE_API_URL || ''
-export function Postings({ setPage, page }) {
-    const [data, setData] = useState({ postings: [], total_postings: 0 })
-
-    useEffect(function () {
-        axios.get(`${API_BASE}/postings`).then(function (answer) {
-            setData(answer.data)
-        }).catch(function () {
-            setData({ postings: [], total_postings: 0 })
-        })
-    }, [])
-
-    const postings = data.postings;
+export function Postings({ cachedData }) {
+    const data = cachedData || { postings: [], total_postings: 0 }
+    const postings = data.postings || []
     const totalPostings = data.total_postings;
 
     const recentPostings = postings.length

@@ -1,10 +1,7 @@
 import React from "react"
-import { useEffect, useState } from "react"
-import axios from "axios"
-const API_BASE = import.meta.env.VITE_API_URL || ''
 
-export function Salary({ setPage, page }) {
-  const [data, setData] = useState({
+export function Salary({ cachedData }) {
+  const data = cachedData || {
     sample: [],
     coverage_percentage: 0,
     coverage_count: 0,
@@ -16,31 +13,10 @@ export function Salary({ setPage, page }) {
     yearly_percentage: 0,
     each_category_median: [],
     total_postings: 0
-  });
+  }
 
-
-  useEffect(function () {
-    axios.get(`${API_BASE}/salary`).then(function (answer) {
-      return setData(answer.data)
-    }).catch(function () {
-      setData({
-        sample: [],
-        coverage_percentage: 0,
-        coverage_count: 0,
-        median_min: 0,
-        median_max: 0,
-        hourly_count: 0,
-        yearly_count: 0,
-        hourly_percentage: 0,
-        yearly_percentage: 0,
-        each_category_median: [],
-        total_postings: 0
-      })
-    })
-  }, [])
-
-  const coverage_percentage = Math.round(data.coverage_percentage);
-  const coverage_count = data.coverage_count;
+  const coverage_percentage = Math.round(data.coverage_percentage)
+  const coverage_count = data.coverage_count
 
   const median_min = data.median_min;
   const median_max = data.median_max;  
@@ -74,17 +50,17 @@ export function Salary({ setPage, page }) {
         <div className="metric-card">
           <span>Coverage</span>
           <strong>{coverage_percentage}% ({coverage_count})</strong>
-          <p>Year-over-year movement across the compensation dataset.</p>
+          <p>{coverage_percentage}% postings has salary data</p>
         </div>
           <div className="metric-card">
           <span>Median pay</span>
-          <strong>{median_min} and {median_max}</strong>
-          <p>Example bench for the most active roles in the current market.</p>
+          <strong>${median_min} - ${median_max}/year</strong>
+          <p>The median of salary floor (low-end to high-end)</p>
         </div>
         <div className="metric-card">
-          <span>Pay Type</span>
+          <span>Pay structure</span>
           <strong>{yearly_percentage}% / {hourly_percentage}%</strong>
-          <p>Signals that pay should be aligned with today’s high-demand roles.</p>
+          <p>{yearly_percentage}% Salaried - {hourly_percentage}% Hourly </p>
         </div>
       </div>
 

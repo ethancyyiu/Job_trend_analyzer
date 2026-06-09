@@ -1,19 +1,7 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
 import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
-const API_BASE = import.meta.env.VITE_API_URL || ''
-export function SkillsView({ setPage, page }) {
-    const [data, setData] = useState({skills: [], concentration: 0})
-
-    useEffect(function () {
-        axios.get(`${API_BASE}/skills`).then(function (answer) {
-            return setData(answer.data)
-        }).catch(function () {
-            setData({ skills: [], concentration: 0 })
-        })
-    }, [])
-
-    let skills = data.skills;
+export function SkillsView({ cachedData }) {
+    const data = cachedData || { skills: [], concentration: 0 }
+    let skills = data.skills || []
 
     let topSkill;
 

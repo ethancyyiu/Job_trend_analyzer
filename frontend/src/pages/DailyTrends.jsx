@@ -1,17 +1,6 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
-const API_BASE = import.meta.env.VITE_API_URL || ''
-export function DailyTrends({ setPage, page }) {
-    const [data, setData] = useState([])
-
-    useEffect(function () {
-        axios.get(`${API_BASE}/trends`).then(function (answer) {
-            return setData(answer.data)
-        }).catch(function () {
-            setData([])
-        })
-    }, []) 
+export function DailyTrends({ cachedData }) {
+    const data = Array.isArray(cachedData) ? cachedData : []
 
     let latest;
     if (data.length > 0) {

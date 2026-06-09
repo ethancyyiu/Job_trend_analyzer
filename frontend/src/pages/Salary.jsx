@@ -4,7 +4,7 @@ import axios from "axios"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export function Salary({ setPage, page }) {
-  const [salaryData, setSalaryData] = useState({
+  const [data, setData] = useState({
     sample: [],
     coverage_percentage: 0,
     coverage_count: 0,
@@ -20,7 +20,7 @@ export function Salary({ setPage, page }) {
 
 
   useEffect(function () {
-    axios.get(`${API_BASE}/skills`).then(function (answer) {
+    axios.get(`${API_BASE}/salary`).then(function (answer) {
       return setData(answer.data)
     }).catch(function () {
       setData({
@@ -39,6 +39,8 @@ export function Salary({ setPage, page }) {
     })
   }, [])
 
+  const median_min = data.median_min;
+  const median_max = data.median_max;  
 
   return (
     <div className="card">
@@ -65,7 +67,7 @@ export function Salary({ setPage, page }) {
       <div className="page-panel-row">
         <div className="metric-card">
           <span>Median pay</span>
-          <strong>$N/A</strong>
+          <strong>{median_min} and {median_max}</strong>
           <p>Example bench for the most active roles in the current market.</p>
         </div>
         <div className="metric-card">

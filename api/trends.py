@@ -105,8 +105,8 @@ def get_salary():
         FROM postings;
     """)
     
-    total = coverage[0]["total"]
-    has_salary = coverage[0]["has_salary"]
+    total = coverage[0][0]
+    has_salary = coverage[0][1]
     
     if total and total > 0:
         coverage_percent = has_salary / total
@@ -123,8 +123,8 @@ def get_salary():
     
     type_dictionary = {}
     for types in type_amount:
-        salary_type = types["salary_type"]
-        count = types["count"]
+        salary_type = types[0]
+        count = types[1]
         type_dictionary[salary_type] = count
         
     hourly = type_dictionary.get("hourly", 0)
@@ -148,8 +148,8 @@ def get_salary():
         WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
     """)
     
-    median_max = median[0]["median_max"]
-    median_min = median[0]["median_min"]
+    median_min = median[0][0]
+    median_max = median[0][1]
     
     hourly_percentage_rounded = round(hourly_percentage, 3)
     yearly_percentage_rounded = round(yearly_percentage, 3)

@@ -8,6 +8,7 @@ export default defineConfig({
       '/trends': 'http://localhost:8000',
       '/skills': 'http://localhost:8000',
       '/postings': 'http://localhost:8000',
+      '/salary': 'http://localhost:8000',
     }
   }
 })

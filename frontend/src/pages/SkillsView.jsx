@@ -3,25 +3,29 @@ import axios from "axios"
 import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 export function SkillsView({ setPage, page }) {
-    const [data, setData] = useState([])
+    const [data, setData] = useState({skills: [], concentration: 0})
 
     useEffect(function () {
         axios.get(`${API_BASE}/skills`).then(function (answer) {
             return setData(answer.data)
         }).catch(function () {
-            setData([])
+            setData({ skills: [], concentration: 0 })
         })
     }, [])
 
+    let skills = data.skills;
+
     let topSkill;
 
-    if (data.length > 0) {
-        const copy = data.slice(); // copy array
-        copy.sort((a, b) => b.count - a.count); // sort descending
-        topSkill = copy[0].skill; // first element's skill
+    if (skills.length > 0) {
+        const copy = skills.slice(); 
+        copy.sort((a, b) => b.count - a.count); 
+        topSkill = copy[0].skill; 
     } else {
         topSkill = "N/A";
     }
+
+    const concentration = Math.round(data.concentration);
 
     return (
         <div className="card">
@@ -38,13 +42,13 @@ export function SkillsView({ setPage, page }) {
                 </div>
                 <div className="metric-card">
                     <span>Skills tracked</span>
-                    <strong>{data.length}</strong>
+                    <strong>{skills.length}</strong>
                     <p>Unique skills included in the current analysis.</p>
                 </div>
                 <div className="metric-card">
-                    <span>Market view</span>
-                    <strong>Demand-driven</strong>
-                    <p>See which skill areas are heating up so you can focus your talent pipeline.</p>
+                    <span>Concentration Index</span>
+                    <strong>{concentration}%</strong>
+                    <p>Top 3 Skills = {concentration}% of all demand</p>
                 </div>
             </div>
 
@@ -55,13 +59,13 @@ export function SkillsView({ setPage, page }) {
                 </div>
                 <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data}>
+                        <BarChart data={skills}>
                             <XAxis dataKey="skill" />
                             <YAxis />
                             <Tooltip />
                             <CartesianGrid strokeDasharray="3 3" />
                             <Bar dataKey="count" fill="#C86541">
-                                {data.map((entry, index) => (
+                                {skills.map((entry, index) => (
                                   <Cell key={`cell-${entry.skill}`} fill={index < 5 ? 'var(--accent)' : 'var(--accent-mid)'} />
                                 ))}
                             </Bar>

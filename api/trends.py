@@ -85,6 +85,7 @@ def get_postings():
 
 @router.get("/salary")
 def get_salary():
+    # sample testing query
     sample = query(""" 
         SELECT salary_min, salary_max, salary_type
         FROM postings

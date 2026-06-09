@@ -3,7 +3,41 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
-export function Salary({setPage, page}) {
+export function Salary({ setPage, page }) {
+  const [salaryData, setSalaryData] = useState({
+    sample: [],
+    coverage_percentage: 0,
+    coverage_count: 0,
+    median_min: 0,
+    median_max: 0,
+    hourly_count: 0,
+    yearly_count: 0,
+    hourly_percentage: 0,
+    yearly_percentage: 0,
+    each_category_median: [],
+    total_postings: 0
+  });
+
+
+  useEffect(function () {
+    axios.get(`${API_BASE}/skills`).then(function (answer) {
+      return setData(answer.data)
+    }).catch(function () {
+      setData({
+        sample: [],
+        coverage_percentage: 0,
+        coverage_count: 0,
+        median_min: 0,
+        median_max: 0,
+        hourly_count: 0,
+        yearly_count: 0,
+        hourly_percentage: 0,
+        yearly_percentage: 0,
+        each_category_median: [],
+        total_postings: 0
+      })
+    })
+  }, [])
 
 
   return (
@@ -51,8 +85,8 @@ export function Salary({setPage, page}) {
           <h3>Compensation snapshot</h3>
           <p>We’re building the full salary trend chart now. This page will show pay ranges and movement alongside market context.</p>
         </div>
-        <div style={{paddingTop:18}}>
-          <p style={{margin:0, color:'var(--muted)', lineHeight:1.8}}>
+        <div style={{ paddingTop: 18 }}>
+          <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.8 }}>
             In the meantime, this preview emphasizes the structure of a polished salary page: strong header, data summary, and an illustrated insights panel.
           </p>
         </div>

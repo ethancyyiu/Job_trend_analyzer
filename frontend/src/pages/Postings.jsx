@@ -23,17 +23,17 @@ export function Postings({ cachedData }) {
                 <div className="metric-card">
                     <span>Most Recent Postings</span>
                     <strong>{recentPostings}</strong>
-                    <p>Records in the current postings dataset.</p>
+                    <p>Top 50 postings from the dataset</p>
                 </div>
                 <div className="metric-card">
-                    <span>Companies</span>
+                    <span>unique Companies</span>
                     <strong>{companyCount}</strong>
-                    <p>Distinct employers represented in the latest postings.</p>
+                    <p>Distinct employers represented in the latest postings</p>
                 </div>
                 <div className="metric-card">
                     <span>Total Postings</span>
                     <strong>{totalPostings}</strong>
-                    <p>Keep attention on the freshest roles driving hiring activity.</p>
+                    <p>Keep attention on the freshest roles driving hiring activity</p>
                 </div>
             </div>
 

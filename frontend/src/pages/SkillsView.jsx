@@ -26,12 +26,12 @@ export function SkillsView({ cachedData }) {
                 <div className="metric-card">
                     <span>Top skill</span>
                     <strong>{topSkill}</strong>
-                    <p>The highest-demand skill in the current dataset.</p>
+                    <p>The highest-demand skill in the current dataset</p>
                 </div>
                 <div className="metric-card">
                     <span>Skills tracked</span>
                     <strong>{skills.length}</strong>
-                    <p>Unique skills included in the current analysis.</p>
+                    <p>Unique skills included in the current analysis</p>
                 </div>
                 <div className="metric-card">
                     <span>Concentration Index</span>

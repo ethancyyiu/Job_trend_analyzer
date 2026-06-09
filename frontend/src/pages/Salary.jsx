@@ -50,7 +50,7 @@ export function Salary({ cachedData }) {
         <div className="metric-card">
           <span>Coverage</span>
           <strong>{coverage_percentage}% ({coverage_count})</strong>
-          <p>{coverage_percentage}% postings has salary data</p>
+          <p>{coverage_percentage}% of Postings includes salary data</p>
         </div>
           <div className="metric-card">
           <span>Median pay</span>

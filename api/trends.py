@@ -118,6 +118,10 @@ def get_salary():
     median_max = median[0]["median_max"]
     median_min = median[0]["median_min"]
     
+    hourly_percentage_rounded = round(hourly_percentage, 3)
+    yearly_percentage_rounded = round(yearly_percentage, 3)
+    coverage_percent_rounded = round(coverage_percent, 3)
+    
     return {"sample": sample,
             "median_min": median_min, 
             "median_max": median_max,

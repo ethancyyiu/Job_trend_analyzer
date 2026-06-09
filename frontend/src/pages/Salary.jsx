@@ -1,5 +1,11 @@
 import React from "react"
+import { useEffect, useState } from "react"
+import axios from "axios"
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 export function Salary({setPage, page}) {
+
+
   return (
     <div className="card">
       <div className="page-header">

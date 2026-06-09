@@ -94,6 +94,7 @@ def get_salary():
         LIMIT 10; 
     """)
     
+    # how much of top 3 is total coverage
     coverage = query(""" 
         SELECT
             COUNT(*) AS total,
@@ -111,6 +112,7 @@ def get_salary():
     else:
         coverage_percent = 0
     
+    # yearly vs hourly percentage comparison
     type_amount = query("""
         SELECT salary_type, COUNT(*) AS count 
         FROM postings
@@ -136,7 +138,7 @@ def get_salary():
         hourly_percentage = 0
         yearly_percentage = 0
         
-    
+    # median of salary_min and salary_max
     median = query("""
         SELECT 
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
@@ -152,17 +154,44 @@ def get_salary():
     yearly_percentage_rounded = round(yearly_percentage, 3)
     coverage_percent_rounded = round(coverage_percent, 3)
     
+    # find median of salary_min and salary_max of each job category
+    each_median = query("""
+        SELECT
+            CASE
+                WHEN title ILIKE '%software engineer%' THEN 'Software Engineer'
+                WHEN title ILIKE '%data engineer%' THEN 'Data Engineer'
+                WHEN title ILIKE '%machine learning engineer%' THEN 'Machine Learning Engineer'
+                ELSE 'Other'
+            END AS job_categories
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_maximum) AS median_maximum
+            
+        FROM postings
+        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
+        GROUP BY job_categories;
+    """)
+    
+    each_category_median = []
+    for i in each_median:
+        item = {"title": i[0], "median_minimum": i[1], "median_minimum": i[2]}
+        each_category_median.append(item)
+    
     return {
         "sample": sample,
+        "coverage_percentage": coverage_percent_rounded,
+        "coverage_count": has_salary,
+        
         "median_min": median_min,
         "median_max": median_max,
+        
         "hourly_count": hourly,
         "yearly_count": yearly,
         "hourly_percentage": hourly_percentage_rounded,
         "yearly_percentage": yearly_percentage_rounded,
-        "coverage_count": has_salary,
+        
+        "each_category_median": each_category_median
+        
         "total_postings": total,
-        "coverage_percentage": coverage_percent_rounded
     }
     
 

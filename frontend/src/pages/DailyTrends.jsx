@@ -1,6 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
 export function DailyTrends({ cachedData }) {
-    const data = Array.isArray(cachedData) ? cachedData : []
+    let data;
+    if (Array.isArray(cachedData)) {
+        data = cachedData;
+    }
+    else {
+        data = [];
+    }
 
     let latest;
     if (data.length > 0) {

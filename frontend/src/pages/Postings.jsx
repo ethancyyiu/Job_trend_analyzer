@@ -1,6 +1,6 @@
 export function Postings({ cachedData }) {
     const data = cachedData || { postings: [], total_postings: 0 }
-    const postings = data.postings || []
+    const postings = data.postings
     const totalPostings = data.total_postings;
 
     const recentPostings = postings.length
@@ -51,7 +51,7 @@ export function Postings({ cachedData }) {
                         <tbody>
                             {postings.map(function (row, i) {
                                 return (
-                                    <tr key={i} className="postings-row">
+                                    <tr key={i} className="postings-row animate-row" style={{ animationDelay: `${i * 55}ms` }}>
                                         <td className="postings-cell title-cell">
                                             <div className="job-title">{row.title}</div>
                                         </td>

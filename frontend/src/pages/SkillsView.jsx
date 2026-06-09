@@ -1,7 +1,7 @@
 import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
 export function SkillsView({ cachedData }) {
     const data = cachedData || { skills: [], concentration: 0 }
-    let skills = data.skills || []
+    let skills = data.skills
 
     let topSkill;
 

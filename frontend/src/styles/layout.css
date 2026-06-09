@@ -247,12 +247,32 @@
   font-weight: 500;
 }
 
+.postings-row {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.postings-row.animate-row {
+  animation: postings-row-enter 320ms ease-out forwards;
+}
+
 .postings-row:hover td {
   background: hsla(36, 12%, 94%, 1);
 }
 
 .postings-row:last-child td {
   border-bottom: none;
+}
+
+@keyframes postings-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .job-title {

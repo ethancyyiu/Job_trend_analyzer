@@ -3,6 +3,38 @@
 .page-root { width: 100%; }
 .page-content { max-width: 100%; margin: 0 auto; padding: 0 32px; }
 
+.home-hero,
+.home-value,
+.home-features .feature-row {
+  opacity: 0;
+  transform: translateX(-24px);
+  animation: home-slide-in 360ms ease-out forwards;
+}
+
+.home-hero {
+  animation-delay: 0ms;
+}
+
+.home-value {
+  animation-delay: 80ms;
+}
+
+.home-features .feature-row:nth-child(1) {
+  animation-delay: 160ms;
+}
+
+.home-features .feature-row:nth-child(2) {
+  animation-delay: 240ms;
+}
+
+.home-features .feature-row:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+.home-features .feature-row:nth-child(4) {
+  animation-delay: 400ms;
+}
+
 /* Hero */
 .home-hero {
   display: grid;
@@ -14,7 +46,8 @@
   border-radius: var(--radius-xl);
   background: linear-gradient(135deg, rgba(255,245,235,0.92), rgba(255,233,216,0.92) 45%, rgba(255,255,255,0.92));
   background-size: 300% 300%;
-  animation: heroGradient 20s ease infinite;
+  animation: home-slide-in 360ms ease-out forwards, heroGradient 20s ease infinite;
+  animation-delay: 0ms, 0ms;
 }
 
 .home-hero-copy { text-align: left; }
@@ -22,6 +55,17 @@
 @keyframes heroGradient {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
+}
+
+@keyframes home-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .home-eyebrow, .home-value-eyebrow {

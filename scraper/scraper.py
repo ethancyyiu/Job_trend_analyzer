@@ -55,7 +55,7 @@ def scrape(keyword, location, pages):
             # close login page 
             print("escaping from login")
             page.keyboard.press("Escape")
-            page.wait_for_timeout(random.randint(3500, 5000))
+            page.wait_for_timeout(random.randint(3500, 4000))
 
             cards = page.query_selector_all("a.base-card__full-link")
             print(f"  Found {len(cards)} job cards")
@@ -125,7 +125,7 @@ def scrape(keyword, location, pages):
                     print(f"    Error on card: {e}")
                     continue
 
-            time.sleep(random.uniform(3, 7))
+            time.sleep(random.uniform(2, 4))
 
         browser.close()
         db.close()

@@ -95,13 +95,13 @@ def get_salary():
         LIMIT 10; 
     """)
     
-    # how much of top 3 is total coverage
+    # how much of total postings have salary data
     coverage = query(""" 
         SELECT
             COUNT(*) AS total,
             COUNT(*) FILTER (WHERE salary_min IS NOT NULL 
-            AND salary_max IS NOT NULL 
-            AND salary_type IS NOT NULL) AS has_salary
+            OR salary_max IS NOT NULL 
+            OR salary_type IS NOT NULL) AS has_salary
         FROM postings;
     """)
     
@@ -109,7 +109,7 @@ def get_salary():
     has_salary = coverage[0][1]
     
     if total and total > 0:
-        coverage_percent = has_salary / total
+        coverage_percent = has_salary / total * 100
     else:
         coverage_percent = 0
     
@@ -133,8 +133,8 @@ def get_salary():
     combined = hourly + yearly
     
     if combined > 0:
-        hourly_percentage = hourly / combined
-        yearly_percentage = yearly / combined
+        hourly_percentage = hourly / combined * 100
+        yearly_percentage = yearly / combined * 100
     else:
         hourly_percentage = 0
         yearly_percentage = 0
@@ -150,10 +150,6 @@ def get_salary():
     
     median_min = median[0][0]
     median_max = median[0][1]
-    
-    hourly_percentage_rounded = round(hourly_percentage, 3)
-    yearly_percentage_rounded = round(yearly_percentage, 3)
-    coverage_percent_rounded = round(coverage_percent, 3)
     
     # find median of salary_min and salary_max of each job category
     each_median = query("""
@@ -179,7 +175,7 @@ def get_salary():
     
     return {
         "sample": sample,
-        "coverage_percentage": coverage_percent_rounded,
+        "coverage_percentage": coverage_percent,
         "coverage_count": has_salary,
         
         "median_min": median_min,
@@ -187,8 +183,8 @@ def get_salary():
         
         "hourly_count": hourly,
         "yearly_count": yearly,
-        "hourly_percentage": hourly_percentage_rounded,
-        "yearly_percentage": yearly_percentage_rounded,
+        "hourly_percentage": hourly_percentage,
+        "yearly_percentage": yearly_percentage,
         
         "each_category_median": each_category_median,
         

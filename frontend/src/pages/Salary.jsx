@@ -39,8 +39,14 @@ export function Salary({ setPage, page }) {
     })
   }, [])
 
+  const coverage_percentage = Math.round(data.coverage_percentage);
+  const coverage_count = data.coverage_count;
+
   const median_min = data.median_min;
   const median_max = data.median_max;  
+
+  const hourly_percentage = Math.round(data.hourly_percentage);
+  const yearly_percentage = Math.round(data.yearly_percentage);
 
   return (
     <div className="card">
@@ -66,18 +72,18 @@ export function Salary({ setPage, page }) {
 
       <div className="page-panel-row">
         <div className="metric-card">
+          <span>Coverage</span>
+          <strong>{coverage_percentage}% ({coverage_count})</strong>
+          <p>Year-over-year movement across the compensation dataset.</p>
+        </div>
+          <div className="metric-card">
           <span>Median pay</span>
           <strong>{median_min} and {median_max}</strong>
           <p>Example bench for the most active roles in the current market.</p>
         </div>
         <div className="metric-card">
-          <span>Growth</span>
-          <strong>+N/A%</strong>
-          <p>Year-over-year movement across the compensation dataset.</p>
-        </div>
-        <div className="metric-card">
-          <span>Competitive</span>
-          <strong>N/A</strong>
+          <span>Pay Type</span>
+          <strong>{yearly_percentage}% / {hourly_percentage}%</strong>
           <p>Signals that pay should be aligned with today’s high-demand roles.</p>
         </div>
       </div>

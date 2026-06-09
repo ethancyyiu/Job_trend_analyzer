@@ -162,9 +162,9 @@ def get_salary():
                 WHEN title ILIKE '%data engineer%' THEN 'Data Engineer'
                 WHEN title ILIKE '%machine learning engineer%' THEN 'Machine Learning Engineer'
                 ELSE 'Other'
-            END AS job_categories
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_maximum) AS median_maximum
+            END AS job_categories,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_maximum
             
         FROM postings
         WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
@@ -173,7 +173,7 @@ def get_salary():
     
     each_category_median = []
     for i in each_median:
-        item = {"title": i[0], "median_minimum": i[1], "median_minimum": i[2]}
+        item = {"title": i[0], "median_minimum": i[1], "median_maximum": i[2]}
         each_category_median.append(item)
     
     return {
@@ -189,7 +189,7 @@ def get_salary():
         "hourly_percentage": hourly_percentage_rounded,
         "yearly_percentage": yearly_percentage_rounded,
         
-        "each_category_median": each_category_median
+        "each_category_median": each_category_median,
         
         "total_postings": total,
     }

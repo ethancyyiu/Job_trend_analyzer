@@ -25,6 +25,7 @@ export function Salary({ cachedData }) {
   const hourly_percentage = Math.round(data.hourly_percentage)
   const yearly_percentage = Math.round(data.yearly_percentage)
 
+  // apply letter k so it is more compact
   const formatSalary = (value) => {
     if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A"
     const rounded = Math.round(Number(value) / 1000)
@@ -38,11 +39,13 @@ export function Salary({ cachedData }) {
     "Other"
   ]
 
+  // so that all category is in order
   const categoryLookup = (data.each_category_median || []).reduce((acc, item) => {
     acc[item.title] = item
     return acc
   }, {})
 
+  // return the range of the salary
   const salaryRanges = categoryTitles.map((title) => {
     const item = categoryLookup[title] || {}
     const min = Number(item.median_minimum) || 0
@@ -59,17 +62,19 @@ export function Salary({ cachedData }) {
     }
   })
 
+  // to format the graph better
   const highestRangeValue = Math.max(...salaryRanges.map((item) => item.max), median_max || 0, 1)
   const xAxisMax = Math.ceil(highestRangeValue / 10000) * 10000
 
+  // tooltip so when I hover over it, it has the card
   const SalaryTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null
     const item = payload[0].payload
     return (
       <div className="custom-tooltip">
         <div className="tooltip-title">{item.title}</div>
-        <div>{item.label}</div>
-        {item.max > 0 && <div>{formatSalary(item.min)} low · {formatSalary(item.max)} high / year</div>}
+        
+        {item.max > 0 && <div>{formatSalary(item.min)} low - {formatSalary(item.max)} high / year</div>}
       </div>
     )
   }
@@ -123,6 +128,7 @@ export function Salary({ cachedData }) {
           <ResponsiveContainer width="100%" height={320}>
             <BarChart
               data={salaryRanges}
+              maxBarSize={38} 
               layout="vertical"
               margin={{ top: 0, right: 24, left: 8, bottom: 0 }}
             >
@@ -143,7 +149,7 @@ export function Salary({ cachedData }) {
               />
               <Tooltip content={<SalaryTooltip />} cursor={{ fill: "rgba(16, 112, 241, 0.08)" }} />
               <Bar dataKey="min" stackId="a" fill="transparent" />
-              <Bar dataKey="range" stackId="a" barSize={18} radius={999} fill="var(--accent)" />
+              <Bar dataKey="range" stackId="a" barSize={15} radius={10} fill="var(--accent)" />
             </BarChart>
           </ResponsiveContainer>
         </div>

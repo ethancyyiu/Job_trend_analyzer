@@ -65,8 +65,6 @@ export function Postings({ cachedData }) {
                     </table>
                 </div>
             </div>
-
-            <p className="section-note">This page helps you review fresh openings and see which companies and locations are actively hiring right now.</p>
         </div>
     )
 }

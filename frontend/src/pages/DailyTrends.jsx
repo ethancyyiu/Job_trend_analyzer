@@ -93,8 +93,6 @@ export function DailyTrends({ cachedData }) {
                     </ResponsiveContainer>
                 </div>
             </div>
-
-            <p className="section-note">Use this view to understand whether posting activity is growing, steady, or cooling, helping you prioritize hiring focus areas.</p>
         </div>
     )
 }

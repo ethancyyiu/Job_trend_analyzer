@@ -82,15 +82,14 @@ export function Salary({ cachedData }) {
   return (
     <div className="card">
       <div className="page-header">
-        <h2>Salary / Pay</h2>
-        <p>Analyze salary ranges, medians, and compensation trends to inform hiring and salary benchmarking.</p>
+        <h2>Compensation</h2>
+        <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p>
       </div>
 
       <div className="salary-hero">
         <div>
-          <div className="salary-badge">Coming soon</div>
-          <h3>Salary insights for modern talent teams</h3>
-          <p>Get a smarter, simpler look at compensation movement so you can benchmark offers and keep pace with market demand.</p>
+          <h3>Clear compensation trends in one view</h3>
+          <p>Track pay signals, benchmark offers, and spot shifts in salary coverage with a clean, data-driven dashboard.</p>
         </div>
         <div className="salary-hero-visual">
           <div className="salary-preview-wireframe">
@@ -154,8 +153,6 @@ export function Salary({ cachedData }) {
           </ResponsiveContainer>
         </div>
       </div>
-
-      <p className="section-note">Salary insights are essential for competitive offer construction. This page will be the place to compare pay ranges and adjust hiring plans accordingly.</p>
     </div>
   )
 }

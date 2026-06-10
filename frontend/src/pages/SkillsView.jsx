@@ -61,8 +61,6 @@ export function SkillsView({ cachedData }) {
                     </ResponsiveContainer>
                 </div>
             </div>
-
-            <p className="section-note">Use this page to identify the skill categories driving demand today, so your team can invest in the right talent and training.</p>
         </div>
     )
 }

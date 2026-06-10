@@ -90,7 +90,7 @@ def get_salary():
         SELECT salary_min, salary_max, salary_type
         FROM postings
         WHERE salary_min IS NOT NULL 
-        AND salary_max IS NOT NULL
+        OR salary_max IS NOT NULL
         AND salary_type IS NOT NULL
         LIMIT 10; 
     """)
@@ -145,7 +145,7 @@ def get_salary():
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
         FROM postings
-        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
+        WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL;          
     """)
     
     median_min = median[0][0]
@@ -164,7 +164,7 @@ def get_salary():
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_maximum
             
         FROM postings
-        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
+        WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL
         GROUP BY job_categories;
     """)
     
@@ -224,7 +224,7 @@ def home():
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
         FROM postings
-        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
+        WHERE salary_min IS NOT NULL or salary_max IS NOT NULL;          
     """)
     
     median_min = median[0][0]

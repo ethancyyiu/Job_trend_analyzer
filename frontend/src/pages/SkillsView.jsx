@@ -13,7 +13,7 @@ export function SkillsView({ cachedData }) {
         topSkill = "N/A";
     }
 
-    const concentration = Math.round(data.concentration);
+    const concentration = Number(data.concentration.toFixed(1));
 
     return (
         <div className="card">

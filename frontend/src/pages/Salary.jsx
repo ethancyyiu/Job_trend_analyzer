@@ -86,20 +86,6 @@ export function Salary({ cachedData }) {
         <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p>
       </div>
 
-      <div className="salary-hero">
-        <div>
-          <h3>Clear compensation trends in one view</h3>
-          <p>Track pay signals, benchmark offers, and spot shifts in salary coverage with a clean, data-driven dashboard.</p>
-        </div>
-        <div className="salary-hero-visual">
-          <div className="salary-preview-wireframe">
-            <div className="salary-bar short"></div>
-            <div className="salary-bar medium"></div>
-            <div className="salary-bar tall"></div>
-          </div>
-        </div>
-      </div>
-
       <div className="page-panel-row">
         <div className="metric-card">
           <span>Coverage</span>

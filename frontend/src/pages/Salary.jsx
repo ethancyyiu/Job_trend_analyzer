@@ -17,10 +17,7 @@ export function Salary({ cachedData }) {
   }
 
   const coverage_percentage = Math.round(data.coverage_percentage)
-  const coverage_count = data.coverage_count
-
-  const median_min = data.median_min;
-  const median_max = data.median_max;  
+  const coverage_count = data.coverage_count 
 
   const hourly_percentage = Math.round(data.hourly_percentage)
   const yearly_percentage = Math.round(data.yearly_percentage)
@@ -31,6 +28,9 @@ export function Salary({ cachedData }) {
     const rounded = Math.round(Number(value) / 1000)
     return `$${rounded}k`
   }
+
+  const median_min = formatSalary(data.median_min);
+  const median_max = formatSalary(data.median_max); 
 
   const categoryTitles = [
     "Software Engineer",
@@ -94,7 +94,7 @@ export function Salary({ cachedData }) {
         </div>
         <div className="metric-card">
           <span>Median pay</span>
-          <strong>${median_min} - ${median_max}/year</strong>
+          <strong>{median_min} - {median_max}/year</strong>
           <p>The median of salary floor (low-end to high-end)</p>
         </div>
         <div className="metric-card">

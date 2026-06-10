@@ -89,8 +89,7 @@ def get_salary():
     sample = query(""" 
         SELECT salary_min, salary_max, salary_type
         FROM postings
-        WHERE salary_min IS NOT NULL 
-        OR salary_max IS NOT NULL
+        WHERE (salary_min IS NOT NULL OR salary_max IS NOT NULL)
         AND salary_type IS NOT NULL
         LIMIT 10; 
     """)
@@ -99,9 +98,7 @@ def get_salary():
     coverage = query(""" 
         SELECT
             COUNT(*) AS total,
-            COUNT(*) FILTER (WHERE salary_min IS NOT NULL 
-            OR salary_max IS NOT NULL 
-            OR salary_type IS NOT NULL) AS has_salary
+            COUNT(*) FILTER (WHERE salary_min IS NOT NULL) AS has_salary
         FROM postings;
     """)
     

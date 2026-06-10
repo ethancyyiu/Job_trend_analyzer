@@ -52,17 +52,17 @@ export function DailyTrends({ cachedData }) {
 
             <div className="page-panel-row">
                 <div className="metric-card">
-                    <span>Recent volume</span>
+                    <span>New postings today</span>
                     <strong>{latest}</strong>
-                    <p>Latest posting count from today's scrape</p>
+                    <p>Number of postings whose date_posted is today</p>
                 </div>
                 <div className="metric-card">
                     <span>Momentum</span>
                     <strong>
                       {changeLabel}
-                      <span className={`trend-pill ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`}>
-                        {trendSymbol}
-                      </span>
+                        <span className={`trend-pill ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`}>
+                            {trendSymbol}
+                        </span>
                     </strong>
                     <p>Change from the prior period, so you know if demand is accelerating</p>
                 </div>

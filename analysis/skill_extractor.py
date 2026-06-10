@@ -5,8 +5,6 @@ import re
 
 load_dotenv()
 
-DB = psycopg2.connect(os.environ["DATABASE_URL"])
-
 SKILLS = [
     "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c", "html", "css",
 
@@ -31,6 +29,7 @@ def extract_skills(text):
     return [skill for skill in SKILLS if re.search(rf"\b{re.escape(skill)}\b", text)]
 
 def run():
+    DB = psycopg2.connect(os.environ["DATABASE_URL"])
     with DB.cursor() as cur:
         cur.execute("SELECT id, title, description FROM postings WHERE skills IS NULL OR skills = '{}'")
         rows = cur.fetchall()

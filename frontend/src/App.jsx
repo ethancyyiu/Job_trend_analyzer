@@ -14,7 +14,7 @@ export default function App() {
   const [cache, setCache] = useState({})
 
   useEffect(() => {
-    const endpoints = ['/trends', '/skills', '/postings', '/salary']
+    const endpoints = ['/home', '/trends', '/skills', '/postings', '/salary']
     endpoints.forEach((endpoint) => {
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))
@@ -26,7 +26,7 @@ export default function App() {
   }, [])
 
   let showing_page
-  if (page === "Home") showing_page = <Home setPage={setPage} />
+  if (page === "Home") showing_page = <Home setPage={setPage} cachedData={cache['/home']} />
   else if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} />
   else if (page === "SkillsView") showing_page = <SkillsView cachedData={cache['/skills']} />
   else if (page === "Salary") showing_page = <Salary cachedData={cache['/salary']} />

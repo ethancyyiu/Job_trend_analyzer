@@ -1,7 +1,17 @@
 import React from "react"
 import "./Home.css"
 
-export default function Home({ setPage, page }) {
+export default function Home({ setPage, cachedData }) {
+
+  const momentumPercent = cachedData && typeof cachedData.momentum === 'number'
+    ? `${Math.round(cachedData.momentum * 100)}%`
+    : "+12%"
+  const totalPostings = cachedData?.total || "2,400+"
+  const skillsCount = "60+"
+  const salaryRange = (cachedData && cachedData.rounded_median_min && cachedData.rounded_median_max)
+    ? `${cachedData.rounded_median_min}–${cachedData.rounded_median_max}`
+    : "$65k–$115k"
+
   return (
     <div className="page-root">
       <div className="page-content">
@@ -23,20 +33,20 @@ export default function Home({ setPage, page }) {
               <p className="home-hero-panel-label">Live product overview</p>
               <h3>One daily trends view to monitor talent demand, postings, and compensation.</h3>
               <p>Everything teams need to spot high-growth roles, skill gaps, and salary pressure without switching between reports.</p>
-              <div className="home-hero-panel-stats">
-                <div className="hero-stat">
-                  <strong>2,400+</strong>
-                  <span>Postings indexed</span>
+                <div className="home-hero-panel-stats">
+                  <div className="hero-stat">
+                    <strong>{totalPostings}</strong>
+                    <span>Postings indexed</span>
+                  </div>
+                  <div className="hero-stat">
+                    <strong>{skillsCount}</strong>
+                    <span>Skills tracked</span>
+                  </div>
+                  <div className="hero-stat">
+                    <strong>Once a day</strong>
+                    <span>Updated automatically</span>
+                  </div>
                 </div>
-                <div className="hero-stat">
-                  <strong>40+</strong>
-                  <span>Skills tracked</span>
-                </div>
-                <div className="hero-stat">
-                  <strong>Once a day</strong>
-                  <span>Updated automatically</span>
-                </div>
-              </div>
             </div>
           </aside>
         </section>
@@ -53,7 +63,7 @@ export default function Home({ setPage, page }) {
             </div>
             <h3>See where hiring momentum is accelerating</h3>
             <p>Quickly compare posting volume and trend direction to prioritize roles.</p>
-            <div className="card-meta"><span className="meta-pill">Posting momentum</span><strong>+12%</strong></div>
+            <div className="card-meta"><span className="meta-pill">Posting momentum</span><strong>{momentumPercent}</strong></div>
           </div>
 
           <div className="feature-card" onClick={() => setPage("SkillsView")}>
@@ -67,7 +77,7 @@ export default function Home({ setPage, page }) {
             </div>
             <h3>Highlight the skills employers are chasing</h3>
             <p>Surface rising skills and gaps so your team can target hiring and training.</p>
-            <div className="card-meta"><span className="meta-pill">Top skill</span><strong>React</strong></div>
+            <div className="card-meta"><span className="meta-pill">Top skill</span><strong>{cachedData?.top_skill || 'React'}</strong></div>
           </div>
 
           <div className="feature-card" onClick={() => setPage("Postings")}>
@@ -93,7 +103,7 @@ export default function Home({ setPage, page }) {
             </div>
             <h3>Understand compensation trends quickly</h3>
             <p>Track pay-range shifts so offers remain competitive across markets.</p>
-            <div className="card-meta"><span className="meta-pill">Range</span><strong>$65k–$115k</strong></div>
+            <div className="card-meta"><span className="meta-pill">Range</span><strong>{salaryRange}</strong></div>
           </div>
         </section>
       </div>

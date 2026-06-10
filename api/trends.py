@@ -231,24 +231,20 @@ def home():
     median_max = median[0][1]
     
     def format_k(value):
-    if value >= 1000:
-        return f"{int(value / 1000)}k"
-    return str(int(value))
+        if value >= 1000:
+            return f"{int(value / 1000)}k"
+        return str(int(value))
 
     rounded_median_min = format_k(median_min)
     rounded_median_max = format_k(median_max)
     
+    number = query("SELECT COUNT(*) FROM postings")
+    total = number[0][0]
+    
     return {"momentum": momentum, "top_skill": top_skill, 
             "rounded_median_min": rounded_median_min,
-            "rounded_median_max": rounded_median_min}
-    
-    
-    
-        
-    
-        
-    
-    
+            "rounded_median_max": rounded_median_max, 
+            "total": total}
     
 
 @router.api_route("/health", methods = ["GET", "HEAD"])

@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx"
 import {Salary} from "./pages/Salary.jsx"
 import Layout from "./components/Layout.jsx"
 import axios from 'axios'
+import { Analytics } from "@vercel/analytics/react"
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -35,6 +36,7 @@ export default function App() {
   return (
     <div style = {{fontFamily: "Inter, sans-serif", padding: "0", width: "100%"}}>
       <Layout page={page} setPage={setPage}>{showing_page}</Layout>
+      <Analytics />
     </div>
   )
 }

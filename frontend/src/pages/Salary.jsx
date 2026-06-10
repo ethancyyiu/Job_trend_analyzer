@@ -1,4 +1,5 @@
 import React from "react"
+import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer} from "recharts"
 
 export function Salary({ cachedData }) {
   const data = cachedData || {
@@ -21,8 +22,57 @@ export function Salary({ cachedData }) {
   const median_min = data.median_min;
   const median_max = data.median_max;  
 
-  const hourly_percentage = Math.round(data.hourly_percentage);
-  const yearly_percentage = Math.round(data.yearly_percentage);
+  const hourly_percentage = Math.round(data.hourly_percentage)
+  const yearly_percentage = Math.round(data.yearly_percentage)
+
+  const formatSalary = (value) => {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A"
+    const rounded = Math.round(Number(value) / 1000)
+    return `$${rounded}k`
+  }
+
+  const categoryTitles = [
+    "Software Engineer",
+    "Data Engineer",
+    "Machine Learning Engineer",
+    "Other"
+  ]
+
+  const categoryLookup = (data.each_category_median || []).reduce((acc, item) => {
+    acc[item.title] = item
+    return acc
+  }, {})
+
+  const salaryRanges = categoryTitles.map((title) => {
+    const item = categoryLookup[title] || {}
+    const min = Number(item.median_minimum) || 0
+    const max = Number(item.median_maximum) || 0
+    const range = Math.max(0, max - min)
+    const hasRange = min > 0 && max > 0 && range >= 0
+
+    return {
+      title,
+      min,
+      range,
+      max,
+      label: hasRange ? `${formatSalary(min)} – ${formatSalary(max)}` : "No salary range available"
+    }
+  })
+
+  const highestRangeValue = Math.max(...salaryRanges.map((item) => item.max), median_max || 0, 1)
+  const xAxisMax = Math.ceil(highestRangeValue / 10000) * 10000
+
+  const SalaryTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null
+    const item = payload[0].payload
+    return (
+      <div className="custom-tooltip">
+        <div className="tooltip-title">{item.title}</div>
+        <div>{item.label}</div>
+        {item.max > 0 && <div>{formatSalary(item.min)} low · {formatSalary(item.max)} high / year</div>}
+      </div>
+    )
+  }
 
   return (
     <div className="card">
@@ -52,7 +102,7 @@ export function Salary({ cachedData }) {
           <strong>{coverage_percentage}% ({coverage_count})</strong>
           <p>{coverage_percentage}% of Postings includes salary data</p>
         </div>
-          <div className="metric-card">
+        <div className="metric-card">
           <span>Median pay</span>
           <strong>${median_min} - ${median_max}/year</strong>
           <p>The median of salary floor (low-end to high-end)</p>
@@ -60,19 +110,42 @@ export function Salary({ cachedData }) {
         <div className="metric-card">
           <span>Pay structure</span>
           <strong>{yearly_percentage}% / {hourly_percentage}%</strong>
-          <p>{yearly_percentage}% Salaried - {hourly_percentage}% Hourly </p>
+          <p>{yearly_percentage}% Salaried - {hourly_percentage}% Hourly</p>
         </div>
       </div>
 
       <div className="chart-card">
         <div className="chart-card-header">
           <h3>Compensation snapshot</h3>
-          <p>We’re building the full salary trend chart now. This page will show pay ranges and movement alongside market context.</p>
+          <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p>
         </div>
-        <div style={{ paddingTop: 18 }}>
-          <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.8 }}>
-            In the meantime, this preview emphasizes the structure of a polished salary page: strong header, data summary, and an illustrated insights panel.
-          </p>
+        <div className="salary-range-chart">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart
+              data={salaryRanges}
+              layout="vertical"
+              margin={{ top: 0, right: 24, left: 8, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis
+                type="number"
+                domain={[0, xAxisMax]}
+                tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="title"
+                axisLine={false}
+                tickLine={false}
+                width={170}
+              />
+              <Tooltip content={<SalaryTooltip />} cursor={{ fill: "rgba(16, 112, 241, 0.08)" }} />
+              <Bar dataKey="min" stackId="a" fill="transparent" />
+              <Bar dataKey="range" stackId="a" barSize={18} radius={999} fill="var(--accent)" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

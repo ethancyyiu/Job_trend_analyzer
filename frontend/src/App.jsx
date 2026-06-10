@@ -7,7 +7,7 @@ import {Salary} from "./pages/Salary.jsx"
 import Layout from "./components/Layout.jsx"
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function App() {
   const [page, setPage] = useState("Home")
@@ -18,7 +18,8 @@ export default function App() {
     endpoints.forEach((endpoint) => {
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))
-      }).catch(function () {
+      }).catch(function (error) {
+        console.warn(`API fetch failed for ${endpoint}:`, error?.message || error)
         setCache((prev) => ({ ...prev, [endpoint]: null }))
       })
     })

@@ -358,7 +358,30 @@
   right: 12%; top: 22%;
   width: 12px; height: 12px;
   border-radius: 50%;
-  background: var(--accent);
+}
+
+.salary-range-chart {
+  width: 100%;
+  min-height: 320px;
+}
+
+.custom-tooltip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.custom-tooltip .tooltip-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.custom-tooltip div {
+  line-height: 1.5;
 }
 
 @media (max-width: 900px) {

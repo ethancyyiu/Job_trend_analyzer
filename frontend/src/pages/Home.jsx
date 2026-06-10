@@ -41,88 +41,59 @@ export default function Home({ setPage, page }) {
           </aside>
         </section>
 
-        <section className="home-value">
-          <div className="home-value-copy">
-            <span className="home-value-eyebrow">Why it matters</span>
-            <h2>Stop reacting to hiring noise. Start responding to real demand.</h2>
-            <p>
-              Many teams rely on outdated spreadsheets and disconnected reports. Job Trend Analyzer brings the job market into a single, modern daily trends view so hiring decisions happen with clarity and speed.
-            </p>
-          </div>
-        </section>
-
-        <section className="home-features">
-          <div className="feature-row feature-row-1">
-            <div className="feature-row-copy">
+        <section className="home-feature-grid" aria-label="Explore features">
+          <div className="feature-card" onClick={() => setPage("DailyTrends")}>
+            <div className="card-head">
               <span className="home-eyebrow">Daily Trends</span>
-              <h3>See where hiring momentum is accelerating.</h3>
-              <p>Understand posting volume and trend direction at a glance, with a centralized view that keeps your team aligned.</p>
+              <svg className="feature-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <rect x="3" y="10" width="3" height="11" rx="1" fill="var(--accent)" />
+                <rect x="9" y="6" width="3" height="15" rx="1" fill="var(--accent)" />
+                <rect x="15" y="2" width="3" height="19" rx="1" fill="var(--accent)" />
+              </svg>
             </div>
-            <div className="feature-row-illustration">
-              <div className="feature-preview mini-chart">
-                <div className="sparkline">
-                  <div className="spark-bar short"></div>
-                  <div className="spark-bar medium"></div>
-                  <div className="spark-bar tall"></div>
-                  <div className="spark-bar medium"></div>
-                  <div className="spark-bar tall"></div>
-                </div>
-                <div className="preview-labels">
-                  <span>Posting momentum</span>
-                  <strong>+12%</strong>
-                </div>
-              </div>
-            </div>
+            <h3>See where hiring momentum is accelerating</h3>
+            <p>Quickly compare posting volume and trend direction to prioritize roles.</p>
+            <div className="card-meta"><span className="meta-pill">Posting momentum</span><strong>+12%</strong></div>
           </div>
 
-          <div className="feature-row feature-row-2">
-            <div className="feature-row-copy">
+          <div className="feature-card" onClick={() => setPage("SkillsView")}>
+            <div className="card-head">
               <span className="home-eyebrow">Skills</span>
-              <h3>Highlight the skills employers are chasing right now.</h3>
-              <p>Spot rising talent demand and skill gaps with a visual experience designed for fast decision making.</p>
+              <svg className="feature-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <circle cx="7" cy="7" r="3" fill="var(--accent)" />
+                <circle cx="17" cy="7" r="2" fill="var(--accent)" opacity="0.9" />
+                <rect x="5" y="14" width="14" height="3" rx="1" fill="var(--accent)" />
+              </svg>
             </div>
-            <div className="feature-row-illustration">
-              <div className="feature-preview skill-chips">
-                <div className="skill-chip">React</div>
-                <div className="skill-chip">Python</div>
-                <div className="skill-chip">SQL</div>
-                <div className="skill-chip">Power BI</div>
-              </div>
-            </div>
+            <h3>Highlight the skills employers are chasing</h3>
+            <p>Surface rising skills and gaps so your team can target hiring and training.</p>
+            <div className="card-meta"><span className="meta-pill">Top skill</span><strong>React</strong></div>
           </div>
 
-          <div className="feature-row feature-row-3">
-            <div className="feature-row-copy">
+          <div className="feature-card" onClick={() => setPage("Postings")}>
+            <div className="card-head">
               <span className="home-eyebrow">Postings</span>
-              <h3>Browse the freshest roles with hiring context.</h3>
-              <p>Surface recent job postings quickly so you can capture demand signals where they matter most.</p>
+              <svg className="feature-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <rect x="4" y="5" width="16" height="14" rx="2" stroke="var(--accent)" strokeWidth="1.2" fill="none" />
+                <path d="M8 9h8M8 13h5" stroke="var(--accent)" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
             </div>
-            <div className="feature-row-illustration">
-              <div className="feature-preview mini-table">
-                <div className="table-row"><span>UX Designer</span><span>Remote</span></div>
-                <div className="table-row"><span>Data Analyst</span><span>Berlin</span></div>
-              </div>
-            </div>
+            <h3>Browse the freshest roles with context</h3>
+            <p>See recent postings with location and urgency signals to act fast.</p>
+            <div className="card-meta"><span className="meta-pill">Detailed</span><strong>24h</strong></div>
           </div>
 
-          <div className="feature-row feature-row-4">
-            <div className="feature-row-copy">
+          <div className="feature-card" onClick={() => setPage("Salary")}>
+            <div className="card-head">
               <span className="home-eyebrow">Salary</span>
-              <h3>Understand compensation trends across the market.</h3>
-              <p>Track how pay ranges are moving so your offers stay competitive and aligned to current demand.</p>
+              <svg className="feature-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <path d="M12 3v18" stroke="var(--accent)" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M7 7h10M7 17h10" stroke="var(--accent)" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
             </div>
-            <div className="feature-row-illustration">
-              <div className="feature-preview salary-range">
-                <div className="range-row">
-                  <span>$65k</span>
-                  <span>$115k</span>
-                </div>
-                <div className="range-bar">
-                  <div className="range-fill"></div>
-                  <div className="range-pin"></div>
-                </div>
-              </div>
-            </div>
+            <h3>Understand compensation trends quickly</h3>
+            <p>Track pay-range shifts so offers remain competitive across markets.</p>
+            <div className="card-meta"><span className="meta-pill">Range</span><strong>$65k–$115k</strong></div>
           </div>
         </section>
       </div>

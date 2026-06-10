@@ -191,13 +191,72 @@ def get_salary():
         "total_postings": total,
     }
     
+@router.get("/home")
+def home():
+    rows = query("""
+        SELECT date_posted, COUNT(*) as count
+        FROM postings
+        WHERE date_posted IS NOT NULL
+        GROUP BY date_posted
+        ORDER BY date_posted DESC
+        LIMIT 2""")
+    
+    latest_count = rows[0][1]
+    old_count = rows[1][1]
+    momentum = 0
+    if old_count > 0:
+        momentum = (latest_count - old_count) / old_count
+    else:
+        momentum = 0
+        
+    skills = query("""
+        SELECT unnest(skills) AS skill, COUNT(*) AS count
+        FROM postings
+        GROUP BY skill
+        ORDER BY count DESC
+        LIMIT 1;
+    """)
+    
+    top_skill = skills[0][0]
+    
+    median = query("""
+        SELECT 
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
+        FROM postings
+        WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;          
+    """)
+    
+    median_min = median[0][0]
+    median_max = median[0][1]
+    
+    def format_k(value):
+    if value >= 1000:
+        return f"{int(value / 1000)}k"
+    return str(int(value))
+
+    rounded_median_min = format_k(median_min)
+    rounded_median_max = format_k(median_max)
+    
+    return {"momentum": momentum, "top_skill": top_skill, 
+            "rounded_median_min": rounded_median_min,
+            "rounded_median_max": rounded_median_min}
+    
+    
+    
+        
+    
+        
+    
+    
+    
 
 @router.api_route("/health", methods = ["GET", "HEAD"])
 def health():
     return {"message": "Bello!!!"}
 
 @router.get("/")
-def home():
+def welcome():
     return {"message": "Welcome to Market Pulse API"}
 
 

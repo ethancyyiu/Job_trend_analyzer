@@ -82,7 +82,7 @@ export function Salary({ cachedData }) {
   return (
     <div className="card">
       <div className="page-header">
-        <h2>Compensation</h2>
+        <h2>Salary Overview</h2>
         <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p>
       </div>
 
@@ -110,10 +110,10 @@ export function Salary({ cachedData }) {
           <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p>
         </div>
         <div className="salary-range-chart">
-          <ResponsiveContainer width="100%" height={320}>
+          <ResponsiveContainer width="100%" height={380}>
             <BarChart
               data={salaryRanges}
-              maxBarSize={38} 
+              maxBarSize={45} 
               layout="vertical"
               margin={{ top: 0, right: 24, left: 8, bottom: 0 }}
             >

@@ -4,11 +4,11 @@ def extract_salary(text):
     if not text:
         return None, None, None
 
-    pattern = r'[$£€][\d,]+(?:\.\d+)?[kK]?(?:\s*/\s*(?:yr|year|annual|hour|hr|h))?'
+    pattern = r'[$£€₹¥][\d,]+(?:\.\d+)?[kK]?(?:\s*/\s*(?:yr|year|annual|hour|hr|h))?'
     matches = re.findall(pattern, text.lower())
 
     def parse(s):
-        s = re.sub(r'[$£€,]', '', s.strip())
+        s = re.sub(r'[$£€¥₹,]', '', s.strip())
         m = re.match(r'([\d.]+)([kK]?)', s)
         if not m:
             return None
@@ -33,6 +33,10 @@ def extract_salary(text):
             return int(value * 1.35)
         if s.startswith('€'):
             return int(value * 1.17)
+        if s.startswith('₹'):
+            return int(value * 0.01)
+        if s.startswith('¥'):
+            return int(value * 0.0062)
         return int(value)
 
     if len(matches) >= 2:

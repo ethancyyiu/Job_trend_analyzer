@@ -31,16 +31,14 @@ def save(db, posting):
             posting.get('salary_min'), posting.get('salary_max'), posting.get('salary_type')
         ))
     db.commit()
-    print(f"  saved: {posting['title']} @ {posting['company']}")
+    print(f"  saved: {posting['title']} @ {posting['company']}\n")
 
 def scrape(keyword, location, pages):
     db = get_db()
-    
-
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = False, args=["--disable-gpu", "--start-maximized"])
+        browser = p.chromium.launch(headless = True)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        context = browser.new_context(user_agent=AGENT, no_viewport=True)
+        context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
 
         for page_num in range(pages):

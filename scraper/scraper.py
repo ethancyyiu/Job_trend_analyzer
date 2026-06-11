@@ -38,9 +38,9 @@ def scrape(keyword, location, pages):
     
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False, args=["--disable-gpu", "--start-maximized"])
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        context = browser.new_context(user_agent=AGENT)
+        context = browser.new_context(user_agent=AGENT, no_viewport=True)
         page = context.new_page()
 
         for page_num in range(pages):

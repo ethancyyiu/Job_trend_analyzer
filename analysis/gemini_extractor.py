@@ -1,12 +1,13 @@
 from google import genai
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def gemini_extract(text):
+def gemini_extract(description):
     prompt = f"""
         You are a precise salary extraction engine. Read the job posting text and extract salary information exactly as stated. Follow these rules exactly and output ONLY valid JSON with no extra text.
 
@@ -37,15 +38,15 @@ Rules
 6. Output format
    - Output ONLY valid JSON that exactly matches this schema and nothing else.
 
-JSON schema
-{{
-  "salary_min": number | null,
-  "salary_max": number | null,
-  "salary_type": "hourly" | "yearly" | null,
-  "raw_text": string | null
-}}
+    JSON schema:
+    {{
+        "salary_min": number | null,
+        "salary_max": number | null,
+        "salary_type": "hourly" | "yearly" | null,
+        "raw_text": string | null
+    }}
 
-Now extract salary information from the job posting: {text}
+    Now extract salary information from the job posting: {description}
 
     """
         
@@ -55,6 +56,17 @@ Now extract salary information from the job posting: {text}
         temperature=0.0
     )
     
-    return response.text
+    result = response.text()
+    data = json.loads(response)
+    
+    salary_min = data["salary_min"]
+    salary_max = data["salary_max"]
+    salary_type = data["salary_type"]
+    raw_text = data["raw_text"]
+    
+    return {"salary_min": salary_min,
+            "salary_max": salary_max,
+            "salary_type": salary_type,
+            "raw_text": raw_text}
 
 

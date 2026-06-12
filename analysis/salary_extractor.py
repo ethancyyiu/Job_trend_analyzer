@@ -23,7 +23,7 @@ def extract_salary(text):
         if re.search(r'/\s*(?:yr|year|annual)', s):
             return 'yearly'
         if re.search(r'/\s*(?:hr|hour|h)\b', s):
-            return 'hourly'
+            
         # use parsed value
         value = parsed_value if parsed_value is not None else 0
         return 'yearly' if value >= 5000 else 'hourly'

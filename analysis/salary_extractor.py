@@ -7,6 +7,10 @@ def extract_salary(text):
 
     pattern = r'[$£€₹¥][\d,]+(?:\.\d+)?[kK]?(?:\s*/\s*(?:yr|year|annual|hour|hr|h))?'
     matches = re.findall(pattern, text.lower())
+    
+    if any("/hr" in m or "/hour" in m or "/h" in m for m in matches):
+        data = gemini_extract(text)
+        return data["salary_min"], data["salary_max"], data["salary_type"]
 
     def parse(s):
         s = re.sub(r'[$£€¥₹,]', '', s.strip())
@@ -23,7 +27,7 @@ def extract_salary(text):
         if re.search(r'/\s*(?:yr|year|annual)', s):
             return 'yearly'
         if re.search(r'/\s*(?:hr|hour|h)\b', s):
-            
+            return 'hourly'
         # use parsed value
         value = parsed_value if parsed_value is not None else 0
         return 'yearly' if value >= 5000 else 'hourly'
@@ -57,6 +61,6 @@ def extract_salary(text):
         val = usd(val_raw, s)
         if sal_type is None:
             sal_type = 'yearly' if val > 1000 else 'hourly'
-        return val, None, sal_type
+        return val, val, sal_type
 
     return None, None, None

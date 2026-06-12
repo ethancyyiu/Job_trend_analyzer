@@ -62,7 +62,7 @@ def scrape(keyword, location, pages):
                 try:
                     card.click()
                     page.wait_for_timeout(random.randint(3500, 4000))
-                    # input("enter")
+                    input("enter")
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")

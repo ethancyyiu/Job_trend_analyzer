@@ -56,8 +56,8 @@ Rules
         temperature=0.0
     )
     
-    result = response.text()
-    data = json.loads(response)
+    result = response.text
+    data = json.loads(result)
     
     salary_min = data["salary_min"]
     salary_max = data["salary_max"]

@@ -1,4 +1,5 @@
 import re
+from gemini_extractor import gemini_extract
 
 def extract_salary(text):
     if not text:

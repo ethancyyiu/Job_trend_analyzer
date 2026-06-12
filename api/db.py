@@ -1,7 +1,7 @@
 import psycopg2
 import os
 from dotenv import load_dotenv
-from psycopg2 import pool
+from psycopg2 import pool, OperationalError
 
 load_dotenv()
 
@@ -21,9 +21,32 @@ def query(sql, params=None):
     conn = None
     try:
         conn = p.getconn()
+        
+        if getattr(conn, "closed", 0):
+            p.putconn(conn, close=True)
+            conn = p.getconn()
+            
         with conn.cursor() as cur:
             cur.execute(sql, params)
             return cur.fetchall()
+        
+    except OperationalError:
+        if conn is not None:
+            try:
+                p.putconn(conn, close=True)
+            except Exception:
+                pass
+            conn = None
+            
+        raise
+            
+    except Exception:
+        if conn is not None:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        raise
     finally:
         if conn is not None:
             p.putconn(conn)

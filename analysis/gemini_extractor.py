@@ -8,6 +8,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def gemini_extract(description):
+    print("CALLED GEMINI API!!!!!!!")
     prompt = f"""
         You are a precise salary extraction engine. Read the job posting text and extract salary information exactly as stated. Follow these rules exactly and output ONLY valid JSON with no extra text.
 
@@ -32,18 +33,14 @@ Rules
 4. Precision and rounding
    - For conversions, round to the nearest whole number.
 
-5. Raw text
-   - Include the exact substring from the posting that contains the salary information in the field raw_text. If multiple salary substrings are present, include the one you used to compute the values.
-
-6. Output format
-   - Output ONLY valid JSON that exactly matches this schema and nothing else.
+5. Output format
+   - Output ONLY valid pure (not markdown) JSON that exactly matches this schema and nothing else.
 
     JSON schema:
     {{
         "salary_min": number | null,
         "salary_max": number | null,
-        "salary_type": "hourly" | "yearly" | null,
-        "raw_text": string | null
+        "salary_type": "hourly" | "yearly" | null
     }}
 
     Now extract salary information from the job posting: {description}
@@ -51,22 +48,27 @@ Rules
     """
         
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-3.1-flash-lite",
         contents=prompt,
-        temperature=0.0
+        config={
+            "response_mime_type": "application/json"
+        }
     )
     
-    result = response.text
+    result = response.text.strip()
     data = json.loads(result)
     
     salary_min = data["salary_min"]
     salary_max = data["salary_max"]
     salary_type = data["salary_type"]
-    raw_text = data["raw_text"]
+    #raw_text = data["raw_text"]
     
     return {"salary_min": salary_min,
             "salary_max": salary_max,
-            "salary_type": salary_type,
-            "raw_text": raw_text}
+            "salary_type": salary_type}
+            # ,"raw_text": raw_text
 
-
+# can also ask it to generate the
+# 5. Raw text
+#    - Include the exact substring from the posting that contains the salary information in the field raw_text. If multiple salary substrings are present, include the one you used to compute the values.
+#        ,"raw_text": string | null

@@ -8,7 +8,7 @@ load_dotenv()
 SKILLS = [
     "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c", "html", "css",
 
-    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nestjs", "power bi",
+    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nest.js", "power bi", "nextjs", "tailwind"
 
     "sql", "postgresql", "mysql", "mongodb", "redis",
     "pandas", "numpy", "scikit-learn", "tensorflow", "pytorch",
@@ -21,7 +21,7 @@ SKILLS = [
     
     "spark", "snowflake", "databricks", "langchain", "xgboost", "lightgbm", "springboot", 
     
-    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark", "rag", "langgraph", "snowflake", "MCP"
+    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark", "rag", "langgraph", "MCP", "statistic"
 ]
 
 def extract_skills(text):

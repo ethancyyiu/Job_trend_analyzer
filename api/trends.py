@@ -155,6 +155,7 @@ def get_salary():
                 WHEN title ILIKE '%software engineer%' THEN 'Software Engineer'
                 WHEN title ILIKE '%data engineer%' THEN 'Data Engineer'
                 WHEN title ILIKE '%machine learning engineer%' THEN 'Machine Learning Engineer'
+                WHEN title ILIKE '%data scientist%' THEN 'Data Scientist'
                 ELSE 'Other'
             END AS job_categories,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum,

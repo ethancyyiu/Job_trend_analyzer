@@ -36,6 +36,7 @@ export function Salary({ cachedData }) {
     "Software Engineer",
     "Data Engineer",
     "Machine Learning Engineer",
+    "Data Scientist",
     "Other"
   ]
 

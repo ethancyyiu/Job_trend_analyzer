@@ -13,7 +13,7 @@ def _get_pool():
         dsn = os.environ.get("DATABASE_URL")
         if not dsn:
             raise RuntimeError("DATABASE_URL environment variable is not set")
-        _pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=10, dsn=dsn)
+        _pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=10, dsn=dsn, connect_timeout=5)
     return _pool
 
 def query(sql, params=None):
@@ -28,7 +28,9 @@ def query(sql, params=None):
             
         with conn.cursor() as cur:
             cur.execute(sql, params)
-            return cur.fetchall()
+            result = cur.fetchall()
+            conn.commit() 
+            return result
         
     except OperationalError:
         if conn is not None:
@@ -37,16 +39,19 @@ def query(sql, params=None):
             except Exception:
                 pass
             conn = None
-            
         raise
             
     except Exception:
         if conn is not None:
             try:
                 conn.rollback()
+                p.putconn(conn)
             except Exception:
-                pass
+                try:
+                    p.putconn(conn, close=True)
+                except Exception:
+                    pass
         raise
-    finally:
+    else:
         if conn is not None:
             p.putconn(conn)

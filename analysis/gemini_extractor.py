@@ -24,15 +24,15 @@ Rules
    - Detect the currency symbol in the salary text.
    - Convert ALL salary values to USD using these exact fixed multipliers:
 
-       * GBP (£) → USD: multiply by 1.35
-       * EUR (€) → USD: multiply by 1.17
-       * INR (₹) → USD: multiply by 0.01
+       * GBP (£) → USD: multiply by 1.34
+       * EUR (€) → USD: multiply by 1.16
+       * INR (₹) → USD: multiply by 0.011
        * JPY (¥) → USD: multiply by 0.0062
 
-       * CAD (C$, CA$, $CAD) → USD: multiply by 0.73
-       * AUD (A$, $AUD) → USD: multiply by 0.66
-       * SGD (S$, $SGD) → USD: multiply by 0.74
-       * CHF (CHF) → USD: multiply by 1.10
+       * CAD (C$, CA$, $CAD) → USD: multiply by 0.71
+       * AUD (A$, $AUD) → USD: multiply by 0.70
+       * SGD (S$, $SGD) → USD: multiply by 0.78
+       * CHF (CHF) → USD: multiply by 1.25
        * HKD (HK$) → USD: multiply by 0.13
 
        * If currency is already USD ($), keep as-is.

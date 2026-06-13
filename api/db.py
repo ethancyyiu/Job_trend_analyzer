@@ -52,6 +52,6 @@ def query(sql, params=None):
                 except Exception:
                     pass
         raise
-    else:
+    finally:
         if conn is not None:
             p.putconn(conn)

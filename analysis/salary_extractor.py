@@ -26,7 +26,7 @@ def extract_salary(text):
             return 'hourly'
         # use parsed value
         value = parsed_value if parsed_value is not None else 0
-        return 'yearly' if value >= 5000 else 'hourly'
+        return 'yearly' if value >= 35000 else 'hourly'
 
     def usd(value, s):
         s = s.strip()
@@ -52,7 +52,7 @@ def extract_salary(text):
         low = usd(low_raw, matches[0])
         high = usd(high_raw, matches[1])
         if sal_type is None:
-            sal_type = 'yearly' if low > 1000 else 'hourly'
+            sal_type = 'yearly' if low > 35000 else 'hourly'
         
         return low, high, sal_type
 
@@ -67,7 +67,7 @@ def extract_salary(text):
         
         val = usd(val_raw, s)
         if sal_type is None:
-            sal_type = 'yearly' if val > 1000 else 'hourly'
+            sal_type = 'yearly' if val > 35000 else 'hourly'
         return val, val, sal_type
 
     return None, None, None

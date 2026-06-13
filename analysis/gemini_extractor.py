@@ -19,7 +19,7 @@ Rules
    - null if there is no explicit salary information.
 
 2. Conversions
-   - If salary is given as weekly, convert to yearly by multiplying weekly by 4.333 then by 12 (equivalent to ~52 weeks). After conversion, set salary_type to "yearly".
+   - If salary is given as weekly, convert to yearly by multiplying weekly by 52. After conversion, set salary_type to "yearly".
    - If salary is given as monthly, convert to yearly by multiplying monthly by 12. After conversion, set salary_type to "yearly".
    - Do not convert hourly values to yearly. If the posting gives hourly, keep salary_type "hourly" and return hourly numeric values.
 

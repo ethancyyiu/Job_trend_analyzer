@@ -2,6 +2,8 @@ from google import genai
 import os
 from dotenv import load_dotenv
 import json
+import psycopg2
+import time
 
 load_dotenv()
 
@@ -17,24 +19,44 @@ Rules
    - "hourly" if the posting explicitly states an hourly rate.
    - "yearly" if the posting explicitly states an annual salary, or if the posting states weekly or monthly pay that you convert to annual using the conversion rules below.
    - null if there is no explicit salary information.
+   
+2. Currency detection and conversion to USD
+   - Detect the currency symbol in the salary text.
+   - Convert ALL salary values to USD using these exact fixed multipliers:
 
-2. Conversions
+       * GBP (£) → USD: multiply by 1.35
+       * EUR (€) → USD: multiply by 1.17
+       * INR (₹) → USD: multiply by 0.01
+       * JPY (¥) → USD: multiply by 0.0062
+
+       * CAD (C$, CA$, $CAD) → USD: multiply by 0.73
+       * AUD (A$, $AUD) → USD: multiply by 0.66
+       * SGD (S$, $SGD) → USD: multiply by 0.74
+       * CHF (CHF) → USD: multiply by 1.10
+       * HKD (HK$) → USD: multiply by 0.13
+
+       * If currency is already USD ($), keep as-is.
+       * If currency is unknown, assume USD.
+
+   - Apply currency conversion BEFORE converting weekly/monthly/daily → yearly.
+
+3. Conversions
    - If salary is given as weekly, convert to yearly by multiplying weekly by 52. After conversion, set salary_type to "yearly".
    - If salary is given as monthly, convert to yearly by multiplying monthly by 12. After conversion, set salary_type to "yearly".
    - If salary is given as daily, convert to yearly by multiplying daily by 220. After conversion, set salary_type to "yearly".
    - Do not convert hourly values to yearly. If the posting gives hourly, keep salary_type "hourly" and return hourly numeric values.
 
-3. Numeric output rules
+4. Numeric output rules
    - Return **numbers only** for salary_min and salary_max (no currency symbols, no commas).
    - If the posting gives a single salary value (not a range), set both salary_min and salary_max to that same numeric value.
    - If the posting gives a range, extract the numeric minimum and maximum.
    - If the posting gives multiple different salary lines, extract the primary salary mentioned for the role described in the posting. 
    - If no salary information is present, set salary_type, salary_min, and salary_max to null.
 
-4. Precision and rounding
+5. Precision and rounding
    - For conversions, round to the nearest whole number.
 
-5. Output format
+6. Output format
    - Output ONLY valid pure (not markdown) JSON that exactly matches this schema and nothing else.
 
     JSON schema:
@@ -82,16 +104,18 @@ def run():
         print(f"Processing {len(rows)} postings...")
 
         for row_id, title, description in rows:
+            time.sleep(3)
             found = gemini_extract(description)
             salary_min = found["salary_min"]
             salary_max = found["salary_max"]
             salary_type = found["salary_type"]
+            print(f"salary_min: {salary_min}, salary_max: {salary_max}, salary_type: {salary_type}")
             cur.execute(
                 "UPDATE postings SET salary_min = %s, salary_max = %s, salary_type = %s WHERE id = %s",
                 (salary_min, salary_max, salary_type, row_id)
             )
+            DB.commit()
 
-        DB.commit()
         print("all done!")
         
 if __name__ == "__main__":

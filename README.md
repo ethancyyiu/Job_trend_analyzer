@@ -29,7 +29,7 @@ Building this has taught me way more than any course so far.
 - Saves title, company, location, description, post date, etc. into PostgreSQL
 
 ## Skill Extraction Engine
-- Scans every job description for 65+ technologies
+- Scans every job description for 70+ technologies
 - Stores skills as arrays for easy querying
 - Lets me track which skills show up the most over time
 

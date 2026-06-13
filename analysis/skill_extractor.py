@@ -21,7 +21,7 @@ SKILLS = [
     
     "spark", "snowflake", "databricks", "langchain", "xgboost", "lightgbm", "springboot", 
     
-    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark"
+    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark", "rag", "langgraph", "snowflake", "MCP"
 ]
 
 def extract_skills(text):

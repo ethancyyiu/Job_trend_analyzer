@@ -21,6 +21,7 @@ Rules
 2. Conversions
    - If salary is given as weekly, convert to yearly by multiplying weekly by 52. After conversion, set salary_type to "yearly".
    - If salary is given as monthly, convert to yearly by multiplying monthly by 12. After conversion, set salary_type to "yearly".
+   - If salary is given as daily, convert to yearly by multiplying daily by 220. After conversion, set salary_type to "yearly".
    - Do not convert hourly values to yearly. If the posting gives hourly, keep salary_type "hourly" and return hourly numeric values.
 
 3. Numeric output rules

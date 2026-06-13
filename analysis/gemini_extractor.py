@@ -73,3 +73,26 @@ Rules
 # 5. Raw text
 #    - Include the exact substring from the posting that contains the salary information in the field raw_text. If multiple salary substrings are present, include the one you used to compute the values.
 #        ,"raw_text": string | null
+
+def run():
+    DB = psycopg2.connect(os.environ["DATABASE_URL"])
+    with DB.cursor() as cur:
+        cur.execute("SELECT id, title, description FROM postings WHERE salary_type = 'hourly'")
+        rows = cur.fetchall()
+        print(f"Processing {len(rows)} postings...")
+
+        for row_id, title, description in rows:
+            found = gemini_extract(description)
+            salary_min = found["salary_min"]
+            salary_max = found["salary_max"]
+            salary_type = found["salary_type"]
+            cur.execute(
+                "UPDATE postings SET salary_min = %s, salary_max = %s, salary_type = %s WHERE id = %s",
+                (salary_min, salary_max, salary_type, row_id)
+            )
+
+        DB.commit()
+        print("all done!")
+        
+if __name__ == "__main__":
+   run()

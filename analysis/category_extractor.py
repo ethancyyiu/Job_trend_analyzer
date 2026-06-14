@@ -1,46 +1,81 @@
 import re
-import json
+import os
+from dotenv import load_dotenv
+import psycopg2
+from google import genai
+
+load_dotenv()
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+def get_gemini(text):
+    print("CALLED GEMINI API!!!!!!!!!\n")
+    prompt = f"""
+        You are a strict job title classifier.
+
+        I will give you a job title.  Your task is to classify it into exactly one of the following categories:
+
+- Software Engineer
+- Data Engineer
+- Machine Learning Engineer
+- Data Scientist
+- Others
+
+Rules:
+- Do NOT guess.
+- If the job title does not clearly indicate one of the four roles, return "Others".
+- Ignore seniority levels (junior, senior, lead, principal).
+- Ignore company names and irrelevant modifiers.
+- Base your decision ONLY on the job title.
+
+Return ONLY the category name exactly as written above.
+
+Job title: {text}
+    """    
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite",
+        contents=prompt,
+        config={
+            "response_mime_type": "text/plain"
+        }
+    )
+                
+    answer = response.text.strip().lower()
+    return answer
+    
 
 def run():
     DB = psycopg2.connect(os.environ["DATABASE_URL"])
     with DB.cursor() as cur:
-        cur.execute("SELECT id, title FROM postings")
+        cur.execute("SELECT id, title FROM postings WHERE job_category IS NULL")
 
         rows = cur.fetchall()
         print(f"Processing {len(rows)} postings...")
 
         for row_id, title in rows:
+            print(f"id: {row_id}")
             if re.search(r"software engineer", title, re.IGNORECASE):
-                cur.execute(
-                    "UPDATE postings SET job_category = 'software engineer' WHERE id = %s",
-                    (row_id)
-                )
-            elif re.search(r"data engineer", title, re.IGNORECASE):
-                cur.execute(
-                    "UPDATE postings SET job_category = 'data engineer' WHERE id = %s",
-                    (row_id)
-                )
-            elif re.search(r"machine learning engineer", title, re.IGNORECASE):
-                cur.execute(
-                    "UPDATE postings SET job_category = 'machine learning engineer' WHERE id = %s",
-                    (row_id)
-                )
-            elif re.search(r"data scientist", title, re.IGNORECASE):
-                cur.execute(
-                    "UPDATE postings SET job_category = 'data scientist' WHERE id = %s",
-                    (row_id)
-                )
-            else:
-                response = client.models.generate_content(
-                    model="gemini-3.1-flash-lite",
-                    contents=prompt,
-                    config={
-                        "response_mime_type": "application/json"
-                    }
-                )
+                category = "software engineer"
                 
-                answer = response.text.strip()
-                result = json.loads(answer)
+            elif re.search(r"data engineer", title, re.IGNORECASE):
+                category = "data engineer"
+                
+            elif re.search(r"machine learning engineer", title, re.IGNORECASE):
+                category = "machine learning engineer"
+                
+            elif re.search(r"data scientist", title, re.IGNORECASE):
+                category = "data scientist"
+                
+            else:
+                category = get_gemini(title)
+
+            cur.execute(
+                "UPDATE postings SET job_category = %s WHERE id = %s",
+                (category, row_id)
+            )
 
             DB.commit()
         print("all done!")
+        
+if __name__ == "__main__":
+    run()

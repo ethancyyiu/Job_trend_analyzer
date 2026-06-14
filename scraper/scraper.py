@@ -33,7 +33,7 @@ def save(db, posting):
     db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}\n")
 
-def scrape(keyword, location, pages):
+def scrape(keyword, location, pages, batch_number):
     db = get_db()
     with sync_playwright() as p:
         browser = p.chromium.launch(headless = True)
@@ -116,13 +116,16 @@ def scrape(keyword, location, pages):
                         "salary_max":  salary_max,
                         "salary_type": salary_type,
                     })
+                    
+                    print(f"on page: {batch_number}")
 
                     time.sleep(random.uniform(0.2, 0.5))
 
                 except Exception as e:
                     print(f"    Error on card: {e}")
                     continue
-
+            
+            batch_number += 1
             time.sleep(random.uniform(2, 4))
 
         browser.close()
@@ -131,16 +134,16 @@ def scrape(keyword, location, pages):
 
 
 if __name__ == "__main__":
-    scrape("data scientist", "remote", 2)
-    scrape("data scientist", "canada", 1)
+    scrape("data scientist", "remote", 2, 1)
+    scrape("data scientist", "canada", 1, 3)
 
-    scrape("software engineer", "remote", 2)
-    scrape("software engineer", "canada", 1)
+    scrape("software engineer", "remote", 2, 4)
+    scrape("software engineer", "canada", 1, 6)
 
-    scrape("data engineer", "remote", 2)
-    scrape("data engineer", "canada", 1)
+    scrape("data engineer", "remote", 2, 7)
+    scrape("data engineer", "canada", 1, 9)
 
-    scrape("machine learning engineer", "remote", 2)
-    scrape("machine learning engineer", "canada", 1)
+    scrape("machine learning engineer", "remote", 2, 10)
+    scrape("machine learning engineer", "canada", 1, 12)
 
     run()

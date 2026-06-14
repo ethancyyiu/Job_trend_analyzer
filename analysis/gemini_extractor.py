@@ -99,8 +99,10 @@ Rules
 def run():
    DB = psycopg2.connect(os.environ["DATABASE_URL"])
    with DB.cursor() as cur:
-      #cur.execute("SELECT id, title, description FROM postings WHERE salary_type = 'hourly'")
-      cur.execute("SELECT id, title, description FROM postings WHERE date_scraped = '2026-06-13' ORDER BY id DESC OFFSET 50 LIMIT 150")
+      cur.execute("SELECT id, title, description FROM postings WHERE salary_type = 'hourly'")
+      
+      # for fixing particular job postings only
+      # cur.execute("SELECT id, title, description FROM postings WHERE date_scraped = '2026-06-13' ORDER BY id DESC OFFSET 149 LIMIT 51")
       rows = cur.fetchall()
       print(f"Processing {len(rows)} postings...")
 

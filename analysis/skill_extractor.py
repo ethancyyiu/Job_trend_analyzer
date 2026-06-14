@@ -31,7 +31,14 @@ def extract_skills(text):
 def run():
     DB = psycopg2.connect(os.environ["DATABASE_URL"])
     with DB.cursor() as cur:
-        cur.execute("SELECT id, title, description FROM postings WHERE skills IS NULL OR skills = '{}'")
+        cur.execute("""
+            SELECT id, title, description
+            FROM postings
+            WHERE (skills IS NULL OR skills = '{}')
+                AND date_scraped >= NOW() - INTERVAL '3 days'
+                ORDER BY id DESC
+        """)
+
         rows = cur.fetchall()
         print(f"Processing {len(rows)} postings...")
 

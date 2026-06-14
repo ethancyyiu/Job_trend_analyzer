@@ -108,7 +108,7 @@ def run():
 
       count = 1
       for row_id, title, description in rows:
-         time.sleep(3)
+         # time.sleep(3)
          found = gemini_extract(description)
          salary_min = found["salary_min"]
          salary_max = found["salary_max"]

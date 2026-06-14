@@ -9,6 +9,7 @@ def get_trends():
         SELECT date_posted, COUNT(*) as count
         FROM postings
         WHERE date_posted IS NOT NULL
+        AND date_posted >= NOW() - INTERVAL '60 days'
         GROUP BY date_posted
         ORDER BY date_posted""")
     

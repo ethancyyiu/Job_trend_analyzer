@@ -64,7 +64,13 @@ export function Salary({ cachedData }) {
   })
 
   // to format the graph better
-  const highestRangeValue = Math.max(...salaryRanges.map((item) => item.max), median_max || 0, 1)
+  const number_max = Number(data.median_max) || 0
+
+  const highestRangeValue = Math.max(
+    ...salaryRanges.map((item) => item.max),
+    number_max, 1
+  )
+
   const xAxisMax = Math.ceil(highestRangeValue / 10000) * 10000
 
   // tooltip so when I hover over it, it has the card

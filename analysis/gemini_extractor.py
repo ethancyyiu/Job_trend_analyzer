@@ -97,27 +97,29 @@ Rules
 #        ,"raw_text": string | null
 
 def run():
-    DB = psycopg2.connect(os.environ["DATABASE_URL"])
-    with DB.cursor() as cur:
-        #cur.execute("SELECT id, title, description FROM postings WHERE salary_type = 'hourly'")
-        cur.execute("SELECT id, title, description FROM postings WHERE date_scraped = '2024-06-13' ORDER BY id DESC LIMIT 200")
-        rows = cur.fetchall()
-        print(f"Processing {len(rows)} postings...")
+   DB = psycopg2.connect(os.environ["DATABASE_URL"])
+   with DB.cursor() as cur:
+      #cur.execute("SELECT id, title, description FROM postings WHERE salary_type = 'hourly'")
+      cur.execute("SELECT id, title, description FROM postings WHERE date_scraped = '2026-06-13' ORDER BY id DESC OFFSET 50 LIMIT 150")
+      rows = cur.fetchall()
+      print(f"Processing {len(rows)} postings...")
 
-        for row_id, title, description in rows:
-            time.sleep(3)
-            found = gemini_extract(description)
-            salary_min = found["salary_min"]
-            salary_max = found["salary_max"]
-            salary_type = found["salary_type"]
-            print(f"salary_min: {salary_min}, salary_max: {salary_max}, salary_type: {salary_type}")
-            cur.execute(
-                "UPDATE postings SET salary_min = %s, salary_max = %s, salary_type = %s WHERE id = %s",
-                (salary_min, salary_max, salary_type, row_id)
-            )
-            DB.commit()
+      count = 1
+      for row_id, title, description in rows:
+         time.sleep(3)
+         found = gemini_extract(description)
+         salary_min = found["salary_min"]
+         salary_max = found["salary_max"]
+         salary_type = found["salary_type"]
+         print(f"count: {count}, salary_min: {salary_min}, salary_max: {salary_max}, salary_type: {salary_type}")
+         count += 1
+         cur.execute(
+            "UPDATE postings SET salary_min = %s, salary_max = %s, salary_type = %s WHERE id = %s",
+            (salary_min, salary_max, salary_type, row_id)
+         )
+         DB.commit()
 
-        print("all done!")
+      print("all done!")
         
 if __name__ == "__main__":
    run()

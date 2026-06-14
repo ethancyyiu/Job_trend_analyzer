@@ -47,7 +47,7 @@ def scrape(keyword, location, pages, batch_number):
                 f"?keywords={keyword}&location={location}&start={page_num * 25}"
             )
             print(f"\n--- Loading page {page_num + 1} ---")
-            page.goto(url, timeout=30000)
+            page.goto(url, timeout = 30000)
             page.wait_for_timeout(6000)
             
             # close login page 
@@ -105,6 +105,7 @@ def scrape(keyword, location, pages, batch_number):
                            salary_min, salary_max, salary_type = None, None, None
                            
                     print(f"min={salary_min}, max={salary_max}, type={salary_type}")
+                    print(f"on page: {batch_number}")
 
                     save(db, {
                         "title":    title,
@@ -117,7 +118,7 @@ def scrape(keyword, location, pages, batch_number):
                         "salary_type": salary_type,
                     })
                     
-                    print(f"on page: {batch_number}")
+                    
 
                     time.sleep(random.uniform(0.2, 0.5))
 

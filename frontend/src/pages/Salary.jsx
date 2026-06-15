@@ -114,7 +114,7 @@ export function Salary({ cachedData }) {
 
       <div className="chart-card">
         <div className="chart-card-header">
-          {/* <h3>Compensation snapshot</h3> */}
+          <h3>Compensation Ranges by Role</h3>
           {/* <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p> */}
         </div>
         <div className="salary-range-chart">

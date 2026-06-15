@@ -13,6 +13,8 @@ const API_BASE = import.meta.env.VITE_API_URL || ''
 export default function App() {
   const [page, setPage] = useState("Home")
   const [cache, setCache] = useState({})
+  const [period, setPeriod] = useState("30d");
+
 
   useEffect(() => {
     const endpoints = ['/home', '/trends', '/skills', '/postings', '/salary']

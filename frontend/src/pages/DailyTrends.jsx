@@ -1,5 +1,7 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
-export function DailyTrends({ cachedData }) {
+import { TimeToggle } from "../components/TimeToggle";
+
+export function DailyTrends({ cachedData, period, setPeriod }) {
     let data;
     if (Array.isArray(cachedData)) {
         data = cachedData;
@@ -75,15 +77,15 @@ export function DailyTrends({ cachedData }) {
 
             <div className="chart-card">
                 <div className="chart-card-header">
-                    <h3>Real-time posting trend</h3>
-                    <p>Track how job posting volume shifts over time so hiring teams can react to momentum sooner.</p>
+                    <h3>Activity Trend by Date</h3>
+                    {/* <p>Track how job posting volume shifts over time so hiring teams can react to momentum sooner.</p> */}
                 </div>
-                <div className="toggle-row">
+                {/* <div className="toggle-row">
                     <button onClick={() => setPeriod("7d")}>7 days</button>
                     <button onClick={() => setPeriod("30d")}>30 days</button>
                     <button onClick={() => setPeriod("90d")}>90 days</button>
-                    <button onClick={() => setPeriod("1y")}>1 year</button>
-                </div>
+                    <button onClick={() => setPeriod("all")}>All time</button>
+                </div> */}
                 <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data}>

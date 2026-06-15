@@ -1,22 +1,22 @@
 export function TimeToggle({ period, setPeriod }) {
   const options = [
-    { label: "7 days", value: "7d" },
-    { label: "30 days", value: "30d" },
-    { label: "90 days", value: "90d" },
-    { label: "All Time", value: "All Time" },
+    { label: "7d", value: "7d" },
+    { label: "30d", value: "30d" },
+    { label: "90d", value: "90d" },
+    { label: "All time", value: "all" },
   ];
 
   return (
-    <select
-      className="time-toggle"
-      value={period}
-      onChange={(e) => setPeriod(e.target.value)}
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
+    <div className="toggle-row">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          className={period === opt.value ? "active" : ""}
+          onClick={() => setPeriod(opt.value)}
+        >
           {opt.label}
-        </option>
+        </button>
       ))}
-    </select>
+    </div>
   );
 }

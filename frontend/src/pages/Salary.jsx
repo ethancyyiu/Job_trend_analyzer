@@ -33,11 +33,12 @@ export function Salary({ cachedData }) {
   const median_max = formatSalary(data.median_max); 
 
   const categoryTitles = [
-    "Software Engineer",
-    "Data Engineer",
-    "Machine Learning Engineer",
-    "Data Scientist",
-    "Other"
+    "software engineer",
+    "data engineer",
+    "machine learning engineer",
+    "data scientist",
+    "data analyst",
+    "others"
   ]
 
   // so that all category is in order
@@ -113,8 +114,8 @@ export function Salary({ cachedData }) {
 
       <div className="chart-card">
         <div className="chart-card-header">
-          <h3>Compensation snapshot</h3>
-          <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p>
+          {/* <h3>Compensation snapshot</h3> */}
+          {/* <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p> */}
         </div>
         <div className="salary-range-chart">
           <ResponsiveContainer width="100%" height={380}>

@@ -151,20 +151,13 @@ def get_salary():
     
     # find median of salary_min and salary_max of each job category
     each_median = query("""
-        SELECT
-            CASE
-                WHEN title ILIKE '%software engineer%' THEN 'Software Engineer'
-                WHEN title ILIKE '%data engineer%' THEN 'Data Engineer'
-                WHEN title ILIKE '%machine learning engineer%' THEN 'Machine Learning Engineer'
-                WHEN title ILIKE '%data scientist%' THEN 'Data Scientist'
-                ELSE 'Other'
-            END AS job_categories,
+        SELECT 
+            job_category,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_maximum
-            
         FROM postings
         WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL
-        GROUP BY job_categories;
+        GROUP BY job_category
     """)
     
     each_category_median = []

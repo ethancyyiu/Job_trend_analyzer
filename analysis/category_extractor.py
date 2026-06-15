@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 from google import genai
+import time
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ def get_gemini(text):
 - Data Engineer
 - Machine Learning Engineer
 - Data Scientist
+- Data Analyst
 - Others
 
 Rules:
@@ -47,12 +49,13 @@ Job title: {text}
 def run():
     DB = psycopg2.connect(os.environ["DATABASE_URL"])
     with DB.cursor() as cur:
-        cur.execute("SELECT id, title FROM postings WHERE job_category IS NULL")
+        cur.execute("SELECT id, title FROM postings WHERE job_category IS NULL ORDER BY id")
 
         rows = cur.fetchall()
         print(f"Processing {len(rows)} postings...")
 
         for row_id, title in rows:
+            time.sleep(0.5)
             print(f"id: {row_id}")
             if re.search(r"software engineer", title, re.IGNORECASE):
                 category = "software engineer"
@@ -66,9 +69,13 @@ def run():
             elif re.search(r"data scientist", title, re.IGNORECASE):
                 category = "data scientist"
                 
+            elif re.search(r"data analyst", title, re.IGNORECASE):
+                category = "data analyst" 
+                
             else:
                 category = get_gemini(title)
 
+            print(category)
             cur.execute(
                 "UPDATE postings SET job_category = %s WHERE id = %s",
                 (category, row_id)

@@ -52,13 +52,6 @@ def get_skills():
         ORDER BY count DESC;
     """)
     
-    category = query("""
-        SELECT unnest(skills) as skill, job_category, COUNT(*) AS count
-        FROM postings
-        GROUP BY skill, job_category
-        ORDER BY count DESC;                  
-    """)
-    
     rows = all_rows[:20]
 
     total = 0
@@ -73,15 +66,62 @@ def get_skills():
         concentration_percent = top_three / total * 100
     else:
         concentration_percent = 0
-        
-    answer = {}
-    for skill, count in rows:
-        answer[skill] = {"skill": skill, "count": count}
-        
-    for skill, job_category, count in category:
-        answer[skill][job_category] = count
 
-    return {"skills": list(answer.values()), "concentration": concentration_percent}
+    answer = []
+    for i in rows:
+        item = {"skill": i[0], "count": i[1]}
+        answer.append(item)
+
+    return {"skills": answer, "concentration": concentration_percent}
+
+
+# @router.get("/skills")
+# def get_skills():
+#     concentration = query("""
+#         SELECT unnest(skills) AS skill, COUNT(*) AS count
+#         FROM postings
+#         GROUP BY skill
+#         ORDER BY count DESC
+#         LIMIT 3;
+#     """)
+    
+#     all_rows = query("""
+#         SELECT unnest(skills) AS skill, COUNT(*) AS count
+#         FROM postings
+#         GROUP BY skill
+#         ORDER BY count DESC;
+#     """)
+    
+#     category = query("""
+#         SELECT unnest(skills) as skill, job_category, COUNT(*) AS count
+#         FROM postings
+#         GROUP BY skill, job_category
+#         ORDER BY count DESC;                  
+#     """)
+    
+#     rows = all_rows[:20]
+
+#     total = 0
+#     for i in rows:
+#         total += i[1]
+    
+#     top_three = 0
+#     for i in range(min(3, len(rows))):
+#         top_three += concentration[i][1]
+    
+#     if total > 0:
+#         concentration_percent = top_three / total * 100
+#     else:
+#         concentration_percent = 0
+        
+#     answer = {}
+#     for skill, count in rows:
+#         answer[skill] = {"skill": skill, "count": count}
+        
+#     for skill, job_category, count in category:
+#         answer[skill][job_category] = count
+
+#     return {"skills": list(answer.values()), "concentration": concentration_percent}
 
 @router.get("/postings")
 def get_postings():

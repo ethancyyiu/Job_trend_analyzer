@@ -147,5 +147,5 @@ if __name__ == "__main__":
     scrape("machine learning engineer", "remote", 2, 10)
     scrape("machine learning engineer", "canada", 1, 12)
     
-    scrape("data analyst", "canada", 13)
+    scrape("data analyst", "canada", 1, 13)
     run()

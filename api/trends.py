@@ -13,12 +13,34 @@ def get_trends():
         GROUP BY date_posted
         ORDER BY date_posted""")
     
-    answer = []
-    for i in rows:
-        item = {"date": str(i[0]), "count": i[1]}
-        answer.append(item)
+    each_category = query("""
+        SELECT date_posted, job_category, COUNT(*) as count 
+        FROM postings
+        WHERE date_posted IS NOT NULL
+        AND date_posted >= NOW() - INTERVAL '60 days'
+        GROUP BY date_posted, job_category
+        ORDER BY date_posted""")
     
-    return answer
+    answer = {}
+    for date, count in rows:
+        answer[date] = {"date": date, "count": count}
+        
+    for date, category, count in each_category:
+        answer[date][category] = count
+        
+    return list(answer.values())
+    
+    # total = []
+    # for i in rows:
+    #     item = {"date": str(i[0]), "count": i[1]}
+    #     total.append(item)
+        
+    # each = []
+    # for i in each_category:
+    #     item = {"date": str(i[0]), "category": str(i[1]), "count": i[2]}
+    #     each.append(item)
+    
+    
 
 @router.get("/skills")
 def get_skills():
@@ -37,6 +59,13 @@ def get_skills():
         ORDER BY count DESC;
     """)
     
+    category = query("""
+        SELECT unnest(skills) as skill, job_category, COUNT(*) AS count
+        FROM postings
+        GROUP BY skill, job_category
+        ORDER BY count DESC;                  
+    """)
+    
     rows = all_rows[:20]
 
     total = 0
@@ -52,10 +81,13 @@ def get_skills():
     else:
         concentration_percent = 0
 
-    answer = []
+    answer = {}
     for i in rows:
         item = {"skill": i[0], "count": i[1]}
         answer.append(item)
+        
+    for skill, job_category, count in category:
+        answer[skill][job_category] = count
 
     return {"skills": answer, "concentration": concentration_percent}
 

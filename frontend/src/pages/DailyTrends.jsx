@@ -1,7 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
-import { TimeToggle } from "../components/TimeToggle";
 
-export function DailyTrends({ cachedData, period, setPeriod }) {
+export function DailyTrends({ cachedData }) {
     let data;
     if (Array.isArray(cachedData)) {
         data = cachedData;
@@ -92,6 +91,12 @@ export function DailyTrends({ cachedData, period, setPeriod }) {
                             <XAxis dataKey="date" />
                             <YAxis />
                             <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="software engineer" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="data engineer" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="machine learning engineer" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="data scientist" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="data analyst" stroke="#C86541" strokeWidth={2} />
+                            <Line type="monotone" dataKey="others" stroke="#C86541" strokeWidth={2} />
                             {markerDate ? (
                               <ReferenceLine x={markerDate} stroke="var(--accent-mid)" strokeDasharray="4 4" label={{ value: 'Latest', position: 'insideTopRight', fill: '#bf7a67', fontSize: 12 }} />
                             ) : null}

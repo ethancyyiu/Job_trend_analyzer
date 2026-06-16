@@ -21,26 +21,19 @@ def get_trends():
         GROUP BY date_posted, job_category
         ORDER BY date_posted""")
     
+    all_categories = ["software engineer", "data engineer", "machine learning engineer", 
+                      "data scientist", "data analyst", "others"]
+    
     answer = {}
     for date, count in rows:
         answer[date] = {"date": date, "count": count}
+        for cat in all_categories:
+            answer[date][cat] = 0
         
     for date, category, count in each_category:
         answer[date][category] = count
         
     return list(answer.values())
-    
-    # total = []
-    # for i in rows:
-    #     item = {"date": str(i[0]), "count": i[1]}
-    #     total.append(item)
-        
-    # each = []
-    # for i in each_category:
-    #     item = {"date": str(i[0]), "category": str(i[1]), "count": i[2]}
-    #     each.append(item)
-    
-    
 
 @router.get("/skills")
 def get_skills():
@@ -80,16 +73,15 @@ def get_skills():
         concentration_percent = top_three / total * 100
     else:
         concentration_percent = 0
-
+        
     answer = {}
-    for i in rows:
-        item = {"skill": i[0], "count": i[1]}
-        answer.append(item)
+    for skill, count in rows:
+        answer[skill] = {"skill": skill, "count": count}
         
     for skill, job_category, count in category:
         answer[skill][job_category] = count
 
-    return {"skills": answer, "concentration": concentration_percent}
+    return {"skills": list(answer.values()), "concentration": concentration_percent}
 
 @router.get("/postings")
 def get_postings():

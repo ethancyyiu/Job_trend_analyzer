@@ -46,7 +46,7 @@ Job title: {text}
     return answer
     
 
-def run():
+def category_extractor():
     DB = psycopg2.connect(os.environ["DATABASE_URL"])
     with DB.cursor() as cur:
         cur.execute("SELECT id, title FROM postings WHERE job_category IS NULL ORDER BY id")
@@ -85,4 +85,4 @@ def run():
         print("all done!")
         
 if __name__ == "__main__":
-    run()
+    category_extractor()

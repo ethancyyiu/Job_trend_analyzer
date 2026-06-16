@@ -10,6 +10,7 @@ import re
 import logging
 from analysis.salary_extractor import extract_salary
 from analysis.skill_extractor import extract_skills, run
+from analysis.category_extractor import category_extractor 
 
 load_dotenv()
 log = logging.getLogger(__name__)
@@ -149,3 +150,4 @@ if __name__ == "__main__":
     
     scrape("data analyst", "canada", 1, 13)
     run()
+    category_extractor()

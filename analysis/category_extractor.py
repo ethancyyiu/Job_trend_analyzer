@@ -55,7 +55,6 @@ def category_extractor():
         print(f"Processing {len(rows)} postings...")
 
         for row_id, title in rows:
-            time.sleep(3)
             print(f"id: {row_id}")
             if re.search(r"software engineer", title, re.IGNORECASE):
                 category = "software engineer"
@@ -73,6 +72,7 @@ def category_extractor():
                 category = "data analyst" 
                 
             else:
+                time.sleep(2)
                 category = get_gemini(title)
 
             print(category)

@@ -37,7 +37,7 @@ def save(db, posting):
 def scrape(keyword, location, pages, batch_number):
     db = get_db()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
@@ -62,7 +62,7 @@ def scrape(keyword, location, pages, batch_number):
             for card in cards:
                 try:
                     card.click()
-                    page.wait_for_timeout(random.randint(3500, 4000))
+                    page.wait_for_timeout(3000)
                     # input("enter")
                     
                     print("escaping from login")

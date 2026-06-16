@@ -72,7 +72,7 @@ def category_extractor():
                 category = "data analyst" 
                 
             else:
-                time.sleep(2)
+                time.sleep(3)
                 category = get_gemini(title)
 
             print(category)

@@ -93,26 +93,31 @@ export function DailyTrends({ cachedData }) {
             <div className="chart-card">
                 <div className="chart-card-header">
                     <h3>Activity Trend by Date</h3>
-                    {/* <p>Track how job posting volume shifts over time so hiring teams can react to momentum sooner.</p> */}
                 </div>
-                {/* <div className="toggle-row">
-                    <button onClick={() => setPeriod("7d")}>7 days</button>
-                    <button onClick={() => setPeriod("30d")}>30 days</button>
-                    <button onClick={() => setPeriod("90d")}>90 days</button>
-                    <button onClick={() => setPeriod("all")}>All time</button>
-                </div> */}
                 <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data}>
                             <XAxis dataKey="date" />
                             <YAxis />
                             <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} />
-                            <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} />
-                            <Line type="monotone" dataKey="data engineer" stroke="#FFD700" strokeWidth={2} />
-                            <Line type="monotone" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} />
-                            <Line type="monotone" dataKey="data scientist" stroke="#0000FF" strokeWidth={2} />
-                            <Line type="monotone" dataKey="data analyst" stroke="#800080" strokeWidth={2} />
-                            <Line type="monotone" dataKey="others" stroke="#000000" strokeWidth={2} />
+                            {activeCategories.includes("software engineer") && (
+                                <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} />
+                            )}
+                            {activeCategories.includes("data engineer") && (
+                                <Line type="monotone" dataKey="data engineer" stroke="#ff4500" strokeWidth={2} />
+                            )}
+                            {activeCategories.includes("machine learning engineer") && (
+                                <Line type="monotone" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} />
+                            )}
+                            {activeCategories.includes("data scientist") && (
+                                <Line type="monotone" dataKey="data scientist" stroke="#0000FF" strokeWidth={2} />
+                            )}
+                            {activeCategories.includes("data analyst") && (
+                                <Line type="monotone" dataKey="data analyst" stroke="#800080" strokeWidth={2} />
+                            )}
+                            {activeCategories.includes("others") && (
+                                <Line type="monotone" dataKey="others" stroke="#000000" strokeWidth={2} />
+                            )}
                             {markerDate ? (
                               <ReferenceLine x={markerDate} stroke="var(--accent-mid)" strokeDasharray="4 4" label={{ value: 'Latest', position: 'insideTopRight', fill: '#bf7a67', fontSize: 12 }} />
                             ) : null}

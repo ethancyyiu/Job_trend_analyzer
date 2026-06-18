@@ -62,7 +62,7 @@ def scrape(keyword, location, pages, batch_number):
             for card in cards:
                 try:
                     card.click()
-                    page.wait_for_timeout(3000)
+                    page.wait_for_timeout(3500)
                     # input("enter")
                     
                     print("escaping from login")
@@ -118,10 +118,6 @@ def scrape(keyword, location, pages, batch_number):
                         "salary_max":  salary_max,
                         "salary_type": salary_type,
                     })
-                    
-                    
-
-                    time.sleep(random.uniform(0.2, 0.5))
 
                 except Exception as e:
                     print(f"    Error on card: {e}")

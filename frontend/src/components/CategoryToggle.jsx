@@ -5,7 +5,7 @@ export function CategoryToggle({ activeCategories, setActiveCategories }) {
     { label: "ML Engineer", value: "machine learning engineer", color: "#008000" },
     { label: "Data Scientist", value: "data scientist", color: "#0000FF" },
     { label: "Data Analyst", value: "data analyst", color: "#800080" },
-    { label: "Others", value: "others", color: "#000000" },
+    { label: "Other Categories", value: "others", color: "#000000" },
   ];
 
   const toggleCategory = (value) => {
@@ -42,11 +42,6 @@ export function CategoryToggle({ activeCategories, setActiveCategories }) {
             <span className="label-text">{category.label}</span>
           </label>
         ))}
-        <label className="checkbox-label select-all-wrapper">
-            <button className="select-all-btn" onClick={handleSelectAll}>
-                {activeCategories.length === categories.length ? "Clear All" : "Select All"}
-            </button>
-        </label>
       </div>
     </div>
   );

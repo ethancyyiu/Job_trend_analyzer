@@ -490,12 +490,11 @@
 
 /* Category Toggle Styles */
 .category-toggle {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: None;
   padding: 6px;
   margin-bottom: 10px;
   width: 100%;
+  align-items: center;
 }
 
 .toggle-header {
@@ -537,9 +536,10 @@
 
 .checkbox-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 5fr));
-  gap: 10px;
-  align-items: center;
+  grid-template-columns: repeat(6, 1fr); 
+  gap: 57px;
+  align-items: center; 
+  justify-items: center;
 }
 
 
@@ -556,7 +556,7 @@
 }
 
 .checkbox-label:hover {
-  background: hsla(36, 15%, 75%, 0.08);
+  background: hsla(36, 15%, 75%, 0.3);
 }
 
 .checkbox-input {
@@ -603,5 +603,5 @@
   }
 }
 .select-all-wrapper {
-  justify-content: center;
+  justify-content: flex-end;
 }

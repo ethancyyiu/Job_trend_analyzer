@@ -104,7 +104,7 @@ export function DailyTrends({ cachedData }) {
                                 <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} />
                             )}
                             {activeCategories.includes("data engineer") && (
-                                <Line type="monotone" dataKey="data engineer" stroke="#ff4500" strokeWidth={2} />
+                                <Line type="monotone" dataKey="data engineer" stroke="#ffd700" strokeWidth={2} />
                             )}
                             {activeCategories.includes("machine learning engineer") && (
                                 <Line type="monotone" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} />

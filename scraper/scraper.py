@@ -145,9 +145,10 @@ if __name__ == "__main__":
     scrape("data engineer", "remote", 2, 7)
     scrape("data engineer", "canada", 1, 9)
 
-    scrape("machine learning engineer", "remote", 2, 10)
+    scrape("machine learning engineer", "remote", 1, 10)
     scrape("machine learning engineer", "canada", 1, 12)
     
-    scrape("data analyst", "canada", 1, 13)
+    scrape("data analyst", "remote", 1, 13)
+    scrape("data analyst", "canada", 1, 14)
     run()
     category_extractor()

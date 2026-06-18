@@ -91,7 +91,7 @@ export function Salary({ cachedData }) {
     <div className="card">
       <div className="page-header">
         <h2>Salary Overview</h2>
-        <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p>
+        {/* <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p> */}
       </div>
 
       <div className="page-panel-row">

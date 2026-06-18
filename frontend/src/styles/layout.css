@@ -488,3 +488,120 @@
   .sidebar-overlay { display: none; }
 }
 
+/* Category Toggle Styles */
+.category-toggle {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 6px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.toggle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toggle-header h4 {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.select-all-btn {
+  width: auto;  
+  justify-self: end; 
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.select-all-btn:hover {
+  background: hsla(16, 55%, 52%, 0.1);
+  color: var(--accent-dark);
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 5fr));
+  gap: 10px;
+  align-items: center;
+}
+
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  width: 100%;    
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.checkbox-label:hover {
+  background: hsla(36, 15%, 75%, 0.08);
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.label-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.checkbox-label:hover .label-text {
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .toggle-header {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .select-all-btn {
+    align-self: flex-end;
+  }
+}
+.select-all-wrapper {
+  justify-content: center;
+}

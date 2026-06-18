@@ -1,6 +1,17 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, ResponsiveContainer } from "recharts"
+import { useState } from "react"
+import { CategoryToggle } from "../components/CategoryToggle"
 
 export function DailyTrends({ cachedData }) {
+    const [activeCategories, setActiveCategories] = useState([
+        "software engineer",
+        "data engineer",
+        "machine learning engineer",
+        "data scientist",
+        "data analyst",
+        "others"
+    ]);
+
     let data;
     if (Array.isArray(cachedData)) {
         data = cachedData;
@@ -48,7 +59,7 @@ export function DailyTrends({ cachedData }) {
         <div className="card">
             <div className="page-header">
                 <h2>Daily Trends</h2>
-                <p>Explore posting trends over time to identify hiring momentum and market shifts.</p>
+                {/* <p>Explore posting trends over time to identify hiring momentum and market shifts.</p> */}
             </div>
 
             <div className="page-panel-row">
@@ -74,6 +85,11 @@ export function DailyTrends({ cachedData }) {
                 </div>
             </div>
 
+            <CategoryToggle 
+                activeCategories={activeCategories}
+                setActiveCategories={setActiveCategories}
+            />
+
             <div className="chart-card">
                 <div className="chart-card-header">
                     <h3>Activity Trend by Date</h3>
@@ -92,7 +108,7 @@ export function DailyTrends({ cachedData }) {
                             <YAxis />
                             <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} />
                             <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} />
-                            <Line type="monotone" dataKey="data engineer" stroke="#ff4500" strokeWidth={2} />
+                            <Line type="monotone" dataKey="data engineer" stroke="#FFD700" strokeWidth={2} />
                             <Line type="monotone" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} />
                             <Line type="monotone" dataKey="data scientist" stroke="#0000FF" strokeWidth={2} />
                             <Line type="monotone" dataKey="data analyst" stroke="#800080" strokeWidth={2} />

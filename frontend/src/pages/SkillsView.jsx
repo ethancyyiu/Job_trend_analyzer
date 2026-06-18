@@ -19,7 +19,7 @@ export function SkillsView({ cachedData }) {
         <div className="card">
             <div className="page-header">
                 <h2>Skills</h2>
-                <p>Track the most requested skills to guide hiring, training, and career planning.</p>
+                {/* <p>Track the most requested skills to guide hiring, training, and career planning.</p> */}
             </div>
 
             <div className="page-panel-row">
@@ -42,8 +42,8 @@ export function SkillsView({ cachedData }) {
 
             <div className="chart-card">
                 <div className="chart-card-header">
-                    <h3>Skill demand by volume</h3>
-                    <p>Compare the most sought-after skills in a clean bar chart designed for quick interpretation.</p>
+                    <h3>Skills demand by volume</h3>
+                    {/* <p>Compare the most sought-after skills in a clean bar chart designed for quick interpretation.</p> */}
                 </div>
                 <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">

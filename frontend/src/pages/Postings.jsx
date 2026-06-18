@@ -16,7 +16,7 @@ export function Postings({ cachedData }) {
         <div className="card">
             <div className="page-header">
                 <h2>Postings</h2>
-                <p>Browse recently indexed job postings to understand employer demand and opportunities.</p>
+                {/* <p>Browse recently indexed job postings to understand employer demand and opportunities.</p> */}
             </div>
 
             <div className="page-panel-row">

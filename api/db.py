@@ -52,6 +52,15 @@ def query(sql, params=None):
                 except Exception:
                     pass
         raise
+
     finally:
         if conn is not None:
-            p.putconn(conn)
+            # Return the connection exactly once
+            try:
+                p.putconn(conn)
+            except Exception:
+                # If pool rejects it, close the connection
+                try:
+                    p.putconn(conn, close=True)
+                except Exception:
+                    pass

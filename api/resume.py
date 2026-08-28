@@ -61,4 +61,15 @@ async def resume_upload(file: UploadFile = File(...)):
                 }
                 for job in jobs
             ]
+            
+    missing_skills_result = query("""
+        SELECT unnest(skills) AS skill, COUNT(*) as count
+        FROM postings
+        WHERE skills IS NOT NULL AND skills != '{}'
+        GROUP BY skill
+        ORDER BY count DESC
+        LIMIT 15
+    """)
+    
+    
     

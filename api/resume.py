@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 import PyPDF2
 import os
 from api.db import query
-from analysis.skill_extractor import run
+from analysis.skill_extractor import extract_skills
 
 router = APIRouter()
 
@@ -28,3 +28,14 @@ async def resume_upload(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Could not extract text from PDF")
     
     resume_skills = extract_skills(resume_text)
+    
+    if not resume_skills:
+        raise HTTPException(status_code=400, detail="Could not extract skills")
+    
+    all_skills_result = query("""
+        SELECT DISTINCT unnest(skills) AS skill
+        FROM postings
+        WHERE skills IS NOT NULL AND skills != '{}'
+    """)
+    all_skills = [row[0] for row in all_skills_result]
+    

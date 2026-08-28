@@ -41,7 +41,7 @@ async def resume_upload(file: UploadFile = File(...)):
     all_skills = [row[0] for row in all_skills_result]
     
     
-    # top skills that they are qualified for 
+    # top jobs that each skill has to offer
     job_matches = {}
     for skill in resume_skills:
         skill_lower = skill.lower()
@@ -88,5 +88,18 @@ async def resume_upload(file: UploadFile = File(...)):
     for skill, count in all_market_skills.items():
         if skill not in resume_skills_lower:
             missing_skills[skill] = count
+            
+    matched_job_ids = query("""
+    SELECT id, title, company, salary_min, salary_max, skills
+    FROM postings
+    WHERE (
+        SELECT COUNT(*)
+        FROM unnest(skills) AS s
+        WHERE s = ANY(%s)
+    ) >= 2
+    ORDER BY salary_max DESC NULLS LAST
+    LIMIT 20
+""", (resume_skills,))
+
 
     

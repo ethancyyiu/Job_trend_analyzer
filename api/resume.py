@@ -39,3 +39,26 @@ async def resume_upload(file: UploadFile = File(...)):
     """)
     all_skills = [row[0] for row in all_skills_result]
     
+    job_matches = {}
+    for skill in resume_skills:
+        skill_lower = skill.lower()
+        
+        jobs = query("""
+            SELECT title, company, salary_min, salary_max
+            FROM postings
+            WHERE %s = ANY(skills)
+            ORDER BY salary_max DESC NULLS LAST
+            LIMIT 5
+        """, (skill_lower,))
+        
+        if jobs:
+            job_matches[skill] = [
+                {
+                    "title": job[0],
+                    "company": job[1],
+                    "salary_min": job[2],
+                    "salary_max": job[3]
+                }
+                for job in jobs
+            ]
+    

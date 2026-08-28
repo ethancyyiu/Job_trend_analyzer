@@ -88,18 +88,37 @@ async def resume_upload(file: UploadFile = File(...)):
     for skill, count in all_market_skills.items():
         if skill not in resume_skills_lower:
             missing_skills[skill] = count
-            
+    
+    # top jobs that the user qualifies for    
     matched_job_ids = query("""
-    SELECT id, title, company, salary_min, salary_max, skills
-    FROM postings
-    WHERE (
-        SELECT COUNT(*)
-        FROM unnest(skills) AS s
-        WHERE s = ANY(%s)
-    ) >= 2
-    ORDER BY salary_max DESC NULLS LAST
-    LIMIT 20
-""", (resume_skills,))
+        SELECT id, title, company, salary_min, salary_max, skills
+        FROM postings
+        WHERE (
+            SELECT COUNT(*)
+            FROM unnest(skills) AS s
+            WHERE s = ANY(%s)
+        ) >= 2
+        ORDER BY salary_max DESC NULLS LAST
+        LIMIT 20
+        """, (resume_skills,))
+    
+    matched_jobs = []
+    for job_id, title, company, sal_min, sal_max, job_skills in matched_job_ids:
+        
+        if job_skills:
+           job_skills = len(job_skills)
+        else:
+            job_skills = 0 
+        
+        overlap = len(set(job_skills) & set(resume_skills))
+        matched_jobs.append({
+            "title": title,
+            "company": company,
+            "salary_min": sal_min,
+            "salary_max": sal_max,
+            "matched_skills": overlap,
+            "total_skills": job_skills
+        })
 
 
     

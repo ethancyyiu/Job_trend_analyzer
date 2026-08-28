@@ -7,6 +7,7 @@ export default function Nav({page, setPage}){
     {key:'SkillsView', label:'Skills'},
     {key:'Postings', label:'Postings'},
     {key:'Salary', label:'Salary'},
+    {key:'ResumeAnalyzer', label:'Resume Analyzer'}, 
   ]
 
   return (

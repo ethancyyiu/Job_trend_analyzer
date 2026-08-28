@@ -7,6 +7,8 @@ import {Salary} from "./pages/Salary.jsx"
 import Layout from "./components/Layout.jsx"
 import axios from 'axios'
 import {Analytics} from "@vercel/analytics/react"
+import {ResumeAnalyzer} from "./pages/Resume.jsx"
+
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 

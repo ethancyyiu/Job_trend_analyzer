@@ -13,5 +13,7 @@ def extract_text_from_pdf(file_bytes):
         for page in pdf_reader.pages:
             text += page.extract_text()
         return text
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse PDF: {str(e)}")
+    except Exception as failure:    
+        raise HTTPException(status_code = 400, detail = f"Failed to parse PDF because of {str(failure)}")
+    
+@router.post

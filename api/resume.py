@@ -121,6 +121,12 @@ async def resume_upload(file: UploadFile = File(...)):
             "matched_skills": overlap,
             "total_skills": total_skills
         })
-
+        
+    return {
+        "resume_skills": resume_skills,
+        "matched_jobs": matched_jobs,
+        "top_missing_skills": dict(list(missing_skills.items())[:10]),
+        "skill_opportunities": job_matches
+    }
 
     

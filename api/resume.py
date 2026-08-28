@@ -32,6 +32,7 @@ async def resume_upload(file: UploadFile = File(...)):
     if not resume_skills:
         raise HTTPException(status_code=400, detail="Could not extract skills")
     
+    #all the skills in DB
     all_skills_result = query("""
         SELECT DISTINCT unnest(skills) AS skill
         FROM postings
@@ -39,6 +40,8 @@ async def resume_upload(file: UploadFile = File(...)):
     """)
     all_skills = [row[0] for row in all_skills_result]
     
+    
+    # top skills that they are qualified for 
     job_matches = {}
     for skill in resume_skills:
         skill_lower = skill.lower()
@@ -61,7 +64,9 @@ async def resume_upload(file: UploadFile = File(...)):
                 }
                 for job in jobs
             ]
-            
+    
+    
+    # top missing skills
     missing_skills_result = query("""
         SELECT unnest(skills) AS skill, COUNT(*) as count
         FROM postings
@@ -71,5 +76,17 @@ async def resume_upload(file: UploadFile = File(...)):
         LIMIT 15
     """)
     
-    
+    all_market_skills = {}
+    for row in missing_skills_result:
+        skill = row[0]
+        count = row[1]
+        all_market_skills[skill] = count
+
+    resume_skills_lower = [s.lower() for s in resume_skills]
+
+    missing_skills = {}
+    for skill, count in all_market_skills.items():
+        if skill not in resume_skills_lower:
+            missing_skills[skill] = count
+
     

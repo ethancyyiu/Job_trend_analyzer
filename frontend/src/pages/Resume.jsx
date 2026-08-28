@@ -31,7 +31,7 @@ export function ResumeAnalyzer() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await axios.post("/resume/upload", formData, {
+      const response = await axios.post("/resume_upload", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       })
 

@@ -1,12 +1,14 @@
 import React, { useState } from "react"
 import axios from "axios"
-import "../styles/resume.css"
+import "../pages/Resume.css"
 
 export function ResumeAnalyzer() {
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
+
+  const API_BASE = import.meta.env.VITE_API_URL || ''
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
@@ -31,9 +33,10 @@ export function ResumeAnalyzer() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await axios.post("/resume_upload", formData, {
+      const response = await axios.post(`${API_BASE}/resume_upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       })
+
 
       setResults(response.data)
     } catch (err) {

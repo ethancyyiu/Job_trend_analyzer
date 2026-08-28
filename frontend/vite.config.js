@@ -10,6 +10,7 @@ export default defineConfig({
       '/skills': 'http://localhost:8000',
       '/postings': 'http://localhost:8000',
       '/salary': 'http://localhost:8000',
+      '/resume_upload': 'http://localhost:8000',
     }
   }
 })

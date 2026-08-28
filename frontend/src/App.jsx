@@ -17,7 +17,7 @@ export default function App() {
   const [cache, setCache] = useState({})
 
   useEffect(() => {
-    const endpoints = ['/home', '/trends', '/skills', '/postings', '/salary', '/resume_upload']
+    const endpoints = ['/home', '/trends', '/skills', '/postings', '/salary']
     endpoints.forEach((endpoint) => {
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))

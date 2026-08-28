@@ -16,4 +16,15 @@ def extract_text_from_pdf(file_bytes):
     except Exception as failure:    
         raise HTTPException(status_code = 400, detail = f"Failed to parse PDF because of {str(failure)}")
     
-@router.post
+@router.post("/resume_upload")
+async def resume_upload(file: UploadFile = File(...)):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code = 400, detail = "Only PDF are allowed")
+    
+    file_got = await file.read()
+    resume_text = extract_text_from_pdf(file_got)
+        
+    if not resume_text.strip():
+        raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+    
+    resume_skills = extract_skills(resume_text)

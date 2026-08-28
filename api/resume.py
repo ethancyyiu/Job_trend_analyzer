@@ -3,18 +3,20 @@ import PyPDF2
 import os
 from api.db import query
 from analysis.skill_extractor import extract_skills
+from io import BytesIO
 
 router = APIRouter()
 
 def extract_text_from_pdf(file_bytes):
     try:
-        pdf_reader = PyPDF2.PdfReader(file_bytes)
+        pdf_reader = PyPDF2.PdfReader(BytesIO(file_bytes))
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
         return text
-    except Exception as failure:    
+    except Exception as failure:
         raise HTTPException(status_code = 400, detail = f"Failed to parse PDF because of {str(failure)}")
+
     
 @router.post("/resume_upload")
 async def resume_upload(file: UploadFile = File(...)):
@@ -25,12 +27,12 @@ async def resume_upload(file: UploadFile = File(...)):
     resume_text = extract_text_from_pdf(file_got)
         
     if not resume_text.strip():
-        raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+        raise HTTPException(status_code = 400, detail = "Could not extract text from PDF")
     
     resume_skills = extract_skills(resume_text)
     
     if not resume_skills:
-        raise HTTPException(status_code=400, detail="Could not extract skills")
+        raise HTTPException(status_code = 400, detail = "Could not extract skills")
     
     #all the skills in DB
     all_skills_result = query("""
@@ -106,9 +108,9 @@ async def resume_upload(file: UploadFile = File(...)):
     for job_id, title, company, sal_min, sal_max, job_skills in matched_job_ids:
         
         if job_skills:
-           job_skills = len(job_skills)
+           total_skills = len(job_skills)
         else:
-            job_skills = 0 
+            total_skills = 0 
         
         overlap = len(set(job_skills) & set(resume_skills))
         matched_jobs.append({
@@ -117,7 +119,7 @@ async def resume_upload(file: UploadFile = File(...)):
             "salary_min": sal_min,
             "salary_max": sal_max,
             "matched_skills": overlap,
-            "total_skills": job_skills
+            "total_skills": total_skills
         })
 
 

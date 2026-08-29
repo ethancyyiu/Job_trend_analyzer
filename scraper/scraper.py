@@ -46,7 +46,8 @@ def save(db, posting):
                 salary_min = EXCLUDED.salary_min,
                 salary_max = EXCLUDED.salary_max,
                 salary_type = EXCLUDED.salary_type,
-                date_scraped = EXCLUDED.date_scraped
+                date_scraped = EXCLUDED.date_scraped,
+                date_posted = EXCLUDED.date_posted
             RETURNING id;
         """, (
             posting['title'], posting['company'], posting['location'],
@@ -55,7 +56,6 @@ def save(db, posting):
             posting.get('salary_type')
         ))
 
-    db.commit()
     print(f"  saved: {posting['title']} @ {posting['company']}\n")
 
 def scrape(keyword, location, pages, batch_number):
@@ -95,7 +95,6 @@ def scrape(keyword, location, pages, batch_number):
                     title_el = page.query_selector("h2.top-card-layout__title")
                     company_el = page.query_selector(".topcard__org-name-link")
                     location_el = page.query_selector(".topcard__flavor--bullet")
-                    location_el = page.query_selector(".topcard__flavor--bullet")
 
                     title = title_el.inner_text().strip() if title_el else None
                     company = company_el.inner_text().strip() if company_el else None
@@ -104,7 +103,6 @@ def scrape(keyword, location, pages, batch_number):
                     
                     posted_el = page.query_selector(".jobs-unified-top-card__posted-date") \
                         or page.query_selector(".posted-time-ago__text")
-                    # page.query_selector("span:has-text('ago')") 
                     posted_text = posted_el.inner_text().strip() if posted_el else ""
                     match = re.search(r'(\d+\s+(?:hour|minute|day|week|month|year)s?\s+ago)', posted_text.lower())
                     date_posted = parse_date(match.group(1)) if match else None
@@ -149,6 +147,7 @@ def scrape(keyword, location, pages, batch_number):
             
             batch_number += 1
             time.sleep(random.uniform(2, 4))
+            db.commit()
 
         browser.close()
         db.close()
@@ -160,15 +159,15 @@ if __name__ == "__main__":
     scrape("data scientist", "canada", 1, 3)
 
     scrape("software engineer", "remote", 2, 4)
-    scrape("software engineer", "canada", 1, 6)
+    scrape("software engineer", "canada", 2, 6)
 
-    scrape("data engineer", "remote", 1, 7)
-    scrape("data engineer", "canada", 1, 8)
+    scrape("data engineer", "remote", 2, 8)
+    scrape("data engineer", "canada", 1, 10)
 
-    scrape("machine learning engineer", "remote", 1, 9)
-    scrape("machine learning engineer", "canada", 1, 10)
+    scrape("machine learning engineer", "remote", 1, 11)
+    scrape("machine learning engineer", "canada", 1, 12)
     
-    scrape("data analyst", "remote", 1, 11)
-    scrape("data analyst", "canada", 1, 12)
+    scrape("data analyst", "remote", 1, 13)
+    scrape("data analyst", "canada", 1, 14)
     run()
     category_extractor()

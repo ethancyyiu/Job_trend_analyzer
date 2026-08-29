@@ -77,7 +77,7 @@ export function ResumeAnalyzer() {
                 disabled={!file || loading}
                 className="upload-button"
             >
-            {loading ? "Analyzing..." : "Analyze Resume"}
+            {loading ? "Analyzing... (~5s)" : "Analyze Resume"}
             </button>
             </div>
         </div>

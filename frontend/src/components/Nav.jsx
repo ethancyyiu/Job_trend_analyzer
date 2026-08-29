@@ -3,11 +3,11 @@ import React from 'react'
 export default function Nav({page, setPage}){
   const items = [
     {key:'Home', label:'Home'},
+    {key:'ResumeAnalyzer', label:'Resume Analyzer'}, 
     {key:'DailyTrends', label:'Daily Trends'},
     {key:'SkillsView', label:'Skills'},
     {key:'Postings', label:'Postings'},
     {key:'Salary', label:'Salary'},
-    {key:'ResumeAnalyzer', label:'Resume Analyzer'}, 
   ]
 
   return (

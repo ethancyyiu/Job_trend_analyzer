@@ -54,35 +54,32 @@ export function ResumeAnalyzer() {
             <h2>Resume Skill Analyzer</h2>
             <p>Upload your resume to see skill gaps and job matches in the market.</p>
           </div>
+        <div className="upload-section">
+            <label htmlFor="file-input" className="upload-box upload-label">
+                <div className="upload-icon">📄</div>
+                <p>Drop your resume here or click to browse</p>
+                <span className="upload-hint">.pdf only</span>
+            </label>
 
-          <div className="upload-section">
-            <div className="upload-box">
-              <input
+            <input
                 type="file"
                 accept=".pdf"
                 onChange={handleFileChange}
                 id="file-input"
                 style={{ display: "none" }}
-              />
-              <label htmlFor="file-input" className="upload-label">
-                <div className="upload-icon">📄</div>
-                <p>Drop your resume here or click to browse</p>
-                <span className="upload-hint">.pdf only</span>
-              </label>
-            </div>
+            />
 
             {file && <p className="selected-file">✓ {file.name}</p>}
-
             {error && <p className="error-message">{error}</p>}
 
             <button
-              onClick={handleUpload}
-              disabled={!file || loading}
-              className="upload-button"
+                onClick={handleUpload}
+                disabled={!file || loading}
+                className="upload-button"
             >
-              {loading ? "Analyzing..." : "Analyze Resume"}
+            {loading ? "Analyzing..." : "Analyze Resume"}
             </button>
-          </div>
+            </div>
         </div>
       </div>
     )

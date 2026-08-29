@@ -1,10 +1,39 @@
+.resume-page {
+  opacity: 0;
+  transform: translateX(-18px);
+  animation: resume-page-enter 420ms ease-out forwards;
+}
+
 .resume-upload-container {
   max-width: 700px;
   margin: 0 auto;
 }
 
+.resume-card {
+  overflow: hidden;
+}
+
+.resume-page-header {
+  animation: resume-page-enter 420ms ease-out 80ms forwards;
+}
+
 .upload-section {
   margin-top: 32px;
+}
+
+.upload-box,
+.selected-file,
+.upload-button,
+.error-message,
+.resume-section,
+.skill-tag-yours,
+.job-card-result,
+.gap-item,
+.skill-opportunity,
+.reset-button {
+  opacity: 0;
+  transform: translateX(-18px);
+  animation: resume-slide-in 420ms ease-out forwards;
 }
 
 .upload-box {
@@ -15,6 +44,7 @@
   background: var(--accent-light);
   cursor: pointer;
   transition: all 0.2s;
+  animation-delay: 120ms;
 }
 
 .upload-box:hover {
@@ -22,6 +52,7 @@
   background: var(--accent-light);
 }
 
+.upload-box,
 .upload-label {
   cursor: pointer;
   display: block;
@@ -48,6 +79,7 @@
   margin-top: 16px;
   color: var(--accent);
   font-weight: 500;
+  animation-delay: 180ms;
 }
 
 .upload-button {
@@ -62,6 +94,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
+  animation-delay: 220ms;
 }
 
 .upload-button:hover:not(:disabled) {
@@ -77,6 +110,7 @@
   color: #dc2626;
   margin-top: 12px;
   font-size: 14px;
+  animation-delay: 200ms;
 }
 
 /* Results Section */
@@ -94,6 +128,7 @@
   font-size: 13px;
   font-weight: 500;
   float: right;
+  animation-delay: 100ms;
 }
 
 .section {
@@ -107,6 +142,10 @@
   font-weight: 600;
   margin-bottom: 16px;
   color: var(--text-primary);
+}
+
+.resume-section {
+  animation-delay: 120ms;
 }
 
 .skill-tags {
@@ -230,4 +269,26 @@
   margin: 6px 0;
   padding-left: 12px;
   border-left: 2px solid var(--accent);
+}
+
+@keyframes resume-page-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes resume-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

@@ -48,38 +48,40 @@ export function ResumeAnalyzer() {
 
   if (!results) {
     return (
-      <div className="resume-upload-container">
-        <div className="card">
-          <div className="page-header">
-            <h2>Resume Skill Analyzer</h2>
-            <p>Upload your resume to see skill gaps and job matches in the market.</p>
-          </div>
-        <div className="upload-section">
-            <label htmlFor="file-input" className="upload-box upload-label">
+      <div className="resume-page resume-upload-page">
+        <div className="resume-upload-container">
+          <div className="card resume-card">
+            <div className="page-header resume-page-header">
+              <h2>Resume Skill Analyzer</h2>
+              <p>Upload your resume to see skill gaps and job matches in the market.</p>
+            </div>
+            <div className="upload-section">
+              <label htmlFor="file-input" className="upload-box upload-label">
                 <div className="upload-icon">📄</div>
                 <p>Drop your resume here or click to browse</p>
                 <span className="upload-hint">.pdf only</span>
-            </label>
+              </label>
 
-            <input
+              <input
                 type="file"
                 accept=".pdf"
                 onChange={handleFileChange}
                 id="file-input"
                 style={{ display: "none" }}
-            />
+              />
 
-            {file && <p className="selected-file">✓ {file.name}</p>}
-            {error && <p className="error-message">{error}</p>}
+              {file && <p className="selected-file">✓ {file.name}</p>}
+              {error && <p className="error-message">{error}</p>}
 
-            <button
+              <button
                 onClick={handleUpload}
                 disabled={!file || loading}
                 className="upload-button"
-            >
-            {loading ? "Analyzing... (~5s)" : "Analyze Resume"}
-            </button>
+              >
+                {loading ? "Analyzing... (~5s)" : "Analyze Resume"}
+              </button>
             </div>
+          </div>
         </div>
       </div>
     )
@@ -93,85 +95,87 @@ function ResumeResults({ results, onReset }) {
   const { resume_skills, matched_jobs, top_missing_skills, skill_opportunities } = results
 
   return (
-    <div className="resume-results-container">
-      <div className="card">
-        <div className="page-header">
-          <h2>Your Skill Analysis</h2>
-          <button onClick={onReset} className="reset-button">
-            ← Upload New Resume
-          </button>
-        </div>
-
-        {/* Your Skills */}
-        <div className="section">
-          <h3>Your Skills ({resume_skills.length})</h3>
-          <div className="skill-tags">
-            {resume_skills.map((skill) => (
-              <span key={skill} className="skill-tag-yours">
-                {skill}
-              </span>
-            ))}
+    <div className="resume-page resume-results-page">
+      <div className="resume-results-container">
+        <div className="card resume-card">
+          <div className="page-header resume-page-header">
+            <h2>Your Skill Analysis</h2>
+            <button onClick={onReset} className="reset-button">
+              ← Upload New Resume
+            </button>
           </div>
-        </div>
 
-        {/* Matched Jobs */}
-        <div className="section">
-          <h3>Jobs You Can Apply For Now</h3>
-          <div className="job-cards">
-            {matched_jobs.slice(0, 10).map((job, idx) => (
-              <div key={idx} className="job-card-result">
-                <div className="job-header">
-                  <h4>{job.title}</h4>
-                  <span className="match-score">
-                    {job.matched_skills}/{job.total_skills} skills match
-                  </span>
-                </div>
-                <p className="company">{job.company}</p>
-                {job.salary_min && job.salary_max && (
-                  <p className="salary">
-                    ${Math.round(job.salary_min / 1000)}k – ${Math.round(job.salary_max / 1000)}k/yr
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top Missing Skills */}
-        <div className="section">
-          <h3>Top Skills to Learn (Most in-demand)</h3>
-          <div className="gap-skills">
-            {Object.entries(top_missing_skills)
-              .slice(0, 8)
-              .map(([skill, count]) => (
-                <div key={skill} className="gap-item">
-                  <span className="skill-name">{skill}</span>
-                  <span className="skill-count">{count} postings</span>
-                </div>
+          {/* Your Skills */}
+          <div className="section resume-section">
+            <h3>Your Skills ({resume_skills.length})</h3>
+            <div className="skill-tags">
+              {resume_skills.map((skill, idx) => (
+                <span key={skill} className="skill-tag-yours" style={{ animationDelay: `${idx * 70}ms` }}>
+                  {skill}
+                </span>
               ))}
+            </div>
           </div>
-        </div>
 
-        {/* Skill Opportunities */}
-        {Object.keys(skill_opportunities).length > 0 && (
-          <div className="section">
-            <h3>Jobs for Each of Your Skills</h3>
-            {Object.entries(skill_opportunities)
-              .slice(0, 5)
-              .map(([skill, jobs]) => (
-                <div key={skill} className="skill-opportunity">
-                  <h4>{skill}</h4>
-                  <div className="opportunity-jobs">
-                    {jobs.slice(0, 3).map((job, idx) => (
-                      <p key={idx}>
-                        {job.title} @ {job.company}
-                      </p>
-                    ))}
+          {/* Matched Jobs */}
+          <div className="section resume-section">
+            <h3>Jobs You Can Apply For Now</h3>
+            <div className="job-cards">
+              {matched_jobs.slice(0, 10).map((job, idx) => (
+                <div key={idx} className="job-card-result" style={{ animationDelay: `${idx * 80}ms` }}>
+                  <div className="job-header">
+                    <h4>{job.title}</h4>
+                    <span className="match-score">
+                      {job.matched_skills}/{job.total_skills} skills match
+                    </span>
                   </div>
+                  <p className="company">{job.company}</p>
+                  {job.salary_min && job.salary_max && (
+                    <p className="salary">
+                      ${Math.round(job.salary_min / 1000)}k – ${Math.round(job.salary_max / 1000)}k/yr
+                    </p>
+                  )}
                 </div>
               ))}
+            </div>
           </div>
-        )}
+
+          {/* Top Missing Skills */}
+          <div className="section resume-section">
+            <h3>Top Skills to Learn (Most in-demand)</h3>
+            <div className="gap-skills">
+              {Object.entries(top_missing_skills)
+                .slice(0, 8)
+                .map(([skill, count], idx) => (
+                  <div key={skill} className="gap-item" style={{ animationDelay: `${idx * 60}ms` }}>
+                    <span className="skill-name">{skill}</span>
+                    <span className="skill-count">{count} postings</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Skill Opportunities */}
+          {Object.keys(skill_opportunities).length > 0 && (
+            <div className="section resume-section">
+              <h3>Jobs for Each of Your Skills</h3>
+              {Object.entries(skill_opportunities)
+                .slice(0, 5)
+                .map(([skill, jobs], idx) => (
+                  <div key={skill} className="skill-opportunity" style={{ animationDelay: `${idx * 80}ms` }}>
+                    <h4>{skill}</h4>
+                    <div className="opportunity-jobs">
+                      {jobs.slice(0, 3).map((job, jobIdx) => (
+                        <p key={jobIdx}>
+                          {job.title} @ {job.company}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -75,7 +75,7 @@ async def resume_upload(file: UploadFile = File(...)):
         WHERE skills IS NOT NULL AND skills != '{}'
         GROUP BY skill
         ORDER BY count DESC
-        LIMIT 15
+        LIMIT 30
     """)
     
     all_market_skills = {}
@@ -99,7 +99,7 @@ async def resume_upload(file: UploadFile = File(...)):
             SELECT COUNT(*)
             FROM unnest(skills) AS s
             WHERE s = ANY(%s)
-        ) >= 2
+        ) >= 3
         ORDER BY salary_max DESC NULLS LAST
         LIMIT 20
         """, (resume_skills,))
@@ -125,7 +125,7 @@ async def resume_upload(file: UploadFile = File(...)):
     return {
         "resume_skills": resume_skills,
         "matched_jobs": matched_jobs,
-        "top_missing_skills": dict(list(missing_skills.items())[:10]),
+        "top_missing_skills": dict(list(missing_skills.items())[:12]),
         "skill_opportunities": job_matches
     }
 

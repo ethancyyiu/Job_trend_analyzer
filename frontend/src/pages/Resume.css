@@ -4,9 +4,21 @@
   animation: resume-page-enter 420ms ease-out forwards;
 }
 
+.resume-page {
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .resume-upload-container {
-  max-width: 700px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .resume-card {
@@ -116,20 +128,33 @@
 
 /* Results Section */
 .resume-results-container {
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* make header a positioned container so the reset button can be absolute */
+.page-header {
+  position: relative;
 }
 
 .reset-button {
   padding: 8px 14px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
-  font-weight: 500;
-  float: right;
+  font-weight: 600;
+  position: absolute;
+  right: 16px;
+  top: 12px;
   animation-delay: 100ms;
+  color: var(--text-secondary);
 }
 
 .section {
@@ -143,6 +168,14 @@
   font-weight: 600;
   margin-bottom: 16px;
   color: var(--text-primary);
+}
+
+/* Center only the 'Your Skills' header */
+.section-title-center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
 }
 
 .resume-section {
@@ -292,4 +325,41 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* Three equal boxes row (side boxes bleed to viewport edges) */
+.three-boxes-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  width: calc(100% + 32px);
+  margin-left: -16px;
+  padding: 16px 0;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+
+.three-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.three-box h4 {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.three-box p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
 }

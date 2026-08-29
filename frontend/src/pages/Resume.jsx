@@ -82,6 +82,20 @@ export function ResumeAnalyzer() {
               </button>
             </div>
           </div>
+          <div className="three-boxes-row">
+            <div className="three-box left-box">
+              <h4>Overview</h4>
+              <p>Summary or quick stats go here.</p>
+            </div>
+            <div className="three-box center-box">
+              <h4>Recommendations</h4>
+              <p>Suggested learning or next steps.</p>
+            </div>
+            <div className="three-box right-box">
+              <h4>Opportunities</h4>
+              <p>Jobs or roles to consider.</p>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -107,7 +121,7 @@ function ResumeResults({ results, onReset }) {
 
           {/* Your Skills */}
           <div className="section resume-section">
-            <h3>Your Skills ({resume_skills.length})</h3>
+            <h3 className="section-title-center">Your Skills ({resume_skills.length})</h3>
             <div className="skill-tags">
               {resume_skills.map((skill, idx) => (
                 <span key={skill} className="skill-tag-yours" style={{ animationDelay: `${idx * 70}ms` }}>
@@ -121,7 +135,7 @@ function ResumeResults({ results, onReset }) {
           <div className="section resume-section">
             <h3>Jobs You Can Apply For Now</h3>
             <div className="job-cards">
-              {matched_jobs.slice(0, 10).map((job, idx) => (
+              {matched_jobs.slice(0, 12).map((job, idx) => (
                 <div key={idx} className="job-card-result" style={{ animationDelay: `${idx * 80}ms` }}>
                   <div className="job-header">
                     <h4>{job.title}</h4>
@@ -145,7 +159,7 @@ function ResumeResults({ results, onReset }) {
             <h3>Top Skills to Learn (Most in-demand)</h3>
             <div className="gap-skills">
               {Object.entries(top_missing_skills)
-                .slice(0, 8)
+                .slice(0, 12)
                 .map(([skill, count], idx) => (
                   <div key={skill} className="gap-item" style={{ animationDelay: `${idx * 60}ms` }}>
                     <span className="skill-name">{skill}</span>

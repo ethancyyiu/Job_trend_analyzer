@@ -23,7 +23,6 @@
 
 .upload-box,
 .selected-file,
-.upload-button,
 .error-message,
 .resume-section,
 .skill-tag-yours,
@@ -94,7 +93,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
-  animation-delay: 220ms;
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
 
 .upload-button:hover:not(:disabled) {

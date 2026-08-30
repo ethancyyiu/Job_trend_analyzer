@@ -53,7 +53,7 @@ export function ResumeAnalyzer() {
           <div className="card resume-card">
             <div className="page-header resume-page-header">
               <h2>Resume Skill Analyzer</h2>
-              <p>Upload your resume to see skill gaps and job matches in the market.</p>
+              {/* <p>Upload your resume to see skill gaps and job matches in the market.</p> */}
             </div>
             <div className="upload-section">
               <label htmlFor="file-input" className="upload-box upload-label">

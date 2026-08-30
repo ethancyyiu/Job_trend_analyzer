@@ -86,10 +86,10 @@ export function ResumeAnalyzer() {
             <div className="three-box left-box">
               <div className="box-topline">
 
-                <span className="box-badge">Insights</span>
+                <span className="box-badge">Missing</span>
               </div>
               <h4>Top Missing Skills</h4>
-              <p>Unlock your next upgrade. Find the most in‑demand skills you don’t have yet.</p>
+              <p>See the most valuable skills you don’t have yet</p>
               <div className="box-microstats">
                 <span>Skill gaps</span>
                 <span className="box-icon">📉</span>
@@ -100,9 +100,9 @@ export function ResumeAnalyzer() {
                 <span className="box-badge accent">Matches</span>
               </div>
               <h4>Matched Jobs</h4>
-              <p>Discover your best-fit roles. See the jobs where you already match 3+ required skills, ranked by salary.</p>
+              <p>Your top job matches, sorted by salary</p>
               <div className="box-microstats">
-                <span>High-fit roles</span>
+                <span>Fitting roles</span>
                 <span className="box-icon">🎯</span>
               </div>
             </div>
@@ -111,9 +111,9 @@ export function ResumeAnalyzer() {
                 <span className="box-badge neutral">Signals</span>
               </div>
               <h4>Job Matches Per Skill</h4>
-              <p>See where your skills shine. We pull the top‑paying jobs for every skill in your resume.</p>
+              <p>View best paying jobs matched to each of your skill</p>
               <div className="box-microstats">
-                <span>Top signals</span>
+                <span>Top Skills</span>
                <span className="box-icon">📊</span>
               </div>
             </div>

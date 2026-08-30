@@ -15,7 +15,7 @@ SKILLS = [
 
     "aws", "gcp", "azure", "docker", "kubernetes", "terraform",
 
-    "git", "github", "linux", "rest api", "graphql", "kafka", "fastapi", "fast api", "restapi", "nosql",
+    "git", "linux", "rest api", "graphql", "kafka", "fastapi", "fast api", "restapi", "nosql",
     
     "r", "tableau", "excel", "machine learning", "ci/cd", "cicd", "jenkins", "github actions",
     

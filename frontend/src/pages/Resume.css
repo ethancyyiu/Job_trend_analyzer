@@ -1,13 +1,10 @@
 .resume-page {
-  opacity: 0;
-  transform: translateX(-18px);
-  animation: resume-page-enter 420ms ease-out forwards;
-}
-
-.resume-page {
   min-height: 90vh;
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  transform: translateX(-18px);
+  animation: resume-page-enter 420ms ease-out forwards;
 }
 
 .resume-upload-container {
@@ -26,7 +23,9 @@
 }
 
 .resume-page-header {
-  animation: resume-page-enter 420ms ease-out 80ms forwards;
+  opacity: 0;
+  transform: translateX(-18px);
+  animation: resume-slide-in 420ms ease-out 80ms forwards;
 }
 
 .upload-section {
@@ -41,7 +40,8 @@
 .job-card-result,
 .gap-item,
 .skill-opportunity,
-.reset-button {
+.reset-button,
+.three-box {
   opacity: 0;
   transform: translateX(-18px);
   animation: resume-slide-in 420ms ease-out forwards;

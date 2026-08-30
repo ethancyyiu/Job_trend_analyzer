@@ -45,27 +45,36 @@ async def resume_upload(file: UploadFile = File(...)):
     
     # top jobs that each skill has to offer
     job_matches = {}
-    for skill in resume_skills:
-        skill_lower = skill.lower()
-        
-        jobs = query("""
-            SELECT title, company, salary_min, salary_max
+
+    if resume_skills:
+        resume_lower = {s.lower() for s in resume_skills}
+
+        jobs_rows = query("""
+            SELECT title, company, salary_min, salary_max, unnest(skills) AS skill
             FROM postings
-            WHERE %s = ANY(skills)
+            WHERE skills IS NOT NULL AND skills != '{}' AND skills && %s
             ORDER BY salary_max DESC NULLS LAST
-            LIMIT 5
-        """, (skill_lower,))
-        
-        if jobs:
-            job_matches[skill] = [
-                {
-                    "title": job[0],
-                    "company": job[1],
-                    "salary_min": job[2],
-                    "salary_max": job[3]
-                }
-                for job in jobs
-            ]
+            LIMIT 500
+        """, (resume_skills,))
+
+        for title, company, sal_min, sal_max, skill in jobs_rows:
+            # if skill is not in resume, leave it
+            if skill not in resume_lower:
+                continue
+            
+            # if skill is not yet in the dictionary as a key, we gotta add it
+            if skill not in job_matches:
+                job_matches[skill] = []
+
+            if len(job_matches[skill]) < 5:
+                job_matches[skill].append({
+                    "title": title,
+                    "company": company,
+                    "salary_min": sal_min,
+                    "salary_max": sal_max
+                })
+
+
     
     
     # top missing skills

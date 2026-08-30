@@ -119,6 +119,8 @@ function ResumeResults({ results, onReset }) {
             </button>
           </div>
 
+          
+
           {/* Your Skills */}
           <div className="section resume-section">
             <h3 className="section-title-center">Your Skills ({resume_skills.length})</h3>

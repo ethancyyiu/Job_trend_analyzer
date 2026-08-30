@@ -8,7 +8,7 @@ load_dotenv()
 SKILLS = [
     "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "ruby", "scala", "c", "html", "css",
 
-    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nest.js", "power bi", "nextjs", "tailwind"
+    "react", "vue", "angular", "node.js", "fastapi", "django", "flask", "nest.js", "power bi", "nextjs", "tailwind",
 
     "sql", "postgresql", "mysql", "mongodb", "redis",
     "pandas", "numpy", "scikit-learn", "tensorflow", "pytorch",
@@ -17,18 +17,25 @@ SKILLS = [
 
     "git", "github", "linux", "rest api", "graphql", "kafka", "fastapi", "fast api", "restapi", "nosql",
     
-    "r", "tableau", "excel", "machine learning", "ci/cd", "cicd", "jenkins", "github actions", 
+    "r", "tableau", "excel", "machine learning", "ci/cd", "cicd", "jenkins", "github actions",
     
-    "spark", "snowflake", "databricks", "langchain", "xgboost", "lightgbm", "springboot", 
+    "spark", "snowflake", "databricks", "langchain", "xgboost", "lightgbm", "springboot",
     
-    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark", "rag", "langgraph", "MCP", "statistic", 
+    "express.js", "prometheus", "sas", "matlab", "bash", "shell scripting", "pyspark", "rag", "langgraph", "MCP", "statistic",
     
     "tailwind css", "powershell", "auth0", "solana", "elevenlabs", "supabase", "vercel"
 ]
 
+# precompiling regexes for each skill 
+_SKILL_PATTERNS = [(skill, re.compile(rf"\b{re.escape(skill)}\b", flags=re.IGNORECASE)) for skill in SKILLS]
+
 def extract_skills(text):
-    text = text.lower()
-    return [skill for skill in SKILLS if re.search(rf"\b{re.escape(skill)}\b", text)]
+    text = text or ""
+    found = []
+    for skill, pattern in _SKILL_PATTERNS:
+        if pattern.search(text):
+            found.append(skill)
+    return found
 
 def run():
     DB = psycopg2.connect(os.environ["DATABASE_URL"])

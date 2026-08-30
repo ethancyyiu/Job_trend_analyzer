@@ -84,16 +84,38 @@ export function ResumeAnalyzer() {
           </div>
           <div className="three-boxes-row">
             <div className="three-box left-box">
-              <h4>Overview</h4>
-              <p>Summary or quick stats go here.</p>
+              <div className="box-topline">
+
+                <span className="box-badge">Insights</span>
+              </div>
+              <h4>Top Missing Skills</h4>
+              <p>Unlock your next upgrade. Find the most in‑demand skills you don’t have yet.</p>
+              <div className="box-microstats">
+                <span>Skill gaps</span>
+                <span className="box-icon">📉</span>
+              </div>
             </div>
             <div className="three-box center-box">
-              <h4>Recommendations</h4>
-              <p>Suggested learning or next steps.</p>
+              <div className="box-topline">
+                <span className="box-badge accent">Matches</span>
+              </div>
+              <h4>Matched Jobs</h4>
+              <p>Discover your best-fit roles. See the jobs where you already match 3+ required skills, ranked by salary.</p>
+              <div className="box-microstats">
+                <span>High-fit roles</span>
+                <span className="box-icon">🎯</span>
+              </div>
             </div>
-            <div className="three-box right-box">
-              <h4>Opportunities</h4>
-              <p>Jobs or roles to consider.</p>
+            <div className="three-box left-box">
+              <div className="box-topline">
+                <span className="box-badge neutral">Signals</span>
+              </div>
+              <h4>Job Matches Per Skill</h4>
+              <p>See where your skills shine. We pull the top‑paying jobs for every skill in your resume.</p>
+              <div className="box-microstats">
+                <span>Top signals</span>
+               <span className="box-icon">📊</span>
+              </div>
             </div>
           </div>
         </div>

@@ -100,7 +100,7 @@ async def resume_upload(file: UploadFile = File(...)):
         if skill not in resume_skills_lower:
             missing_skills[skill] = count
     
-    # top jobs that the user qualifies for    
+    # top jobs that the user qualifies for, for each skills 
     matched_job_ids = query("""
         SELECT id, title, company, salary_min, salary_max, skills
         FROM postings

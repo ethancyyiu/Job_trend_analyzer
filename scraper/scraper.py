@@ -32,31 +32,35 @@ def save(db, posting):
     #         posting['description'], date.today(), posting.get('date_posted'),
     #         posting.get('salary_min'), posting.get('salary_max'), posting.get('salary_type')
     #     ))
-    
-    with db.cursor() as cur:
-        cur.execute("""
-            INSERT INTO postings (
-                title, company, location, description, date_scraped, date_posted,
-                salary_min, salary_max, salary_type
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (title, company, location)
-            DO UPDATE SET
-                description = EXCLUDED.description,
-                salary_min = EXCLUDED.salary_min,
-                salary_max = EXCLUDED.salary_max,
-                salary_type = EXCLUDED.salary_type,
-                date_scraped = EXCLUDED.date_scraped,
-                date_posted = EXCLUDED.date_posted
-            RETURNING id;
-        """, (
-            posting['title'], posting['company'], posting['location'],
-            posting['description'], date.today(), posting.get('date_posted'),
-            posting.get('salary_min'), posting.get('salary_max'),
-            posting.get('salary_type')
-        ))
-
-    print(f"  saved: {posting['title']} @ {posting['company']}\n")
+    try: 
+        with db.cursor() as cur:
+            cur.execute("""
+                INSERT INTO postings (
+                    title, company, location, description, date_scraped, date_posted,
+                    salary_min, salary_max, salary_type
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (title, company, location)
+                DO UPDATE SET
+                    description = EXCLUDED.description,
+                    salary_min = EXCLUDED.salary_min,
+                    salary_max = EXCLUDED.salary_max,
+                    salary_type = EXCLUDED.salary_type,
+                    date_scraped = EXCLUDED.date_scraped,
+                    date_posted = EXCLUDED.date_posted
+                RETURNING id;
+            """, (
+                posting['title'], posting['company'], posting['location'],
+                posting['description'], date.today(), posting.get('date_posted'),
+                posting.get('salary_min'), posting.get('salary_max'),
+                posting.get('salary_type')
+            ))
+        db.commit()
+        print(f"  saved: {posting['title']} @ {posting['company']}\n")
+        
+    except Exception as e:
+        db.rollback() 
+        print("SQL error:", e)
 
 def scrape(keyword, location, pages, batch_number):
     db = get_db()
@@ -72,7 +76,7 @@ def scrape(keyword, location, pages, batch_number):
                 f"?keywords={keyword}&location={location}&start={page_num * 25}"
             )
             print(f"\n--- Loading page {page_num + 1} ---")
-            page.goto(url, timeout = 30000)
+            page.goto(url, timeout = 8000)
             page.wait_for_timeout(6000)
             
             # close login page 
@@ -85,8 +89,14 @@ def scrape(keyword, location, pages, batch_number):
 
             for card in cards:
                 try:
-                    card.click()
+                    try:
+                        card.click(timeout=5000)
+                    except:
+                        print("Card click failed, skipping")
+                        continue
+
                     page.wait_for_timeout(3500)
+
                     # input("enter")
                     
                     print("escaping from login")
@@ -147,7 +157,6 @@ def scrape(keyword, location, pages, batch_number):
             
             batch_number += 1
             time.sleep(random.uniform(2, 4))
-            db.commit()
 
         browser.close()
         db.close()
@@ -155,19 +164,19 @@ def scrape(keyword, location, pages, batch_number):
 
 
 if __name__ == "__main__":
-    scrape("data scientist", "remote", 1, 1)
-    scrape("data scientist", "canada", 1, 2)
+    scrape("data scientist", "remote", 2, 1)
+    scrape("data scientist", "canada", 1, 3)
 
-    scrape("software engineer", "remote", 2, 3)
-    scrape("software engineer", "canada", 2, 5)
+    scrape("software engineer", "remote", 2, 4)
+    scrape("software engineer", "canada", 2, 6)
 
-    scrape("data engineer", "remote", 1, 7)
-    scrape("data engineer", "canada", 1, 8)
+    scrape("data engineer", "remote", 2, 8)
+    scrape("data engineer", "canada", 1, 10)
 
-    scrape("machine learning engineer", "remote", 1, 9)
-    scrape("machine learning engineer", "canada", 1, 10)
+    scrape("machine learning engineer", "remote", 2, 11)
+    scrape("machine learning engineer", "canada", 1, 13)
     
-    scrape("data analyst", "remote", 1, 11)
-    scrape("data analyst", "canada", 1, 12)
+    scrape("data analyst", "remote", 2, 14)
+    scrape("data analyst", "canada", 1, 16)
     run()
     category_extractor()

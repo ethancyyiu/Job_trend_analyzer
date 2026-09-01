@@ -72,7 +72,7 @@ def scrape(keyword, location, pages, batch_number):
             # close login page 
             print("escaping from login")
             page.keyboard.press("Escape")
-            page.wait_for_timeout(random.randint(3500, 4000))
+            page.wait_for_timeout(random.randint(10000, 15000))
 
             cards = page.query_selector_all("a.base-card__full-link")
             print(f"  Found {len(cards)} job cards")

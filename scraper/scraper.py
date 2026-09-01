@@ -22,16 +22,6 @@ def get_db():
 
 
 def save(db, posting):
-    # with db.cursor() as cur:
-    #     cur.execute("""
-    #         INSERT INTO postings (title, company, location, description, date_scraped, date_posted, salary_min, salary_max, salary_type)
-    #         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    #         ON CONFLICT DO NOTHING
-    #     """, (
-    #         posting['title'], posting['company'], posting['location'],
-    #         posting['description'], date.today(), posting.get('date_posted'),
-    #         posting.get('salary_min'), posting.get('salary_max'), posting.get('salary_type')
-    #     ))
     try: 
         with db.cursor() as cur:
             cur.execute("""

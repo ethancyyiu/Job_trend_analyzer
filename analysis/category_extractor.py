@@ -3,11 +3,35 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 from google import genai
+from google.genai.errors import ServerError
 import time
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=15):
+    # retry gemini call with a delay when 503 comes
+    for attempt in range(max_retries):
+        try:
+            return client.models.generate_content(
+                model="gemini-3.1-flash-lite",
+                contents=prompt,
+                config={
+                    "response_mime_type": "text/plain"
+                }
+            )
+        except ServerError as e:
+            if getattr(e, "status_code", None) == 503:
+                print(f"Gemini 503 retrying in {delay}s (attempt {attempt + 1}/{max_retries})")
+                time.sleep(delay)
+            else:
+                raise
+
+    print("Gemini still not available, skipping")
+    return None
+
 
 def get_gemini(text):
     print("CALLED GEMINI API!!!!!!!!!\n")
@@ -33,15 +57,11 @@ Rules:
 Return ONLY the category name exactly as written above.
 
 Job title: {text}
-    """    
-    response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
-        contents=prompt,
-        config={
-            "response_mime_type": "text/plain"
-        }
-    )
-                
+    """
+    response = call_gemini_api_with_retry(client, prompt)
+    if response is None:
+        return "others"
+
     answer = response.text.strip().lower()
     return answer
     
@@ -72,7 +92,7 @@ def category_extractor():
                 category = "data analyst" 
                 
             else:
-                time.sleep(7)
+                time.sleep(10)
                 category = get_gemini(title)
 
             print(category)

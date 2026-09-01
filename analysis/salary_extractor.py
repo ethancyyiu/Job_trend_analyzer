@@ -1,5 +1,5 @@
 import re
-from analysis.gemini_extractor import gemini_extract
+from analysis.gemini_extractor_salary import gemini_extract
 import time 
 
 def extract_salary(text):
@@ -47,7 +47,7 @@ def extract_salary(text):
         sal_type = get_type(matches[0], low_raw) or get_type(matches[1], high_raw)
             
         if sal_type == 'hourly':
-            time.sleep(7)
+            time.sleep(10)
             data = gemini_extract(text)
             return data["salary_min"], data["salary_max"], data["salary_type"]
         
@@ -64,6 +64,7 @@ def extract_salary(text):
         sal_type = get_type(s, val_raw)
         
         if sal_type == 'hourly':
+            time.sleep(10)
             data = gemini_extract(text)
             return data["salary_min"], data["salary_max"], data["salary_type"]
         

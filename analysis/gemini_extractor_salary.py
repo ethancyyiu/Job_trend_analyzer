@@ -1,4 +1,5 @@
 from google import genai
+from google.genai.errors import ServerError
 import os
 from dotenv import load_dotenv
 import json
@@ -8,6 +9,29 @@ import time
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=15):
+    # retry gemini call with a delay when 503 comes
+    for attempt in range(max_retries):
+        try:
+            return client.models.generate_content(
+                model="gemini-3.1-flash-lite",
+                contents=prompt,
+                config={
+                    "response_mime_type": "application/json"
+                }
+            )
+        except ServerError as e:
+            if getattr(e, "status_code", None) == 503:
+                print(f"Gemini 503 retrying in {delay}s (attempt {attempt + 1}/{max_retries})")
+                time.sleep(delay)
+            else:
+                raise
+
+    print("gemini still not available, skipping")
+    return None
+
 
 def gemini_extract(description):
     print("CALLED GEMINI API!!!!!!!")
@@ -69,23 +93,18 @@ Rules
     Now extract salary information from the job posting: {description}
 
     """
-        
-    response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json"
-        }
-    )
-    
+    response = call_gemini_api_with_retry(client, prompt)
+    if response is None:
+        return {"salary_min": None, "salary_max": None, "salary_type": None}
+
     result = response.text.strip()
     data = json.loads(result)
-    
+
     salary_min = data["salary_min"]
     salary_max = data["salary_max"]
     salary_type = data["salary_type"]
     #raw_text = data["raw_text"]
-    
+
     return {"salary_min": salary_min,
             "salary_max": salary_max,
             "salary_type": salary_type}

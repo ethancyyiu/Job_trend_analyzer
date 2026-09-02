@@ -55,7 +55,7 @@ def save(db, posting):
 def scrape(keyword, location, pages, batch_number):
     db = get_db()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
@@ -75,19 +75,23 @@ def scrape(keyword, location, pages, batch_number):
             page.wait_for_timeout(random.randint(10000, 15000))
 
             cards = page.query_selector_all("a.base-card__full-link")
+            page.wait_for_timeout(random.randint(10000, 15000))
             print(f"  Found {len(cards)} job cards")
 
             for card in cards:
                 try:
                     try:
+                        card.scroll_into_view_if_needed()
                         card.click(timeout=5000)
-                    except:
-                        print("Card click failed, skipping")
-                        continue
+                    except Exception:
+                        # use dom click to bypass the visual stuff
+                        try:
+                            card.evaluate("el => el.click()")
+                        except Exception as e:
+                            print("Card click failed, skipping ->", e)
+                            continue
 
-                    page.wait_for_timeout(3500)
-
-                    # input("enter")
+                    page.wait_for_timeout(5500)
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")

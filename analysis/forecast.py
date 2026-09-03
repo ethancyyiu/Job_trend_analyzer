@@ -25,11 +25,4 @@ def load_posting_data():
     
     return df
 
-# Load it
 df = load_posting_data()
-
-# Check it
-print(df.head(10))
-print(f"Date range: {df['posting_date'].min()} to {df['posting_date'].max()}")
-print(f"Total days of data: {len(df)}")
-print(f"Missing dates: {(df['posting_date'].max() - df['posting_date'].min()).days - len(df)}")

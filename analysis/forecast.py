@@ -39,4 +39,24 @@ def prepare_data(df):
     return prophet_df
 
 prophet_data = prepare_data(df)
-print(prophet_data.head(10))
+
+from prophet import Prophet
+
+def train_model(df):
+    model = Prophet(
+        interval_width= 0.95,  
+        yearly_seasonality = False,  
+        weekly_seasonality = True,  
+        daily_seasonality = False,  
+    )
+    
+    # this can help with sudden movement if I know when a posting spike might be
+    # model.add_seasonality(name='september_spike', period=365, fourier_order=5)
+    
+    print("training")
+    model.fit(df)
+    print("trained")
+    
+    return model
+
+model = train_model(prophet_data)

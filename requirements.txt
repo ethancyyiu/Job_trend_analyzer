@@ -8,6 +8,8 @@ python-multipart==0.0.6
 APScheduler==3.10.4
 httpx==0.28.1
 google-genai==2.8.0
-PyPDF2==3.0.1   
+PyPDF2==3.0.1
 pandas==2.2.2
+numpy==1.26.4
 prophet==1.1.5
+cmdstanpy==1.2.4

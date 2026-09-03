@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 DB_URL = os.environ["DATABASE_URL"]
 
-def load_posting_data():
+def load_data():
     conn = psycopg2.connect(DB_URL)
     
     query = """
@@ -25,4 +25,18 @@ def load_posting_data():
     
     return df
 
-df = load_posting_data()
+df = load_data()
+
+def prepare_data(df):
+    # because prophet only takes 2 columns, we need to prepare it with the date, and the value to forecast   
+    prophet_df = df.copy()
+    prophet_df['ds'] = pd.to_datetime(prophet_df['posting_date'])
+    prophet_df['y'] = prophet_df['posting_count']
+    
+    prophet_df = prophet_df[['ds', 'y']].sort_values('ds')
+    
+    prophet_df = prophet_df.set_index('ds').asfreq('D').interpolate().reset_index()
+    return prophet_df
+
+prophet_data = prepare_data(df)
+print(prophet_data.head(10))

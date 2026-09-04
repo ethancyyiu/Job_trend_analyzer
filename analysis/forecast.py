@@ -1,3 +1,4 @@
+from prophet import Prophet
 import psycopg2
 import pandas as pd
 from datetime import datetime
@@ -40,8 +41,6 @@ def prepare_data(df):
 
 prophet_data = prepare_data(df)
 
-from prophet import Prophet
-
 def train_model(df):
     model = Prophet(
         interval_width= 0.95,  
@@ -60,3 +59,17 @@ def train_model(df):
     return model
 
 model = train_model(prophet_data)
+
+def forecast_next_days(model, days_ahead=14):
+    # creates the dates for the model to fill in
+    future = model.make_future_dataframe(periods=days_ahead)
+    
+    forecast = model.predict(future)
+    
+    # date, value, upper and lower bounds
+    forecast_output = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(days_ahead)
+    
+    return forecast_output
+
+forecast = forecast_next_days(model, days_ahead=14)
+print(forecast)

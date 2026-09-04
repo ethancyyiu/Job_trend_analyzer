@@ -11,7 +11,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=15):
+def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=60):
     # retry gemini call with a delay when 503 comes
     for attempt in range(max_retries):
         try:

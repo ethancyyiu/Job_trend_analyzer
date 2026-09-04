@@ -102,15 +102,18 @@ def calculate_forecast(historical_df, forecast_df):
         confidence = "high"
     else:
         confidence = "Medium"
+        
+    # print(forecast_df['yhat_upper'].mean() - forecast_df['yhat_lower'].mean())
     
     return {
-        "latest": latest_actual,
-        "forecast_avg": round(forecast_avg),
-        "direction": direction,
-        "percent_change": round(change, 1),
-        "trend": trend_signal,
-        "confidence": confidence
-    }
+    "latest": int(latest_actual),
+    "forecast_avg": float(round(forecast_avg)),
+    "direction": direction,
+    "percent_change": float(round(change, 1)),
+    "trend": trend_signal,
+    "confidence": "High" if float(forecast_df['yhat_upper'].mean() - forecast_df['yhat_lower'].mean()) < 30 else "Medium"
+}
+
 
 insights = calculate_forecast(prophet_data, forecast)
 print(insights)

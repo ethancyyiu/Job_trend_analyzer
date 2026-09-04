@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from api.db import query
+from analysis.forecast import load_data, prepare_data, train_model, forecast_next_days, calculate_forecast
 
 router = APIRouter()
 
@@ -34,6 +35,19 @@ def get_trends():
         answer[date][category] = count
         
     return list(answer.values())
+
+@router.get("/trends/forecast")
+def get_forecast():
+    df = load_data()
+    prophet_data = prepare_data(df)
+    model = train_model(prophet_data)
+    forecast = forecast_next_days(model, days_ahead = 7)
+    insights = calculate_forecast(prophet_data, forecast)
+    
+    return {
+        "forecast": forecast.to_dict('records'),
+        "summary": insights
+    }
 
 @router.get("/skills")
 def get_skills():
@@ -73,55 +87,6 @@ def get_skills():
         answer.append(item)
 
     return {"skills": answer, "concentration": concentration_percent}
-
-
-# @router.get("/skills")
-# def get_skills():
-#     concentration = query("""
-#         SELECT unnest(skills) AS skill, COUNT(*) AS count
-#         FROM postings
-#         GROUP BY skill
-#         ORDER BY count DESC
-#         LIMIT 3;
-#     """)
-    
-#     all_rows = query("""
-#         SELECT unnest(skills) AS skill, COUNT(*) AS count
-#         FROM postings
-#         GROUP BY skill
-#         ORDER BY count DESC;
-#     """)
-    
-#     category = query("""
-#         SELECT unnest(skills) as skill, job_category, COUNT(*) AS count
-#         FROM postings
-#         GROUP BY skill, job_category
-#         ORDER BY count DESC;                  
-#     """)
-    
-#     rows = all_rows[:20]
-
-#     total = 0
-#     for i in rows:
-#         total += i[1]
-    
-#     top_three = 0
-#     for i in range(min(3, len(rows))):
-#         top_three += concentration[i][1]
-    
-#     if total > 0:
-#         concentration_percent = top_three / total * 100
-#     else:
-#         concentration_percent = 0
-        
-#     answer = {}
-#     for skill, count in rows:
-#         answer[skill] = {"skill": skill, "count": count}
-        
-#     for skill, job_category, count in category:
-#         answer[skill][job_category] = count
-
-#     return {"skills": list(answer.values()), "concentration": concentration_percent}
 
 @router.get("/postings")
 def get_postings():

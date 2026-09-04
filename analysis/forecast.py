@@ -16,7 +16,7 @@ def load_data():
         DATE(date_posted) as posting_date,
         COUNT(*) as posting_count
     FROM postings
-    WHERE date_posted >= now() - interval '90 days'
+    WHERE date_posted >= now() - interval '95 days'
     GROUP BY DATE(date_posted)
     ORDER BY posting_date ASC
     """
@@ -40,6 +40,7 @@ def prepare_data(df):
     return prophet_df
 
 prophet_data = prepare_data(df)
+# print(prophet_data.head(10))
 
 def train_model(df):
     model = Prophet(
@@ -52,15 +53,15 @@ def train_model(df):
     # this can help with sudden movement if I know when a posting spike might be
     # model.add_seasonality(name='september_spike', period=365, fourier_order=5)
     
-    print("training")
+    # print("training")
     model.fit(df)
-    print("trained")
+    # print("done")
     
     return model
 
 model = train_model(prophet_data)
 
-def forecast_next_days(model, days_ahead=14):
+def forecast_next_days(model, days_ahead):
     # creates the dates for the model to fill in
     future = model.make_future_dataframe(periods=days_ahead)
     
@@ -71,5 +72,45 @@ def forecast_next_days(model, days_ahead=14):
     
     return forecast_output
 
-forecast = forecast_next_days(model, days_ahead=14)
-print(forecast)
+forecast = forecast_next_days(model, days_ahead = 7)
+# print(forecast)
+
+def calculate_forecast(historical_df, forecast_df):
+    # most recent real value
+    latest_actual = historical_df['y'].iloc[-1]
+    
+    # average of the forecast
+    forecast_avg = forecast_df['yhat'].mean()
+    
+    if forecast_avg > latest_actual:
+        direction = "Up" 
+    else: 
+        "Down"
+    
+    change = ((forecast_avg - latest_actual) / latest_actual) * 100
+    
+    if change > 10:
+        trend_signal = "Accelerating"
+    elif change > 0:
+        trend_signal = "Growing"
+    elif change > -10:
+        trend_signal = "Declining"
+    else:
+        trend_signal = "Cooling"
+        
+    if forecast_df['yhat_upper'].mean() - forecast_df['yhat_lower'].mean() < 30:
+        confidence = "high"
+    else:
+        confidence = "Medium"
+    
+    return {
+        "latest": latest_actual,
+        "forecast_avg": round(forecast_avg),
+        "direction": direction,
+        "percent_change": round(change, 1),
+        "trend": trend_signal,
+        "confidence": confidence
+    }
+
+insights = calculate_forecast(prophet_data, forecast)
+print(insights)

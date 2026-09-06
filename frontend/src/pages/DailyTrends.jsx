@@ -3,6 +3,8 @@ import { useState } from "react"
 import { CategoryToggle } from "../components/CategoryToggle"
 
 export function DailyTrends({ cachedData }) {
+
+    
     const [activeCategories, setActiveCategories] = useState([
         "software engineer",
         "data engineer",

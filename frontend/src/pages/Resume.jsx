@@ -140,9 +140,6 @@ function ResumeResults({ results, onReset }) {
               ← Upload New Resume
             </button>
           </div>
-
-          
-
           {/* Your Skills */}
           <div className="section resume-section">
             <h3 className="section-title-center">Your Skills ({resume_skills.length})</h3>

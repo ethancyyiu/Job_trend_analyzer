@@ -11,9 +11,8 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=60):
-    # retry gemini call with a delay when 503 comes
-    for attempt in range(max_retries):
+def call_gemini_api_with_retry(client, prompt, max_retries = 5, delay = 60):
+    for attempt in range(1, max_retries + 1):
         try:
             return client.models.generate_content(
                 model="gemini-3.1-flash-lite",
@@ -22,12 +21,19 @@ def call_gemini_api_with_retry(client, prompt, max_retries=3, delay=60):
                     "response_mime_type": "application/json"
                 }
             )
-        except ServerError as e:
-            if getattr(e, "status_code", None) == 503:
-                print(f"Gemini 503 retrying in {delay}s (attempt {attempt + 1}/{max_retries})")
+        except Exception as e: 
+            status_code = getattr(e, "status_code", None)
+            status = getattr(e, "status", None)
+            msg = str(e).lower()
+
+            if status_code in (429, 503) or status in ("UNAVAILABLE", "RESOURCE_EXHAUSTED") or "high demand" in msg or "503" in msg:
+                if attempt == max_retries:
+                    print(f"Gemini still unavailable after {max_retries} attempts: {e}")
+                    return None
+                print(f"Gemini retrying in {delay}s (attempt {attempt}/{max_retries})")
                 time.sleep(delay)
-            else:
-                raise
+                continue
+            raise
 
     print("gemini still not available, skipping")
     return None

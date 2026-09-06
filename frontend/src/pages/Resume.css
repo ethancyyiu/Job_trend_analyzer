@@ -146,7 +146,7 @@
   flex-direction: column;
 }
 
-/* make header a positioned container so the reset button can be absolute */
+/* make header a positioned container so the reset button is absolute */
 .page-header {
   position: relative;
   padding-bottom: 6px;

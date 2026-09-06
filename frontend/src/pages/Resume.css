@@ -139,7 +139,7 @@
 .resume-results-container {
   width: 100%;
   max-width: none;
-  margin: 100px 0;   /* ← CHANGED from "margin: 100;" */
+  margin: 100;
   padding: 0 16px;
   box-sizing: border-box;
   display: flex;

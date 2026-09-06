@@ -156,7 +156,7 @@ function ResumeResults({ results, onReset }) {
           <div className="section resume-section">
             <h3>Jobs You Can Apply For Now</h3>
             <div className="job-cards">
-              {matched_jobs.slice(0, 12).map((job, idx) => (
+              {matched_jobs.slice(0, 10).map((job, idx) => (
                 <div key={idx} className="job-card-result" style={{ animationDelay: `${idx * 80}ms` }}>
                   <div className="job-header">
                     <h4>{job.title}</h4>
@@ -180,7 +180,7 @@ function ResumeResults({ results, onReset }) {
             <h3>Top Skills to Learn (Most in-demand)</h3>
             <div className="gap-skills">
               {Object.entries(top_missing_skills)
-                .slice(0, 12)
+                .slice(0, 14)
                 .map(([skill, count], idx) => (
                   <div key={skill} className="gap-item" style={{ animationDelay: `${idx * 60}ms` }}>
                     <span className="skill-name">{skill}</span>

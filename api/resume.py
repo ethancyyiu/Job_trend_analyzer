@@ -134,7 +134,7 @@ async def resume_upload(file: UploadFile = File(...)):
     return {
         "resume_skills": resume_skills,
         "matched_jobs": matched_jobs,
-        "top_missing_skills": dict(list(missing_skills.items())[:12]),
+        "top_missing_skills": dict(list(missing_skills.items())[:14]),
         "skill_opportunities": job_matches
     }
 

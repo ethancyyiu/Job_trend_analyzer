@@ -37,6 +37,10 @@ def get_trends():
 
 @router.get("/metadata")
 def get_metadata():
+    # `scrape_runs` is an audit table populated only after the whole pipeline
+    # completes. Older databases (and interrupted runs) can still contain
+    # successfully saved postings without an audit row, so use the latest
+    # saved posting as the availability fallback.
     try:
         rows = query("""
             SELECT completed_at
@@ -45,10 +49,22 @@ def get_metadata():
             LIMIT 1
         """)
     except Exception:
-        # No completed run has created the table yet.
         rows = []
 
-    return {"last_scraped_at": rows[0][0].isoformat() if rows else None}
+    if rows and rows[0][0]:
+        last_scraped_at = rows[0][0]
+    else:
+        try:
+            posting_rows = query("""
+                SELECT MAX(date_scraped)
+                FROM postings
+                WHERE date_scraped IS NOT NULL
+            """)
+        except Exception:
+            posting_rows = []
+        last_scraped_at = posting_rows[0][0] if posting_rows else None
+
+    return {"last_scraped_at": last_scraped_at.isoformat() if last_scraped_at else None}
 
 @router.get("/trends/forecast")
 def get_forecast(response: Response):

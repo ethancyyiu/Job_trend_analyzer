@@ -1,5 +1,5 @@
 function formatLastScrapedAt(value) {
-  if (!value) return "Last scrape unavailable";
+  if (!value) return "Loading last scrape...";
 
   const timestamp = new Date(value);
   if (Number.isNaN(timestamp.getTime())) return "Last scrape unavailable";

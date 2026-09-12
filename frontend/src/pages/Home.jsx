@@ -7,6 +7,7 @@ export default function Home({ setPage, cachedData }) {
     : "+12%"
   const totalPostings = cachedData?.total || "2,400+"
   const skillsCount = "70+"
+  const topSkill = cachedData?.top_skill?.toUpperCase() || 'REACT'
   const salaryRange = (cachedData && cachedData.rounded_median_min && cachedData.rounded_median_max)
     ? `${cachedData.rounded_median_min}–${cachedData.rounded_median_max}`
     : "$65k–$115k"
@@ -76,7 +77,7 @@ export default function Home({ setPage, cachedData }) {
             </div>
             <h3>Highlight the skills employers are chasing</h3>
             <p>Surface rising skills and gaps so your team can target hiring and training.</p>
-            <div className="card-meta"><span className="meta-pill">Top skill</span><strong>{cachedData?.top_skill || 'React'}</strong></div>
+            <div className="card-meta"><span className="meta-pill">Top skill</span><strong>{topSkill}</strong></div>
           </div>
 
           <div className="feature-card" onClick={() => setPage("Postings")}>

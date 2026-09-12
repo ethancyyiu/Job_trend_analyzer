@@ -620,6 +620,71 @@
   color: #b9cbe0;
   font-size: 12px;
 }
+.market-snapshot {
+  margin-top: 22px;
+  padding: 27px;
+  border: 1px solid #bcecf4;
+  border-radius: 20px;
+  background: #ecfeff;
+}
+.market-snapshot-heading h2 {
+  color: #0a1a2f;
+  font-size: 22px;
+}
+.market-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+.market-snapshot-grid article {
+  padding: 17px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #dce5ef;
+}
+.market-snapshot-grid span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.market-snapshot-grid strong {
+  display: block;
+  color: #0891b2;
+  font: 800 24px var(--display);
+  margin: 6px 0;
+}
+.market-snapshot-grid p {
+  color: #475569;
+  font-size: 13px;
+}
+.market-snapshot-action {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #cffafe;
+  border-left: 5px solid #06b6d4;
+  box-shadow: 0 10px 20px rgba(8, 145, 178, 0.12);
+}
+.market-snapshot-action-label {
+  display: block;
+  color: #0e7490;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.market-snapshot-action p {
+  margin-top: 4px;
+  color: #0a1a2f;
+  font: 700 16px/1.4 var(--sans);
+}
+.market-snapshot-action p strong {
+  color: #0e7490;
+}
 .resume-report-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 315px;
@@ -639,9 +704,9 @@
   background: #fff;
 }
 .report-section-dark {
-  background: #102b49;
-  color: #fff;
-  border: 0;
+  background: #f3e8ff;
+  color: #2e1065;
+  border: 1px solid #ddd6fe;
 }
 .report-section-heading {
   display: flex;
@@ -661,10 +726,10 @@
   font-size: 13px;
 }
 .report-section-dark .report-eyebrow {
-  color: #67e8f9;
+  color: #7e22ce;
 }
 .report-section-dark h2 {
-  color: #fff;
+  color: #2e1065;
 }
 .report-count {
   background: #ecfeff;
@@ -681,21 +746,22 @@
   gap: 12px;
 }
 .report-action-grid article {
-  background: #ffffff12;
+  background: #fff;
+  border: 1px solid #e9d5ff;
   padding: 17px;
   border-radius: 14px;
 }
 .report-action-grid article > span {
-  color: #67e8f9;
+  color: #7e22ce;
   font: 800 13px var(--display);
 }
 .report-action-grid h3 {
-  color: #fff;
+  color: #2e1065;
   font-size: 16px;
   margin: 13px 0 6px;
 }
 .report-action-grid p {
-  color: #c6d7e9;
+  color: #5b4778;
   font-size: 13px;
 }
 .report-job-cards {
@@ -782,6 +848,11 @@
   padding: 6px 9px;
   font-size: 11px;
 }
+.resume-results-page .skill-tag-yours,
+.resume-results-page .skill-name,
+.resume-results-page .skill-opportunity h4 {
+  text-transform: uppercase;
+}
 .next-step-card {
   background: #ecfeff;
   border-color: #bcecf4;
@@ -797,7 +868,7 @@
   border-radius: 10px;
   padding: 11px;
   background: #06b6d4;
-  color: #06263a;
+  color: #fff;
   font-weight: 800;
   cursor: pointer;
 }
@@ -832,7 +903,8 @@
   .report-stat-grid,
   .report-action-grid,
   .report-job-cards,
-  .report-gap-skills {
+  .report-gap-skills,
+  .market-snapshot-grid {
     grid-template-columns: 1fr !important;
   }
   .report-section-heading {

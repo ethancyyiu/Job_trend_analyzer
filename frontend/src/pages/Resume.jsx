@@ -183,6 +183,7 @@ function ResumeResults({ results, onReset }) {
     matched_jobs = [],
     top_missing_skills = {},
     skill_opportunities = {},
+    market_snapshot = {},
   } = results;
   const gaps = Object.entries(top_missing_skills);
   const top = matched_jobs[0];
@@ -221,6 +222,7 @@ function ResumeResults({ results, onReset }) {
             </div>
           </div>
         </section>
+        <MarketSnapshot snapshot={market_snapshot} />
         <div className="resume-report-layout">
           <div className="resume-report-main">
             <section className="report-section report-section-dark">
@@ -340,6 +342,69 @@ function ResumeResults({ results, onReset }) {
     </div>
   );
 }
+
+function MarketSnapshot({ snapshot }) {
+  const {
+    market_total = 0,
+    matching_job_count = 0,
+    top_gap: topGap,
+    salary,
+  } = snapshot;
+  const matchRate = market_total
+    ? ((matching_job_count / market_total) * 100).toFixed(1)
+    : null;
+
+  return (
+    <section className="market-snapshot" aria-label="Your market snapshot">
+      <div className="market-snapshot-heading">
+        <span className="report-eyebrow">Your market snapshot</span>
+        <h2>Where you stand, and what to do next.</h2>
+      </div>
+      <div className="market-snapshot-grid">
+        <article>
+          <span>Matching roles</span>
+          <strong>{matching_job_count.toLocaleString()}</strong>
+          <p>
+            {matchRate
+              ? `${matchRate}% of ${market_total.toLocaleString()} tracked roles match at least three of your skills.`
+              : "No matching roles are available yet."}
+          </p>
+        </article>
+        <article>
+          <span>Highest-impact gap</span>
+          <strong>{topGap?.skill?.toUpperCase() || "No clear gap"}</strong>
+          <p>
+            {topGap
+              ? `It appears in ${topGap.matching_roles.toLocaleString()} roles that otherwise fit your profile.`
+              : "Your current skills cover the available matched roles well."}
+          </p>
+        </article>
+        <article>
+          <span>Listed pay in matching roles</span>
+          <strong>
+            {salary
+              ? `${formatCompensation(salary.median_min)}–${formatCompensation(salary.median_max)}`
+              : "Not enough data"}
+          </strong>
+          <p>
+            {salary
+              ? `Median listed range across ${salary.sample_size.toLocaleString()} matching roles with salary data.`
+              : "Shown once at least five matching roles include both salary bounds."}
+          </p>
+        </article>
+      </div>
+      {topGap && (
+        <div className="market-snapshot-action">
+          <span className="market-snapshot-action-label">Best next move</span>
+          <p>
+            Prioritize <strong>{topGap.skill.toUpperCase()}</strong>, it could expand the roles you can target most quickly.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function Action({ number, title, copy }) {
   return (
     <article>

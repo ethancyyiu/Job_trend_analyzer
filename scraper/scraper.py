@@ -177,4 +177,3 @@ if __name__ == "__main__":
     category_extractor()
     generate_and_save_forecast()
     record_successful_scrape()
-    record_successful_scrape()

@@ -152,7 +152,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                     stroke="#06B6D4"
                     strokeWidth={2}
                     connectNulls
-                    animationDuration={3000}
+                    animationDuration={4500}
                     dot={{ r: 3 }}
                   />
                   <Line

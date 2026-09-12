@@ -128,10 +128,82 @@ async def resume_upload(file: UploadFile = File(...)):
             "matched_skills": overlap,
             "total_skills": total_skills
         })
+
+    market_total = query("""
+        SELECT COUNT(*)
+        FROM postings
+        WHERE skills IS NOT NULL AND skills != '{}'
+    """)[0][0]
+
+    matching_job_count = query("""
+        SELECT COUNT(*)
+        FROM postings
+        WHERE skills IS NOT NULL AND skills != '{}'
+        AND (
+            SELECT COUNT(*)
+            FROM unnest(skills) AS s
+            WHERE s = ANY(%s)
+        ) >= 3
+    """, (resume_skills,))[0][0]
+
+    gap_rows = query("""
+        WITH matching_postings AS (
+            SELECT skills
+            FROM postings
+            WHERE skills IS NOT NULL AND skills != '{}'
+            AND (
+                SELECT COUNT(*)
+                FROM unnest(skills) AS s
+                WHERE s = ANY(%s)
+            ) >= 3
+        )
+        SELECT skill, COUNT(*) AS count
+        FROM matching_postings
+        CROSS JOIN LATERAL unnest(skills) AS skill
+        WHERE NOT (LOWER(skill) = ANY(%s))
+        GROUP BY skill
+        ORDER BY count DESC
+        LIMIT 1
+    """, (resume_skills, resume_skills_lower))
+
+    salary_row = query("""
+        SELECT
+            COUNT(*) FILTER (
+                WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
+            ) AS salary_sample_size,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
+            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
+        FROM postings
+        WHERE skills IS NOT NULL AND skills != '{}'
+        AND (
+            SELECT COUNT(*)
+            FROM unnest(skills) AS s
+            WHERE s = ANY(%s)
+        ) >= 3
+    """, (resume_skills,))[0]
+
+    top_gap = (
+        {"skill": gap_rows[0][0], "matching_roles": gap_rows[0][1]}
+        if gap_rows else None
+    )
+    salary_sample_size, median_min, median_max = salary_row
+    salary_summary = None
+    if salary_sample_size >= 5 and median_min is not None and median_max is not None:
+        salary_summary = {
+            "sample_size": salary_sample_size,
+            "median_min": median_min,
+            "median_max": median_max,
+        }
         
     return {
         "resume_skills": resume_skills,
         "matched_jobs": matched_jobs,
         "top_missing_skills": dict(list(missing_skills.items())[:14]),
-        "skill_opportunities": job_matches
+        "skill_opportunities": job_matches,
+        "market_snapshot": {
+            "market_total": market_total,
+            "matching_job_count": matching_job_count,
+            "top_gap": top_gap,
+            "salary": salary_summary,
+        },
     }

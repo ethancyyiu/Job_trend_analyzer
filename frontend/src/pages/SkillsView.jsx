@@ -3,7 +3,9 @@ import { AdviceRow, PageHero } from "../components/AdviceModules";
 
 export function SkillsView({ cachedData }) {
   const skills = cachedData?.skills || [];
-  const ranked = [...skills].sort((a, b) => Number(b.count) - Number(a.count));
+  const ranked = [...skills]
+    .sort((a, b) => Number(b.count) - Number(a.count))
+    .map((item) => ({ ...item, skill: String(item.skill).toUpperCase() }));
   const topSkill = ranked[0]?.skill || "your strongest market skill";
   const concentration = cachedData?.concentration
     ? Number(cachedData.concentration).toFixed(1)

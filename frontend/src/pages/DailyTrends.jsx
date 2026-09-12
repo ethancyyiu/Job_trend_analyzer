@@ -137,43 +137,43 @@ export function DailyTrends({ cachedData, forecastData }) {
                         <LineChart data={chartData}>
                             <XAxis dataKey="date" />
                             <YAxis />
-                            <Line type="monotone" dataKey="actualCount" stroke="#C86541" strokeWidth={2} connectNulls animationDuration={3000} dot={{ r: 3 }}/>
-                            <Line type="monotone" dataKey="forecastCount" stroke="#C86541" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                            <Line type="monotone" dataKey="actualCount" name = "Total Postings" stroke="#C86541" strokeWidth={2} connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                            <Line type="monotone" name="Total Postings prediction" dataKey="forecastCount" stroke="#C86541" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             {activeCategories.includes("software engineer") && (
-                                <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" dataKey="software engineer" name="Software Engineer" stroke="#FF0000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("software engineer") && (
-                                <Line type="monotone" dataKey="software engineerForecast" stroke="#FF0000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Software Engineer prediction" dataKey="software engineerForecast" stroke="#FF0000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data engineer") && (
-                                <Line type="monotone" dataKey="data engineer" stroke="#ffd700" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Engineer" dataKey="data engineer" stroke="#ffd700" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data engineer") && (
-                                <Line type="monotone" dataKey="data engineerForecast" stroke="#ffd700" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Engineer prediction" dataKey="data engineerForecast" stroke="#ffd700" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("machine learning engineer") && (
-                                <Line type="monotone" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Machine Learning" dataKey="machine learning engineer" stroke="#008000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("machine learning engineer") && (
-                                <Line type="monotone" dataKey="machine learning engineerForecast" stroke="#008000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Machine Learning Engineer prediction" dataKey="machine learning engineerForecast" stroke="#008000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data scientist") && (
-                                <Line type="monotone" dataKey="data scientist" stroke="#0000FF" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Scientist" dataKey="data scientist" stroke="#0000FF" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data scientist") && (
-                                <Line type="monotone" dataKey="data scientistForecast" stroke="#0000FF" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Scientist prediction" dataKey="data scientistForecast" stroke="#0000FF" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data analyst") && (
-                                <Line type="monotone" dataKey="data analyst" stroke="#800080" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Analyst" dataKey="data analyst" stroke="#800080" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("data analyst") && (
-                                <Line type="monotone" dataKey="data analystForecast" stroke="#800080" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Data Analyst prediction" dataKey="data analystForecast" stroke="#800080" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("others") && (
-                                <Line type="monotone" dataKey="others" stroke="#000000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" anme = "Others" dataKey="others" stroke="#000000" strokeWidth={2} animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {activeCategories.includes("others") && (
-                                <Line type="monotone" dataKey="othersForecast" stroke="#000000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
+                                <Line type="monotone" name="Other Categories prediction" dataKey="othersForecast" stroke="#000000" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={{ r: 3 }}/>
                             )}
                             {markerDate ? (
                               <ReferenceLine x={markerDate} stroke="var(--accent-mid)" strokeDasharray="4 4" label={{ value: 'Latest', position: 'insideTopRight', fill: '#bf7a67', fontSize: 12 }} />

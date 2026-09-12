@@ -300,6 +300,6 @@ def health():
 
 @router.get("/")
 def welcome():
-    return {"message": "Welcome to Market Pulse API"}
+    return {"message": "Welcome to Market Pulse!!!!!!!!!"}
 
 

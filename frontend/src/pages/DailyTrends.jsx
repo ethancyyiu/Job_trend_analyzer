@@ -2,7 +2,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, R
 import { useState } from "react"
 import { CategoryToggle } from "../components/CategoryToggle"
 
-export function DailyTrends({ cachedData }) {
+export function DailyTrends({ cachedData, forecastData }) {
 
     
     const [activeCategories, setActiveCategories] = useState([
@@ -21,6 +21,24 @@ export function DailyTrends({ cachedData }) {
     else {
         data = [];
     }
+
+    const forecastList = Array.isArray(forecastData?.forecast) ? forecastData.forecast : [];
+    const lastDataIndex = data.length - 1;
+    const chartData = [
+        // Give the forecast series the final actual value as its first point. This
+        // anchors the dotted segment exactly where the solid series ends.
+        ...data.map((row, index) => ({
+            ...row,
+            actualCount: Number(row.count ?? 0),
+            forecastCount: index === lastDataIndex ? Number(row.count ?? 0) : null,
+        })),
+        ...forecastList.map((row) => ({
+            date: row.ds ? row.ds.slice(0, 10) : row.date,
+            actualCount: null,
+            forecastCount: Number(row.yhat ?? 0),
+            count: null,
+        }))
+    ];
 
     let latest;
     if (data.length > 0) {
@@ -98,10 +116,11 @@ export function DailyTrends({ cachedData }) {
                 </div>
                 <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data}>
+                        <LineChart data={chartData}>
                             <XAxis dataKey="date" />
                             <YAxis />
-                            <Line type="monotone" dataKey="count" stroke="#C86541" strokeWidth={2} animationDuration={3000}/>
+                            <Line type="monotone" dataKey="actualCount" stroke="#C86541" strokeWidth={2} connectNulls animationDuration={3000}/>
+                            <Line type="monotone" dataKey="forecastCount" stroke="#C86541" strokeWidth={2} strokeDasharray="6 6" connectNulls animationDuration={3000} dot={false}/>
                             {activeCategories.includes("software engineer") && (
                                 <Line type="monotone" dataKey="software engineer" stroke="#FF0000" strokeWidth={2} animationDuration={3000}/>
                             )}

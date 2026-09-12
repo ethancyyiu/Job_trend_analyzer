@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Resume.css";
 
@@ -8,6 +8,10 @@ export function ResumeAnalyzer() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const API_BASE = import.meta.env.VITE_API_URL || "";
+
+  useEffect(() => {
+    if (results) window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [results]);
 
   const upload = async () => {
     if (!file) return setError("Please select a PDF file first.");
@@ -32,9 +36,24 @@ export function ResumeAnalyzer() {
   return (
     <div className="resume-page resume-upload-page">
       <div className="resume-upload-container">
-        <div className="card resume-card">
+        <section className="upload-hero">
+          <div className="upload-hero-copy">
+            <span className="upload-eyebrow"><i /> Career intelligence, personalized</span>
+            <h1>Find the roles your resume is already built for.</h1>
+            <p>Upload your resume and we’ll turn it into a clear job-search strategy: where you fit, what you’re missing, and the next move worth making.</p>
+            <div className="upload-proof"><span className="proof-avatars"><b>J</b><b>M</b><b>A</b></span>Built from live market signals—not generic advice.</div>
+          </div>
+          <div className="report-preview" aria-label="Preview of your career fit report">
+            <div className="preview-topline"><span>Your career fit report</span><b>Live market data</b></div>
+            <div className="preview-score"><div><small>Strongest role match</small><h3>Senior Product Designer</h3><p>Based on your experience</p></div><strong>86<small>%</small></strong></div>
+            <div className="preview-meter"><span /></div>
+            <div className="preview-insight"><em>↗</em><div><small>Your edge</small><b>Product strategy + research</b><p>Skills employers are actively seeking</p></div></div>
+            <div className="preview-stats"><div><strong>12</strong><span>skills found</span></div><div><strong>28</strong><span>matching roles</span></div><div><strong>4</strong><span>growth moves</span></div></div>
+          </div>
+        </section>
+        <div className="card resume-card upload-panel">
           <div className="page-header resume-page-header">
-            <h2>Resume Skill Analyzer</h2>
+            <span className="step-label">Step 1 of 1</span><h2>Start with your resume</h2><p>PDF only · Used solely to create your report.</p>
           </div>
           <div className="upload-section">
             <label htmlFor="file-input" className="upload-box upload-label">
@@ -62,8 +81,9 @@ export function ResumeAnalyzer() {
               disabled={!file || loading}
               className="upload-button"
             >
-              {loading ? "Analyzing…" : "Analyze Resume"}
+              {loading ? "Building your career fit report…" : "Analyze Resume"}
             </button>
+            <p className="upload-reassurance">Takes less than a minute <span>·</span> No account required</p>
           </div>
         </div>
         <div className="three-boxes-row">

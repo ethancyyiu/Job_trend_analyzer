@@ -1,11 +1,11 @@
 export function CategoryToggle({ activeCategories, setActiveCategories }) {
   const categories = [
-    { label: "Software Engineer", value: "software engineer", color: "#FF0000" },
-    { label: "Data Engineer", value: "data engineer", color: "#FFD700" },
-    { label: "ML Engineer", value: "machine learning engineer", color: "#008000" },
-    { label: "Data Scientist", value: "data scientist", color: "#0000FF" },
-    { label: "Data Analyst", value: "data analyst", color: "#800080" },
-    { label: "Other Categories", value: "others", color: "#000000" },
+    { label: "Software Engineer", value: "software engineer", color: "#0EA5E9" },
+    { label: "Data Engineer", value: "data engineer", color: "#22C55E" },
+    { label: "ML Engineer", value: "machine learning engineer", color: "#16A34A" },
+    { label: "Data Scientist", value: "data scientist", color: "#F59E0B" },
+    { label: "Data Analyst", value: "data analyst", color: "#D97706" },
+    { label: "Other Categories", value: "others", color: "#334155" },
   ];
 
   const toggleCategory = (value) => {

@@ -1,152 +1,141 @@
-import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer} from "recharts"
+import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer} from "recharts";
+import { AdviceRow, PageHero } from "../components/AdviceModules";
+
+const money = (value) => value ? `$${Math.round(Number(value) / 1000)}k` : "—";
 
 function SalaryTooltip({ active, payload }) {
-  if (!active || !payload || !payload.length) return null
-  const item = payload[0].payload
-  const formatSalary = (value) => `$${Math.round(Number(value) / 1000)}k`
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
   return (
     <div className="custom-tooltip">
-      <div className="tooltip-title">{item.title}</div>
-      {item.max > 0 && <div>{formatSalary(item.min)} low - {formatSalary(item.max)} high / year</div>}
+      <div className="tooltip-title">{d.title}</div>
+      <div>{d.label}</div>
     </div>
-  )
+  );
 }
-
 export function Salary({ cachedData }) {
-  const data = cachedData || {
-    sample: [],
-    coverage_percentage: 0,
-    coverage_count: 0,
-    median_min: 0,
-    median_max: 0,
-    hourly_count: 0,
-    yearly_count: 0,
-    hourly_percentage: 0,
-    yearly_percentage: 0,
-    each_category_median: [],
-    total_postings: 0
-  }
-
-  const coverage_percentage = Math.round(data.coverage_percentage)
-  const coverage_count = data.coverage_count 
-
-  const hourly_percentage = Math.round(data.hourly_percentage)
-  const yearly_percentage = Math.round(data.yearly_percentage)
-
-  // apply letter k so it is more compact
-  const formatSalary = (value) => {
-    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A"
-    const rounded = Math.round(Number(value) / 1000)
-    return `$${rounded}k`
-  }
-
-  const median_min = formatSalary(data.median_min);
-  const median_max = formatSalary(data.median_max); 
-
-  const categoryTitles = [
+  const data = cachedData || {};
+  const categories = [
     "software engineer",
     "data engineer",
     "machine learning engineer",
     "data scientist",
     "data analyst",
-    "others"
-  ]
-
-  // so that all category is in order
-  const categoryLookup = (data.each_category_median || []).reduce((acc, item) => {
-    acc[item.title] = item
-    return acc
-  }, {})
-
-  // return the range of the salary
-  const salaryRanges = categoryTitles.map((title) => {
-    const item = categoryLookup[title] || {}
-    const min = Number(item.median_minimum) || 0
-    const max = Number(item.median_maximum) || 0
-    const range = Math.max(0, max - min)
-    const hasRange = min > 0 && max > 0 && range >= 0
-
+    "others",
+  ];
+  const lookup = (data.each_category_median || []).reduce(
+    (a, x) => ({ ...a, [x.title]: x }),
+    {},);
+  const ranges = categories.map((title) => {
+    const x = lookup[title] || {};
+    const min = Number(x.median_minimum) || 0,
+      max = Number(x.median_maximum) || 0;
     return {
       title,
       min,
-      range,
+      range: Math.max(0, max - min),
       max,
-      label: hasRange ? `${formatSalary(min)} – ${formatSalary(max)}` : "No salary range available"
-    }
-  })
-
-  // to format the graph better
-  const number_max = Number(data.median_max) || 0
-
-  const highestRangeValue = Math.max(
-    ...salaryRanges.map((item) => item.max),
-    number_max, 1
-  )
-
-  const xAxisMax = Math.ceil(highestRangeValue / 10000) * 10000
-
+      label: min && max ? `${money(min)} – ${money(max)}` : "Range unavailable",
+    };
+  });
+  const max =
+    Math.ceil(
+      Math.max(...ranges.map((x) => x.max), Number(data.median_max) || 1) / 10000,) * 10000;
+  const coverage = Math.round(data.coverage_percentage || 0);
+  const median = `${money(data.median_min)} – ${money(data.median_max)}`;
   return (
-    <div className="card">
-      <div className="page-header">
-        <h2>Salary Overview</h2>
-        {/* <p>Use current salary data to benchmark pay, review coverage, and compare compensation structure across roles.</p> */}
-      </div>
-
-      <div className="page-panel-row">
+    <main className="page-shell">
+      <PageHero
+        eyebrow="Pay strategy"
+        title="Know your range before the conversation starts."
+        description="Turn compensation data into a confident negotiation position and a clear filter for opportunities."
+        decision={
+          coverage
+            ? `Anchor around ${median}.`
+            : "Compare roles before naming a number."
+        }
+        decisionDetail="Use role-specific ranges as your starting point, then adjust for location and your proof of impact."
+      />
+      <AdviceRow
+        meaning={{
+          title: "Ranges are useful when you turn them into an ask.",
+          body: `Salary data is available for ${coverage}% of tracked postings. Treat the midpoint as context—not a ceiling—and prepare the value evidence that supports the upper part of your range.`,
+        }}
+        actions={{
+          title: "Prepare your compensation case",
+          items: [
+            "Set a target, a stretch number, and a walk-away point.",
+            "Compare only roles with similar scope and seniority.",
+            "Connect your ask to outcomes, not years of experience alone.",
+          ],
+        }}
+      />
+      <section className="metric-grid">
         <div className="metric-card">
-          <span>Coverage</span>
-          <strong>{coverage_percentage}% ({coverage_count})</strong>
-          <p>{coverage_percentage}% of Postings includes salary data</p>
+          <span>Salary visibility</span>
+          <strong>{coverage}%</strong>
+          <p>{data.coverage_count || 0} postings disclose pay</p>
         </div>
         <div className="metric-card">
-          <span>Median pay</span>
-          <strong>{median_min} - {median_max}/year</strong>
-          <p>The median of salary floor (low-end to high-end)</p>
+          <span>Market range</span>
+          <strong>{median}</strong>
+          <p>Median disclosed annual range</p>
         </div>
         <div className="metric-card">
-          <span>Pay structure</span>
-          <strong>{yearly_percentage}% / {hourly_percentage}%</strong>
-          <p>{yearly_percentage}% Salaried - {hourly_percentage}% Hourly</p>
+          <span>Compensation mix</span>
+          <strong>{Math.round(data.yearly_percentage || 0)}%</strong>
+          <p>Roles reported as salaried</p>
         </div>
-      </div>
-
-      <div className="chart-card">
+      </section>
+      <section className="chart-card">
         <div className="chart-card-header">
-          <h3>Compensation Ranges by Role</h3>
-          {/* <p>Salary ranges by role show floating low-to-high compensation boundaries for current hiring data.</p> */}
+          <div>
+            <div className="module-kicker">Negotiation context</div>
+            <h2>Role ranges worth benchmarking</h2>
+            <p>Compare the scope of roles before you compare the numbers.</p>
+          </div>
         </div>
         <div className="salary-range-chart">
-          <ResponsiveContainer width="100%" height={380}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={salaryRanges}
-              maxBarSize={45} 
+              data={ranges}
               layout="vertical"
-              margin={{ top: 0, right: 24, left: 8, bottom: 0 }}
+              margin={{ left: 5, right: 25 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <CartesianGrid
+                stroke="#dce5ef"
+                strokeDasharray="3 3"
+                horizontal={false}
+              />
               <XAxis
                 type="number"
-                domain={[0, xAxisMax]}
-                tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                domain={[0, max]}
+                tickFormatter={money}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 type="category"
                 dataKey="title"
+                width={155}
+                tick={{ fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
-                width={170}
               />
-              <Tooltip content={<SalaryTooltip />} cursor={{ fill: "rgba(16, 112, 241, 0.08)" }} />
+              <Tooltip content={<SalaryTooltip />} />
               <Bar dataKey="min" stackId="a" fill="transparent" />
-              <Bar dataKey="range" stackId="a" barSize={15} radius={10} fill="var(--accent)" />
+              <Bar
+                dataKey="range"
+                stackId="a"
+                fill="#06B6D4"
+                radius={8}
+                barSize={17}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-    </div>
-  )
+      </section>
+    </main>
+  );
 }
-
-export default Salary
+export default Salary;

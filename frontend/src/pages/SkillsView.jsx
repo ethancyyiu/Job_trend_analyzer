@@ -1,67 +1,87 @@
-import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
+import {Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,} from "recharts";
+import { AdviceRow, PageHero } from "../components/AdviceModules";
+
 export function SkillsView({ cachedData }) {
-    const data = cachedData || { skills: [], concentration: 0 }
-    let skills = data.skills
-
-    let topSkill;
-
-    if (skills.length > 0) {
-        const copy = skills.slice(); 
-        copy.sort((a, b) => b.count - a.count); 
-        topSkill = copy[0].skill; 
-    } else {
-        topSkill = "N/A";
-    }
-
-    const concentration = Number(data.concentration.toFixed(1));
-
-    return (
-        <div className="card">
-            <div className="page-header">
-                <h2>Skills</h2>
-                {/* <p>Track the most requested skills to guide hiring, training, and career planning.</p> */}
-            </div>
-
-            <div className="page-panel-row">
-                <div className="metric-card">
-                    <span>Top skill</span>
-                    <strong>{topSkill}</strong>
-                    <p>The highest-demand skill in the current dataset</p>
-                </div>
-                <div className="metric-card">
-                    <span>Skills tracked</span>
-                    <strong>{skills.length}</strong>
-                    <p>Unique skills included in the current analysis</p>
-                </div>
-                <div className="metric-card">
-                    <span>Concentration Index</span>
-                    <strong>{concentration}%</strong>
-                    <p>Top 3 Skills = {concentration}% of all demand</p>
-                </div>
-            </div>
-
-            <div className="chart-card">
-                <div className="chart-card-header">
-                    <h3>Skills demand by volume</h3>
-                    {/* <p>Compare the most sought-after skills in a clean bar chart designed for quick interpretation.</p> */}
-                </div>
-                <div style={{ height: 420 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={skills}>
-                            <XAxis dataKey="skill" />
-                            <YAxis />
-                            <Tooltip />
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <Bar dataKey="count" fill="#C86541">
-                                {skills.map((entry, index) => (
-                                  <Cell key={`cell-${entry.skill}`} fill={index < 5 ? 'var(--accent)' : 'var(--accent-mid)'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+  const skills = cachedData?.skills || [];
+  const ranked = [...skills].sort((a, b) => Number(b.count) - Number(a.count));
+  const topSkill = ranked[0]?.skill || "your strongest market skill";
+  const concentration = cachedData?.concentration
+    ? Number(cachedData.concentration).toFixed(1)
+    : "—";
+  return (
+    <main className="page-shell">
+      <PageHero
+        eyebrow="Skill strategy"
+        title="Build the skills that open more doors."
+        description="Translate employer demand into a focused learning plan instead of chasing every trend."
+        decision={`Prioritize ${topSkill} first.`}
+        decisionDetail="It is the clearest current signal in the roles we’re tracking."
+      />
+      <AdviceRow
+        meaning={{
+          title: "Demand is concentrated—focus creates leverage.",
+          body: `The top three skills represent ${concentration}% of tracked demand. A deliberate core skill stack will be more valuable than a long, unfocused list.`,
+        }}
+        actions={{
+          title: "Make this week count",
+          items: [
+            `Audit your evidence of ${topSkill} on your resume.`,
+            "Choose one adjacent skill to pair with your core expertise.",
+            "Create one portfolio proof point before applying.",
+          ],
+        }}
+      />
+      <section className="metric-grid">
+        <div className="metric-card">
+          <span>Best next skill</span>
+          <strong>{topSkill}</strong>
+          <p>Highest demand in current roles</p>
         </div>
-    )
+        <div className="metric-card">
+          <span>Options to explore</span>
+          <strong>{skills.length}</strong>
+          <p>Distinct skills in the market</p>
+        </div>
+        <div className="metric-card">
+          <span>Focus signal</span>
+          <strong>{concentration}%</strong>
+          <p>Demand held by the top three</p>
+        </div>
+      </section>
+      <section className="chart-card">
+        <div className="chart-card-header">
+          <div>
+            <div className="module-kicker">Skill map</div>
+            <h2>Where your learning effort will travel furthest</h2>
+            <p>Use this as a prioritization guide, not a checklist.</p>
+          </div>
+        </div>
+        <div style={{ height: 390 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={ranked}
+              margin={{ top: 8, right: 8, left: -22, bottom: 10 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#dce5ef"
+              />
+              <XAxis dataKey="skill" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                {ranked.map((entry, index) => (
+                  <Cell
+                    key={entry.skill}
+                    fill={index < 3 ? "#06B6D4" : "#88ddea"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+    </main>
+  );
 }
-

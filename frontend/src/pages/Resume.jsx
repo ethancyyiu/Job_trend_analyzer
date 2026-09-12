@@ -1,217 +1,320 @@
-import { useState } from "react"
-import axios from "axios"
-import "../pages/Resume.css"
+import { useState } from "react";
+import axios from "axios";
+import "./Resume.css";
 
 export function ResumeAnalyzer() {
-  const [file, setFile] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState(null)
-  const [error, setError] = useState(null)
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+  const API_BASE = import.meta.env.VITE_API_URL || "";
 
-  const API_BASE = import.meta.env.VITE_API_URL || ''
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0]
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile)
-      setError(null)
-    } else {
-      setError("Please select a PDF file")
-    }
-  }
-
-  const handleUpload = async () => {
-    if (!file) {
-      setError("Please select a file first")
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
+  const upload = async () => {
+    if (!file) return setError("Please select a PDF file first.");
+    setLoading(true);
+    setError(null);
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const response = await axios.post(`${API_BASE}/resume_upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      })
-
-
-      setResults(response.data)
+      const body = new FormData();
+      body.append("file", file);
+      const response = await axios.post(`${API_BASE}/resume_upload`, body, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setResults(response.data);
     } catch (err) {
-      setError(err.response?.data?.detail || "Upload failed. Try again.")
+      setError(err.response?.data?.detail || "Upload failed. Try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!results) {
-    return (
-      <div className="resume-page resume-upload-page">
-        <div className="resume-upload-container">
-          <div className="card resume-card">
-            <div className="page-header resume-page-header">
-              <h2>Resume Skill Analyzer</h2>
-              {/* <p>Upload your resume to see skill gaps and job matches in the market.</p> */}
-            </div>
-            <div className="upload-section">
-              <label htmlFor="file-input" className="upload-box upload-label">
-                <div className="upload-icon">📄</div>
-                <p>Drop your resume here or click to browse</p>
-                <span className="upload-hint">.pdf only</span>
-              </label>
-
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                id="file-input"
-                style={{ display: "none" }}
-              />
-
-              {file && <p className="selected-file">✓ {file.name}</p>}
-              {error && <p className="error-message">{error}</p>}
-
-              <button
-                onClick={handleUpload}
-                disabled={!file || loading}
-                className="upload-button"
-              >
-                {loading ? "Analyzing... (~5s)" : "Analyze Resume"}
-              </button>
-            </div>
-          </div>
-          <div className="three-boxes-row">
-            <div className="three-box left-box">
-              <div className="box-topline">
-
-                <span className="box-badge">Missing</span>
-              </div>
-              <h4>Top Missing Skills</h4>
-              <p>See the most valuable skills you don’t have yet</p>
-              <div className="box-microstats">
-                <span>Skill gaps</span>
-                <span className="box-icon">📉</span>
-              </div>
-            </div>
-            <div className="three-box center-box">
-              <div className="box-topline">
-                <span className="box-badge accent">Matches</span>
-              </div>
-              <h4>Matched Jobs</h4>
-              <p>Your top job matches, sorted by salary</p>
-              <div className="box-microstats">
-                <span>Fitting roles</span>
-                <span className="box-icon">🎯</span>
-              </div>
-            </div>
-            <div className="three-box left-box">
-              <div className="box-topline">
-                <span className="box-badge neutral">Signals</span>
-              </div>
-              <h4>Job Matches Per Skill</h4>
-              <p>View best paying jobs matched to each of your skill</p>
-              <div className="box-microstats">
-                <span>Top Skills</span>
-               <span className="box-icon">📊</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Show results
-  return <ResumeResults results={results} onReset={() => setResults(null)} />
-}
-
-function ResumeResults({ results, onReset }) {
-  const { resume_skills, matched_jobs, top_missing_skills, skill_opportunities } = results
-
+  if (results)
+    return <ResumeResults results={results} onReset={() => setResults(null)} />;
   return (
-    <div className="resume-page resume-results-page">
-      <div className="resume-results-container">
+    <div className="resume-page resume-upload-page">
+      <div className="resume-upload-container">
         <div className="card resume-card">
           <div className="page-header resume-page-header">
-            <h2>Your Skill Analysis</h2>
-            <button onClick={onReset} className="reset-button">
-              ← Upload New Resume
+            <h2>Resume Skill Analyzer</h2>
+          </div>
+          <div className="upload-section">
+            <label htmlFor="file-input" className="upload-box upload-label">
+              <div className="upload-icon">📄</div>
+              <p>Drop your resume here or click to browse</p>
+              <span className="upload-hint">PDF only</span>
+            </label>
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={(event) => {
+                const selected = event.target.files[0];
+                if (selected?.type === "application/pdf") {
+                  setFile(selected);
+                  setError(null);
+                } else setError("Please select a PDF file.");
+              }}
+              id="file-input"
+              style={{ display: "none" }}
+            />
+            {file && <p className="selected-file">✓ {file.name}</p>}
+            {error && <p className="error-message">{error}</p>}
+            <button
+              onClick={upload}
+              disabled={!file || loading}
+              className="upload-button"
+            >
+              {loading ? "Analyzing…" : "Analyze Resume"}
             </button>
           </div>
-          {/* Your Skills */}
-          <div className="section resume-section">
-            <h3 className="section-title-center">Your Skills ({resume_skills.length})</h3>
-            <div className="skill-tags">
-              {resume_skills.map((skill, idx) => (
-                <span key={skill} className="skill-tag-yours" style={{ animationDelay: `${idx * 70}ms` }}>
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Matched Jobs */}
-          <div className="section resume-section">
-            <h3>Jobs You Can Apply For Now</h3>
-            <div className="job-cards">
-              {matched_jobs.slice(0, 10).map((job, idx) => (
-                <div key={idx} className="job-card-result" style={{ animationDelay: `${idx * 80}ms` }}>
-                  <div className="job-header">
-                    <h4>{job.title}</h4>
-                    <span className="match-score">
-                      {job.matched_skills}/{job.total_skills} skills match
-                    </span>
-                  </div>
-                  <p className="company">{job.company}</p>
-                  {job.salary_min && job.salary_max && (
-                    <p className="salary">
-                      ${Math.round(job.salary_min / 1000)}k – ${Math.round(job.salary_max / 1000)}k/yr
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Top Missing Skills */}
-          <div className="section resume-section">
-            <h3>Top Skills to Learn (Most in-demand)</h3>
-            <div className="gap-skills">
-              {Object.entries(top_missing_skills)
-                .slice(0, 14)
-                .map(([skill, count], idx) => (
-                  <div key={skill} className="gap-item" style={{ animationDelay: `${idx * 60}ms` }}>
-                    <span className="skill-name">{skill}</span>
-                    <span className="skill-count">{count} postings</span>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Skill Opportunities */}
-          {Object.keys(skill_opportunities).length > 0 && (
-            <div className="section resume-section">
-              <h3>Jobs for Each of Your Skills</h3>
-              {Object.entries(skill_opportunities)
-                .slice(0, 5)
-                .map(([skill, jobs], idx) => (
-                  <div key={skill} className="skill-opportunity" style={{ animationDelay: `${idx * 80}ms` }}>
-                    <h4>{skill}</h4>
-                    <div className="opportunity-jobs">
-                      {jobs.slice(0, 3).map((job, jobIdx) => (
-                        <p key={jobIdx}>
-                          {job.title} @ {job.company}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
+        </div>
+        <div className="three-boxes-row">
+          <InfoCard
+            label="Missing"
+            title="Top Missing Skills"
+            copy="See the valuable skills you can build next."
+            icon="↗"
+          />
+          <InfoCard
+            label="Matches"
+            title="Matched Jobs"
+            copy="See roles where your current experience already fits."
+            icon="◎"
+            accent
+          />
+          <InfoCard
+            label="Signals"
+            title="Job Matches Per Skill"
+            copy="Connect your existing skills to real market demand."
+            icon="⌁"
+          />
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+function InfoCard({ label, title, copy, icon, accent }) {
+  return (
+    <div className="three-box">
+      <div className="box-topline">
+        <span className={`box-badge ${accent ? "accent" : ""}`}>{label}</span>
+      </div>
+      <h4>{title}</h4>
+      <p>{copy}</p>
+      <div className="box-microstats">
+        <span>Career signal</span>
+        <span className="box-icon">{icon}</span>
+      </div>
+    </div>
+  );
+}
+
+function ResumeResults({ results, onReset }) {
+  const {
+    resume_skills = [],
+    matched_jobs = [],
+    top_missing_skills = {},
+    skill_opportunities = {},
+  } = results;
+  const gaps = Object.entries(top_missing_skills);
+  const top = matched_jobs[0];
+  const fit = top
+    ? Math.round((top.matched_skills / top.total_skills) * 100)
+    : 0;
+  return (
+    <div className="resume-page resume-results-page">
+      <div className="resume-results-container">
+        <section className="resume-report-hero">
+          <div className="report-hero-copy">
+            <span className="report-eyebrow">Your career fit report</span>
+            <h1>Turn your experience into your next opportunity.</h1>
+            <p>
+              We mapped your resume against the market and isolated the moves
+              most likely to improve your outcomes.
+            </p>
+          </div>
+          <div className="report-hero-score">
+            <span>Highest salary role you qualify for </span>
+            <strong>{fit}%</strong>
+            <p>{top?.title || "Your top opportunity"}</p>
+          </div>
+          <div className="report-stat-grid">
+            <div>
+              <strong>{resume_skills.length}</strong>
+              <span>skills recognized</span>
+            </div>
+            <div>
+              <strong>{matched_jobs.length}</strong>
+              <span>roles to explore</span>
+            </div>
+            <div>
+              <strong>{gaps.length}</strong>
+              <span>high-value missing skills</span>
+            </div>
+          </div>
+        </section>
+        <div className="resume-report-layout">
+          <div className="resume-report-main">
+            <section className="report-section report-section-dark">
+              <div className="report-section-heading">
+                <div>
+                  <span className="report-eyebrow">Recommended actions</span>
+                  <h2>Make these moves first</h2>
+                </div>
+              </div>
+              <div className="report-action-grid">
+                <Action
+                  number="01"
+                  title="Apply with intention"
+                  copy="Start with your strongest-fit roles and tailor your opening resume bullets."
+                />
+                <Action
+                  number="02"
+                  title="Close one strategic gap"
+                  copy="Build one in-demand skill into a visible portfolio proof point."
+                />
+                <Action
+                  number="03"
+                  title="Lead with your edge"
+                  copy="Move your strongest matching skills to the top of your resume."
+                />
+              </div>
+            </section>
+            <section className="report-section">
+              <div className="report-section-heading">
+                <div>
+                  <span className="report-eyebrow">Ready now</span>
+                  <h2>Roles where you already have momentum</h2>
+                </div>
+                <span className="report-count">
+                  Top {Math.min(matched_jobs.length, 6)} matches
+                </span>
+              </div>
+              <div className="job-cards report-job-cards">
+                {matched_jobs.slice(0, 6).map((job, index) => (
+                  <JobCard
+                    job={job}
+                    index={index}
+                    key={`${job.title}-${index}`}
+                  />
+                ))}
+              </div>
+            </section>
+            <section className="report-section">
+              <div className="report-section-heading">
+                <div>
+                  <span className="report-eyebrow">Growth plan</span>
+                  <h2>Skills with the highest return</h2>
+                </div>
+                <p>
+                  Focus your learning where the market is already signaling
+                  demand.
+                </p>
+              </div>
+              <div className="gap-skills report-gap-skills">
+                {gaps.slice(0, 8).map(([skill, count], index) => (
+                  <article className="gap-item report-gap-item" key={skill}>
+                    <span className="gap-priority">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="skill-name">{skill}</span>
+                    <span className="skill-count">{count} roles</span>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </div>
+          <aside className="resume-report-rail">
+            <section className="report-rail-card skill-inventory">
+              <span className="report-eyebrow">Your advantage</span>
+              <h2>Skills already on your side</h2>
+              <div className="skill-tags">
+                {resume_skills.slice(0, 18).map((skill) => (
+                  <span key={skill} className="skill-tag-yours">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </section>
+            <section className="report-rail-card next-step-card">
+              <span className="report-eyebrow">What you should do next</span>
+              <h2>Build a shortlist of three roles.</h2>
+              <p>
+                Choose high-fit roles, then tailor one strong proof point for
+                each application.
+              </p>
+              <button onClick={onReset} className="report-reset-button">
+                Analyze another resume
+              </button>
+            </section>
+            {Object.keys(skill_opportunities).length > 0 && (
+              <section className="report-rail-card opportunity-card">
+                <span className="report-eyebrow">Market connection</span>
+                <h2>Where your skills lead</h2>
+                {Object.entries(skill_opportunities)
+                  .slice(0, 3)
+                  .map(([skill, jobs]) => (
+                    <div className="skill-opportunity" key={skill}>
+                      <h4>{skill}</h4>
+                      <p>
+                        {jobs
+                          .slice(0, 2)
+                          .map((job) => `${job.title} · ${job.company}`)
+                          .join("\n")}
+                      </p>
+                    </div>
+                  ))}
+              </section>
+            )}
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+function Action({ number, title, copy }) {
+  return (
+    <article>
+      <span>{number}</span>
+      <h3>{title}</h3>
+      <p>{copy}</p>
+    </article>
+  );
+}
+function formatCompensation(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+  if (amount >= 1_000_000) {
+    return `${Number((amount / 1_000_000).toFixed(1))}M`;
+  }
+  return `${Math.round(amount / 1000)}k`;
+}
+
+function JobCard({ job, index }) {
+  const fit = Math.round((job.matched_skills / job.total_skills) * 100);
+  return (
+    <article className="job-card-result report-job-card">
+      <div className="job-header">
+        <div>
+          <span className="job-rank">Best fit #{index + 1}</span>
+          <h4>{job.title}</h4>
+        </div>
+        <span className="match-score">{fit}% fit</span>
+      </div>
+      <p className="company">{job.company}</p>
+      <div className="match-meter">
+        <span style={{ width: `${fit}%` }} />
+      </div>
+      <div className="job-card-footer">
+        <span>
+          {job.matched_skills} of {job.total_skills} skills matched
+        </span>
+        {job.salary_min && job.salary_max && (
+          <strong>
+            {formatCompensation(job.salary_min)} –{" "}
+            {formatCompensation(job.salary_max)}
+          </strong>
+        )}
+      </div>
+    </article>
+  );
 }

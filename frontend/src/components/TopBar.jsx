@@ -1,4 +1,16 @@
-export default function TopBar({ page, onMenuClick }) {
+function formatLastScrapedAt(value) {
+  if (!value) return "Last scrape unavailable";
+
+  const timestamp = new Date(value);
+  if (Number.isNaN(timestamp.getTime())) return "Last scrape unavailable";
+
+  return `Last scrape: ${new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(timestamp)}`;
+}
+
+export default function TopBar({ page, lastScrapedAt, onMenuClick }) {
   const name =
     page === "SkillsView" ? "Skills" : page.replace(/([A-Z])/g, " $1").trim();
   return (
@@ -14,7 +26,9 @@ export default function TopBar({ page, onMenuClick }) {
           </button>
           <div className="topbar-page">{name}</div>
         </div>
-        <div className="topbar-sync">Daily refresh</div>
+        <div className="topbar-sync" title="Time the most recent scraper run completed">
+          {formatLastScrapedAt(lastScrapedAt)}
+        </div>
       </div>
     </div>
   );

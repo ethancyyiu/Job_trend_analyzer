@@ -35,6 +35,21 @@ def get_trends():
         
     return list(answer.values())
 
+@router.get("/metadata")
+def get_metadata():
+    try:
+        rows = query("""
+            SELECT completed_at
+            FROM scrape_runs
+            ORDER BY completed_at DESC
+            LIMIT 1
+        """)
+    except Exception:
+        # No completed run has created the table yet.
+        rows = []
+
+    return {"last_scraped_at": rows[0][0].isoformat() if rows else None}
+
 @router.get("/trends/forecast")
 def get_forecast(response: Response):
     try:

@@ -24,7 +24,7 @@ export default function App() {
   }, [page])
 
   useEffect(() => {
-    const endpoints = ['/trends', '/trends/forecast', '/skills', '/postings', '/salary']
+    const endpoints = ['/trends', '/trends/forecast', '/skills', '/postings', '/salary', '/metadata']
     endpoints.forEach((endpoint) => {
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))
@@ -44,7 +44,9 @@ export default function App() {
 
   return (
     <div style = {{fontFamily: "Inter, sans-serif", padding: "0", width: "100%"}}>
-      <Layout page={page} setPage={setPage}>{showing_page}</Layout>
+      <Layout page={page} setPage={setPage} lastScrapedAt={cache['/metadata']?.last_scraped_at}>
+        {showing_page}
+      </Layout>
       <Analytics />
     </div>
   )

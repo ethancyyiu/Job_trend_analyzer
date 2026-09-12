@@ -12,6 +12,7 @@ from analysis.salary_extractor import extract_salary
 from analysis.skill_extractor import extract_skills, run
 from analysis.category_extractor import category_extractor 
 from scraper.saving_forecast import generate_and_save_forecast
+from scraper.record_time import record_successful_scrape
 
 load_dotenv()
 log = logging.getLogger(__name__)
@@ -20,7 +21,6 @@ DB_URL = os.environ["DATABASE_URL"]
 
 def get_db():
     return psycopg2.connect(DB_URL)
-
 
 def save(db, posting):
     try: 
@@ -159,20 +159,21 @@ def scrape(keyword, location, pages, batch_number):
 
 
 if __name__ == "__main__":
-    scrape("data scientist", "remote", 2, 1)
-    scrape("data scientist", "canada", 1, 3)
+    # scrape("data scientist", "remote", 2, 1)
+    # scrape("data scientist", "canada", 1, 3)
 
-    scrape("software engineer", "remote", 2, 4)
-    scrape("software engineer", "canada", 2, 6)
+    # scrape("software engineer", "remote", 2, 4)
+    # scrape("software engineer", "canada", 2, 6)
 
-    scrape("data engineer", "remote", 2, 8)
-    scrape("data engineer", "canada", 1, 10)
+    # scrape("data engineer", "remote", 2, 8)
+    # scrape("data engineer", "canada", 1, 10)
 
-    scrape("machine learning engineer", "remote", 2, 11)
-    scrape("machine learning engineer", "canada", 1, 13)
+    # scrape("machine learning engineer", "remote", 2, 11)
+    # scrape("machine learning engineer", "canada", 1, 13)
     
-    scrape("data analyst", "remote", 2, 14)
+    # scrape("data analyst", "remote", 2, 14)
     scrape("data analyst", "canada", 1, 16)
     run()
     category_extractor()
     generate_and_save_forecast()
+    record_successful_scrape()

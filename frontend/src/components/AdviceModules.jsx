@@ -5,6 +5,13 @@ export function PageHero({
   decision,
   decisionDetail,
 }) {
+  const revealDetails = () => {
+    document.getElementById("page-details")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <section className="page-hero">
       <div>
@@ -17,6 +24,14 @@ export function PageHero({
         <strong>{decision}</strong>
         <p>{decisionDetail}</p>
       </aside>
+      <button className="hero-continue" type="button" onClick={revealDetails}>
+        <span>See your next actions</span>
+        <span className="hero-continue-icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16">
+            <path d="m3 6 5 5 5-5" />
+          </svg>
+        </span>
+      </button>
     </section>
   );
 }
@@ -28,7 +43,7 @@ export function AdviceRow({
   actionLabel = "Take the next step",
 }) {
   return (
-    <section className="advice-grid">
+    <section className="advice-grid" id="page-details">
       <article className="advice-card">
         <div className="module-kicker">What this means</div>
         <h2>{meaning.title}</h2>

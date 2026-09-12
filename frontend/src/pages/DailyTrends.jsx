@@ -34,8 +34,23 @@ export function DailyTrends({ cachedData, forecastData }) {
 
     const forecastList = Array.isArray(forecastData?.forecast) ? forecastData.forecast : [];
     const categoryForecasts = forecastData?.category_forecasts ?? {};
+    const isForecastLoading = forecastData === undefined || forecastData?.status === "pending";
     const lastDataIndex = data.length - 1;
     const categoryForecastKey = (category) => `${category}Forecast`;
+    // Keep seven future dates in the chart while the precomputed forecast is
+    // being generated. This prevents the chart from jumping wider later.
+    const forecastSlots = isForecastLoading && data.length > 0
+        ? Array.from({ length: 7 }, (_, index) => {
+            const nextDate = new Date(`${data[lastDataIndex].date}T00:00:00`);
+            nextDate.setDate(nextDate.getDate() + index + 1);
+            return {
+                date: nextDate.toISOString().slice(0, 10),
+                actualCount: null,
+                forecastCount: null,
+                count: null,
+            };
+        })
+        : [];
     const chartData = [
         // Give the forecast series the final actual value as its first point. This
         // anchors the dotted segment exactly where the solid series ends.
@@ -50,12 +65,12 @@ export function DailyTrends({ cachedData, forecastData }) {
                 ])
             ),
         })),
-        ...forecastList.map((row) => {
+        ...(isForecastLoading ? forecastSlots : forecastList).map((row) => {
             const date = row.ds ? row.ds.slice(0, 10) : row.date;
             return {
             date,
             actualCount: null,
-            forecastCount: Number(row.yhat ?? 0),
+            forecastCount: row.yhat == null ? null : Number(row.yhat),
             count: null,
             ...Object.fromEntries(
                 Object.entries(categoryForecasts).map(([category, forecasts]) => {
@@ -146,7 +161,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                   <div className="chart-loading" role="status">Loading market activity…</div>
                 ) : hasLoadError ? (
                   <div className="chart-loading chart-error" role="alert">We couldn’t load trend data. Please refresh and try again.</div>
-                ) : <div style={{ height: 420 }}>
+                ) : <div className="trend-chart" style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>
                             <XAxis dataKey="date" />
@@ -196,6 +211,11 @@ export function DailyTrends({ cachedData, forecastData }) {
                             <Tooltip />
                         </LineChart>
                     </ResponsiveContainer>
+                    {isForecastLoading && (
+                      <div className="prediction-loading" role="status" aria-live="polite">
+                        Prediction is loading…
+                      </div>
+                    )}
                 </div>}
             </div>
         </div>

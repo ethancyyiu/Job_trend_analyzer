@@ -243,6 +243,24 @@
   line-height: 1.55;
 }
 
+.trend-chart {
+  position: relative;
+}
+
+.prediction-loading {
+  position: absolute;
+  right: 4%;
+  top: 46%;
+  transform: translateY(-50%);
+  padding: 8px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
 .postings-table {
   width: 100%;
   min-width: 700px;

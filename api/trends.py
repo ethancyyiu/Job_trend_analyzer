@@ -1,29 +1,8 @@
-import os
-import threading
-import time
-
 from fastapi import APIRouter, Response
 from api.db import query
-from analysis.forecast import load_data, prepare_data, train_model, forecast_next_days, calculate_forecast
+from analysis.predictions import JOB_CATEGORIES
 
 router = APIRouter()
-
-JOB_CATEGORIES = [
-    "software engineer",
-    "data engineer",
-    "machine learning engineer",
-    "data scientist",
-    "data analyst",
-    "others",
-]
-
-# A complete forecast currently fits seven Prophet models.  The underlying
-# posting history changes only when the scraper runs, so recomputing it for
-# every page visit makes the dashboard needlessly slow.  Keep the completed
-# response in-process for a short, configurable period.
-FORECAST_CACHE_TTL_SECONDS = int(os.getenv("FORECAST_CACHE_TTL_SECONDS", "600"))
-_forecast_cache = {"value": None, "created_at": 0.0}
-_forecast_cache_lock = threading.Lock()
 
 @router.get("/trends")
 def get_trends():
@@ -56,65 +35,23 @@ def get_trends():
 
 @router.get("/trends/forecast")
 def get_forecast(response: Response):
-    now = time.monotonic()
-    cached = _forecast_cache["value"]
-    cache_age = now - _forecast_cache["created_at"]
-    if cached is not None and cache_age < FORECAST_CACHE_TTL_SECONDS:
-        response.headers["Cache-Control"] = "public, max-age=60"
-        response.headers["X-Forecast-Cache"] = "HIT"
-        return cached
+    try:
+        rows = query("""
+            SELECT payload
+            FROM forecast_cache
+            WHERE cache_key = 'daily_trends'
+        """)
+    except Exception:
+        # The scraper creates this table. Until its first successful run, the
+        # UI reserves the prediction area and communicates that it is pending.
+        rows = []
 
-    # Hold the lock while calculating so simultaneous dashboard loads do not
-    # all start the same seven expensive model fits.
-    with _forecast_cache_lock:
-        now = time.monotonic()
-        cached = _forecast_cache["value"]
-        cache_age = now - _forecast_cache["created_at"]
-        if cached is not None and cache_age < FORECAST_CACHE_TTL_SECONDS:
-            response.headers["Cache-Control"] = "public, max-age=60"
-            response.headers["X-Forecast-Cache"] = "HIT"
-            return cached
+    if not rows:
+        response.status_code = 202
+        return {"status": "pending"}
 
-        forecast_response = _build_forecast()
-        _forecast_cache["value"] = forecast_response
-        _forecast_cache["created_at"] = time.monotonic()
-
-    response.headers["Cache-Control"] = "public, max-age=60"
-    response.headers["X-Forecast-Cache"] = "MISS"
-    return forecast_response
-
-
-def _build_forecast():
-    df = load_data()
-    prophet_data = prepare_data(df)
-    latest_date = df['posting_date'].max()
-    model = train_model(prophet_data)
-    forecast = forecast_next_days(model, days_ahead = 7)
-    insights = calculate_forecast(prophet_data, forecast)
-
-    category_forecasts = {}
-    for category in JOB_CATEGORIES:
-        category_rows = load_data(category)
-        # Prophet needs at least two observations to fit a meaningful trend.
-        if len(category_rows) < 2:
-            category_forecasts[category] = []
-            continue
-
-        # Align every category forecast with the same latest actual date as the
-        # total trend, including quiet days at the end of a category's history.
-        category_data = prepare_data(
-            category_rows, end_date=latest_date, fill_missing_with_zero=True
-        )
-        category_model = train_model(category_data)
-        category_forecasts[category] = forecast_next_days(
-            category_model, days_ahead=7
-        ).to_dict('records')
-    
-    return {
-        "forecast": forecast.to_dict('records'),
-        "category_forecasts": category_forecasts,
-        "summary": insights
-    }
+    response.headers["Cache-Control"] = "public, max-age=300"
+    return rows[0][0]
 
 @router.get("/skills")
 def get_skills():

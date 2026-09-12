@@ -6,7 +6,6 @@ from analysis.predictions import build_forecast
 
 load_dotenv()
 
-
 def generate_and_save_forecast():
     """Persist the prediction after the daily scrape so API reads stay fast."""
     print("Generating daily forecast...")

@@ -12,9 +12,9 @@ export default function TopBar({ page, onMenuClick }) {
           >
             ☰
           </button>
-          <div className="topbar-page">Your career strategy / {name}</div>
+          <div className="topbar-page">{name}</div>
         </div>
-        <div className="topbar-sync">Market signals refresh daily</div>
+        <div className="topbar-sync">Daily refresh</div>
       </div>
     </div>
   );

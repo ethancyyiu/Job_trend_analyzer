@@ -86,7 +86,7 @@
 }
 .topbar-inner {
   width: 100%;
-  padding: 0 42px;
+  padding: 0 16px 0 26px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -97,11 +97,12 @@
   align-items: center;
 }
 .topbar-page {
-  font: 700 14px var(--display);
+  font: 800 16px var(--display);
   color: var(--slate);
 }
 .topbar-sync {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 750;
   color: var(--muted);
   background: #e8f6f9;
   border-radius: 999px;

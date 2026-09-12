@@ -1,4 +1,8 @@
-from fastapi import APIRouter
+import os
+import threading
+import time
+
+from fastapi import APIRouter, Response
 from api.db import query
 from analysis.forecast import load_data, prepare_data, train_model, forecast_next_days, calculate_forecast
 
@@ -12,6 +16,14 @@ JOB_CATEGORIES = [
     "data analyst",
     "others",
 ]
+
+# A complete forecast currently fits seven Prophet models.  The underlying
+# posting history changes only when the scraper runs, so recomputing it for
+# every page visit makes the dashboard needlessly slow.  Keep the completed
+# response in-process for a short, configurable period.
+FORECAST_CACHE_TTL_SECONDS = int(os.getenv("FORECAST_CACHE_TTL_SECONDS", "600"))
+_forecast_cache = {"value": None, "created_at": 0.0}
+_forecast_cache_lock = threading.Lock()
 
 @router.get("/trends")
 def get_trends():
@@ -43,7 +55,36 @@ def get_trends():
     return list(answer.values())
 
 @router.get("/trends/forecast")
-def get_forecast():
+def get_forecast(response: Response):
+    now = time.monotonic()
+    cached = _forecast_cache["value"]
+    cache_age = now - _forecast_cache["created_at"]
+    if cached is not None and cache_age < FORECAST_CACHE_TTL_SECONDS:
+        response.headers["Cache-Control"] = "public, max-age=60"
+        response.headers["X-Forecast-Cache"] = "HIT"
+        return cached
+
+    # Hold the lock while calculating so simultaneous dashboard loads do not
+    # all start the same seven expensive model fits.
+    with _forecast_cache_lock:
+        now = time.monotonic()
+        cached = _forecast_cache["value"]
+        cache_age = now - _forecast_cache["created_at"]
+        if cached is not None and cache_age < FORECAST_CACHE_TTL_SECONDS:
+            response.headers["Cache-Control"] = "public, max-age=60"
+            response.headers["X-Forecast-Cache"] = "HIT"
+            return cached
+
+        forecast_response = _build_forecast()
+        _forecast_cache["value"] = forecast_response
+        _forecast_cache["created_at"] = time.monotonic()
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    response.headers["X-Forecast-Cache"] = "MISS"
+    return forecast_response
+
+
+def _build_forecast():
     df = load_data()
     prophet_data = prepare_data(df)
     latest_date = df['posting_date'].max()

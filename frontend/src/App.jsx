@@ -17,6 +17,12 @@ export default function App() {
   const [page, setPage] = useState("DailyTrends")
   const [cache, setCache] = useState({})
 
+  // Pages are swapped in place rather than through URL routes, so reset the
+  // document position whenever the active page changes.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [page])
+
   useEffect(() => {
     const endpoints = ['/trends', '/trends/forecast', '/skills', '/postings', '/salary']
     endpoints.forEach((endpoint) => {

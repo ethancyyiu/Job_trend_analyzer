@@ -1,6 +1,5 @@
 from playwright.sync_api import sync_playwright
 import psycopg2
-from psycopg2.extras import Json
 from datetime import date
 import time
 import os
@@ -12,7 +11,7 @@ import logging
 from analysis.salary_extractor import extract_salary
 from analysis.skill_extractor import extract_skills, run
 from analysis.category_extractor import category_extractor 
-from analysis.predictions import build_forecast
+from scraper.saving_forecast import generate_and_save_forecast
 
 load_dotenv()
 log = logging.getLogger(__name__)
@@ -159,48 +158,21 @@ def scrape(keyword, location, pages, batch_number):
         print("\nScrape complete.")
 
 
-def generate_and_save_forecast():
-    """Persist the prediction after the daily scrape so API reads stay fast."""
-    print("Generating daily forecast...")
-    payload = build_forecast()
-    db = get_db()
-    try:
-        with db.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS forecast_cache (
-                    cache_key TEXT PRIMARY KEY,
-                    payload JSONB NOT NULL,
-                    generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )
-            """)
-            cur.execute("""
-                INSERT INTO forecast_cache (cache_key, payload, generated_at)
-                VALUES ('daily_trends', %s, NOW())
-                ON CONFLICT (cache_key) DO UPDATE SET
-                    payload = EXCLUDED.payload,
-                    generated_at = EXCLUDED.generated_at
-            """, (Json(payload),))
-        db.commit()
-        print("Daily forecast saved.")
-    finally:
-        db.close()
-
-
 if __name__ == "__main__":
     scrape("data scientist", "remote", 2, 1)
-    # scrape("data scientist", "canada", 1, 3)
+    scrape("data scientist", "canada", 1, 3)
 
-    # scrape("software engineer", "remote", 2, 4)
-    # scrape("software engineer", "canada", 2, 6)
+    scrape("software engineer", "remote", 2, 4)
+    scrape("software engineer", "canada", 2, 6)
 
-    # scrape("data engineer", "remote", 2, 8)
-    # scrape("data engineer", "canada", 1, 10)
+    scrape("data engineer", "remote", 2, 8)
+    scrape("data engineer", "canada", 1, 10)
 
-    # scrape("machine learning engineer", "remote", 2, 11)
-    # scrape("machine learning engineer", "canada", 1, 13)
+    scrape("machine learning engineer", "remote", 2, 11)
+    scrape("machine learning engineer", "canada", 1, 13)
     
-    # scrape("data analyst", "remote", 2, 14)
-    # scrape("data analyst", "canada", 1, 16)
+    scrape("data analyst", "remote", 2, 14)
+    scrape("data analyst", "canada", 1, 16)
     run()
     category_extractor()
     generate_and_save_forecast()

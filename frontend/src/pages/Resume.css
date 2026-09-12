@@ -139,7 +139,9 @@
 .resume-results-container {
   width: 100%;
   max-width: none;
-  margin: 100;
+  /* Match the upload view: invalid unitless margins can be interpreted
+     inconsistently by deployed/minified stylesheets. */
+  margin: 0;
   padding: 0 16px;
   box-sizing: border-box;
   display: flex;

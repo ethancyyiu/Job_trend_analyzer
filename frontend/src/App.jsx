@@ -2,7 +2,6 @@ import {useState, useEffect} from 'react'
 import {DailyTrends} from "./pages/DailyTrends.jsx"
 import {SkillsView} from "./pages/SkillsView.jsx"
 import {Postings} from "./pages/Postings.jsx"
-import Home from "./pages/Home.jsx"
 import {Salary} from "./pages/Salary.jsx"
 import Layout from "./components/Layout.jsx"
 import axios from 'axios'
@@ -13,11 +12,13 @@ import {ResumeAnalyzer} from "./pages/Resume.jsx"
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function App() {
-  const [page, setPage] = useState("Home")
+  // The dashboard is the product's primary job-to-be-done, so users arrive
+  // directly at the market signal instead of a promotional landing page.
+  const [page, setPage] = useState("DailyTrends")
   const [cache, setCache] = useState({})
 
   useEffect(() => {
-    const endpoints = ['/home', '/trends', '/trends/forecast', '/skills', '/postings', '/salary']
+    const endpoints = ['/trends', '/trends/forecast', '/skills', '/postings', '/salary']
     endpoints.forEach((endpoint) => {
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))
@@ -29,8 +30,7 @@ export default function App() {
   }, [])
 
   let showing_page
-  if (page === "Home") showing_page = <Home setPage={setPage} cachedData={cache['/home']} />
-  else if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} forecastData={cache['/trends/forecast']} />
+  if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} forecastData={cache['/trends/forecast']} />
   else if (page === "SkillsView") showing_page = <SkillsView cachedData={cache['/skills']} />
   else if (page === "Salary") showing_page = <Salary cachedData={cache['/salary']} />
   else if (page === "ResumeAnalyzer") showing_page = <ResumeAnalyzer />

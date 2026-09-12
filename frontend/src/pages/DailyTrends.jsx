@@ -2,6 +2,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, R
 import { useState } from "react"
 import { CategoryToggle } from "../components/CategoryToggle"
 
+function MetricValue({ isLoading, children }) {
+    if (isLoading) {
+        return <span className="metric-value-skeleton" aria-label="Loading value" />
+    }
+
+    return <strong>{children}</strong>
+}
+
 export function DailyTrends({ cachedData, forecastData }) {
 
     
@@ -14,6 +22,8 @@ export function DailyTrends({ cachedData, forecastData }) {
         "others"
     ]);
 
+    const isLoading = cachedData === undefined
+    const hasLoadError = cachedData === null
     let data;
     if (Array.isArray(cachedData)) {
         data = cachedData;
@@ -97,42 +107,46 @@ export function DailyTrends({ cachedData, forecastData }) {
         <div className="card">
             <div className="page-header">
                 <h2>Daily Trends</h2>
-                {/* <p>Explore posting trends over time to identify hiring momentum and market shifts.</p> */}
+                <p>Monitor the latest hiring activity and compare demand across roles.</p>
             </div>
 
             <div className="page-panel-row">
                 <div className="metric-card">
                     <span>New postings today</span>
-                    <strong>{latest}</strong>
+                    <MetricValue isLoading={isLoading}>{latest}</MetricValue>
                     <p>Number of postings whose date_posted is today</p>
                 </div>
                 <div className="metric-card">
                     <span>Momentum</span>
-                    <strong>
+                    {isLoading ? <MetricValue isLoading /> : <strong>
                       {changeLabel}
                         <span className={`trend-pill ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`}>
                             {trendSymbol}
                         </span>
-                    </strong>
+                    </strong>}
                     <p>Change from the prior period, so you know if demand is accelerating</p>
                 </div>
                 <div className="metric-card">
                     <span>Number of Days</span>
-                    <strong>{data.length}</strong>
+                    <MetricValue isLoading={isLoading}>{data.length}</MetricValue>
                     <p>Data points available for analysis</p>
                 </div>
             </div>
 
-            <CategoryToggle 
-                activeCategories={activeCategories}
-                setActiveCategories={setActiveCategories}
-            />
+            {!isLoading && !hasLoadError && <CategoryToggle 
+              activeCategories={activeCategories}
+              setActiveCategories={setActiveCategories}
+            />}
 
             <div className="chart-card">
                 <div className="chart-card-header">
                     <h3>Activity Trend by Date</h3>
                 </div>
-                <div style={{ height: 420 }}>
+                {isLoading ? (
+                  <div className="chart-loading" role="status">Loading market activity…</div>
+                ) : hasLoadError ? (
+                  <div className="chart-loading chart-error" role="alert">We couldn’t load trend data. Please refresh and try again.</div>
+                ) : <div style={{ height: 420 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>
                             <XAxis dataKey="date" />
@@ -182,7 +196,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                             <Tooltip />
                         </LineChart>
                     </ResponsiveContainer>
-                </div>
+                </div>}
             </div>
         </div>
     )

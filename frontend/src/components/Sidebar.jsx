@@ -6,7 +6,7 @@ import logo from '../assets/market_pulse_logo.png'
 export default function Sidebar({ page, setPage }) {
     return (
         <div className="sidebar-root">
-            <div className="sidebar-brand" onClick={() => setPage('Home')}>
+            <div className="sidebar-brand" onClick={() => setPage('DailyTrends')}>
                 <div className="brand-logo">
                     <div className="brand-logo">
                         <img

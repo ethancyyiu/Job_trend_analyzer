@@ -40,9 +40,6 @@ async def resume_upload(file: UploadFile = File(...)):
         FROM postings
         WHERE skills IS NOT NULL AND skills != '{}'
     """)
-    all_skills = [row[0] for row in all_skills_result]
-    
-    
     # top jobs that each skill has to offer
     job_matches = {}
 
@@ -59,15 +56,16 @@ async def resume_upload(file: UploadFile = File(...)):
 
         for title, company, sal_min, sal_max, skill in jobs_rows:
             # if skill is not in resume, leave it
-            if skill not in resume_lower:
+            normalized_skill = skill.lower()
+            if normalized_skill not in resume_lower:
                 continue
             
             # if skill is not yet in the dictionary as a key, we gotta add it
-            if skill not in job_matches:
-                job_matches[skill] = []
+            if normalized_skill not in job_matches:
+                job_matches[normalized_skill] = []
 
-            if len(job_matches[skill]) < 5:
-                job_matches[skill].append({
+            if len(job_matches[normalized_skill]) < 5:
+                job_matches[normalized_skill].append({
                     "title": title,
                     "company": company,
                     "salary_min": sal_min,
@@ -97,7 +95,7 @@ async def resume_upload(file: UploadFile = File(...)):
 
     missing_skills = {}
     for skill, count in all_market_skills.items():
-        if skill not in resume_skills_lower:
+        if skill.lower() not in resume_skills_lower:
             missing_skills[skill] = count
     
     # top jobs that the user qualifies for, for each skills 
@@ -137,5 +135,3 @@ async def resume_upload(file: UploadFile = File(...)):
         "top_missing_skills": dict(list(missing_skills.items())[:14]),
         "skill_opportunities": job_matches
     }
-
-    

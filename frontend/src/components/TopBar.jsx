@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function TopBar({ page, onMenuClick }) {
   return (
     <div className="topbar-root">

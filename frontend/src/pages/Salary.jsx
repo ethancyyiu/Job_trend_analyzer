@@ -1,5 +1,16 @@
-import React from "react"
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer} from "recharts"
+
+function SalaryTooltip({ active, payload }) {
+  if (!active || !payload || !payload.length) return null
+  const item = payload[0].payload
+  const formatSalary = (value) => `$${Math.round(Number(value) / 1000)}k`
+  return (
+    <div className="custom-tooltip">
+      <div className="tooltip-title">{item.title}</div>
+      {item.max > 0 && <div>{formatSalary(item.min)} low - {formatSalary(item.max)} high / year</div>}
+    </div>
+  )
+}
 
 export function Salary({ cachedData }) {
   const data = cachedData || {
@@ -73,19 +84,6 @@ export function Salary({ cachedData }) {
   )
 
   const xAxisMax = Math.ceil(highestRangeValue / 10000) * 10000
-
-  // tooltip so when I hover over it, it has the card
-  const SalaryTooltip = ({ active, payload }) => {
-    if (!active || !payload || !payload.length) return null
-    const item = payload[0].payload
-    return (
-      <div className="custom-tooltip">
-        <div className="tooltip-title">{item.title}</div>
-        
-        {item.max > 0 && <div>{formatSalary(item.min)} low - {formatSalary(item.max)} high / year</div>}
-      </div>
-    )
-  }
 
   return (
     <div className="card">

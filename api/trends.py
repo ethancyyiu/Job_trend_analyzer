@@ -29,6 +29,8 @@ def get_trends():
             answer[date][cat] = 0
         
     for date, category, count in each_category:
+        if date not in answer:
+            answer[date] = {"date": date, "count": 0}
         answer[date][category] = count
         
     return list(answer.values())
@@ -77,7 +79,7 @@ def get_skills():
         total += i[1]
     
     top_three = 0
-    for i in range(min(3, len(rows))):
+    for i in range(min(3, len(concentration))):
         top_three += concentration[i][1]
     
     if total > 0:
@@ -226,8 +228,8 @@ def home():
         ORDER BY date_posted DESC
         LIMIT 2""")
     
-    latest_count = rows[0][1]
-    old_count = rows[1][1]
+    latest_count = rows[0][1] if rows else 0
+    old_count = rows[1][1] if len(rows) > 1 else 0
     momentum = 0
     if old_count > 0:
         momentum = (latest_count - old_count) / old_count
@@ -242,7 +244,7 @@ def home():
         LIMIT 1;
     """)
     
-    top_skill = skills[0][0]
+    top_skill = skills[0][0] if skills else None
     
     median = query("""
         SELECT 
@@ -252,10 +254,12 @@ def home():
         WHERE salary_min IS NOT NULL or salary_max IS NOT NULL;          
     """)
     
-    median_min = median[0][0]
-    median_max = median[0][1]
+    median_min = median[0][0] if median else None
+    median_max = median[0][1] if median else None
     
     def format_k(value):
+        if value is None:
+            return None
         if value >= 1000:
             return f"{int(value / 1000)}k"
         return str(int(value))

@@ -101,9 +101,12 @@ def calculate_forecast(historical_df, forecast_df):
     if forecast_avg > latest_actual:
         direction = "Up" 
     else: 
-        "Down"
+        direction = "Down"
     
-    change = ((forecast_avg - latest_actual) / latest_actual) * 100
+    if latest_actual:
+        change = ((forecast_avg - latest_actual) / latest_actual) * 100 
+    else:
+        change = 0
     
     if change > 10:
         trend_signal = "Accelerating"

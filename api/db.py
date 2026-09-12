@@ -19,6 +19,7 @@ def _get_pool():
 def query(sql, params=None):
     p = _get_pool()
     conn = None
+    returned_to_pool = False
     try:
         conn = p.getconn()
         
@@ -46,9 +47,11 @@ def query(sql, params=None):
             try:
                 conn.rollback()
                 p.putconn(conn)
+                returned_to_pool = True
             except Exception:
                 try:
                     p.putconn(conn, close=True)
+                    returned_to_pool = True
                 except Exception:
                     pass
         raise
@@ -56,11 +59,12 @@ def query(sql, params=None):
     finally:
         if conn is not None:
             # Return the connection exactly once
-            try:
-                p.putconn(conn)
-            except Exception:
-                # If pool rejects it, close the connection
+            if not returned_to_pool:
                 try:
-                    p.putconn(conn, close=True)
+                    p.putconn(conn)
                 except Exception:
-                    pass
+                    # If pool rejects it, close the connection
+                    try:
+                        p.putconn(conn, close=True)
+                    except Exception:
+                        pass

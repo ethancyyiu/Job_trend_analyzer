@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function Nav({page, setPage}){
   const items = [
     {key:'DailyTrends', label:'Daily Trends'},

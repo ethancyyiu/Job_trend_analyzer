@@ -16,14 +16,6 @@ export function CategoryToggle({ activeCategories, setActiveCategories }) {
     }
   };
 
-  const handleSelectAll = () => {
-    if (activeCategories.length === categories.length) {
-      setActiveCategories([]);
-    } else {
-      setActiveCategories(categories.map(cat => cat.value));
-    }
-  };
-
   return (
     <div className="category-toggle">
       <div className="checkbox-group">

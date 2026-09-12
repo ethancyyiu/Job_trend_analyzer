@@ -4,6 +4,15 @@ from analysis.forecast import load_data, prepare_data, train_model, forecast_nex
 
 router = APIRouter()
 
+JOB_CATEGORIES = [
+    "software engineer",
+    "data engineer",
+    "machine learning engineer",
+    "data scientist",
+    "data analyst",
+    "others",
+]
+
 @router.get("/trends")
 def get_trends():
     rows = query("""
@@ -22,13 +31,10 @@ def get_trends():
         GROUP BY date_posted, job_category
         ORDER BY date_posted""")
     
-    all_categories = ["software engineer", "data engineer", "machine learning engineer", 
-                      "data scientist", "data analyst", "others"]
-    
     answer = {}
     for date, count in rows:
         answer[date] = {"date": date, "count": count}
-        for cat in all_categories:
+        for cat in JOB_CATEGORIES:
             answer[date][cat] = 0
         
     for date, category, count in each_category:
@@ -40,12 +46,32 @@ def get_trends():
 def get_forecast():
     df = load_data()
     prophet_data = prepare_data(df)
+    latest_date = df['posting_date'].max()
     model = train_model(prophet_data)
     forecast = forecast_next_days(model, days_ahead = 7)
     insights = calculate_forecast(prophet_data, forecast)
+
+    category_forecasts = {}
+    for category in JOB_CATEGORIES:
+        category_rows = load_data(category)
+        # Prophet needs at least two observations to fit a meaningful trend.
+        if len(category_rows) < 2:
+            category_forecasts[category] = []
+            continue
+
+        # Align every category forecast with the same latest actual date as the
+        # total trend, including quiet days at the end of a category's history.
+        category_data = prepare_data(
+            category_rows, end_date=latest_date, fill_missing_with_zero=True
+        )
+        category_model = train_model(category_data)
+        category_forecasts[category] = forecast_next_days(
+            category_model, days_ahead=7
+        ).to_dict('records')
     
     return {
         "forecast": forecast.to_dict('records'),
+        "category_forecasts": category_forecasts,
         "summary": insights
     }
 

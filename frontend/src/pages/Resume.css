@@ -1264,6 +1264,11 @@
     animation: none;
   }
 
+  .resume-page {
+    opacity: 1;
+    transform: none;
+  }
+
   .report-action-grid article {
     transition: none;
   }

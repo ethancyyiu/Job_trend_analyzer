@@ -5,8 +5,8 @@ export default function Home({ setPage, cachedData }) {
   const momentumPercent = cachedData && typeof cachedData.momentum === 'number'
     ? `${Math.round(cachedData.momentum * 100)}%`
     : "+12%"
-  const totalPostings = cachedData?.total || "2,400+"
-  const skillsCount = "70+"
+  const totalPostings = cachedData?.total || "16,000+"
+  const skillsCount = "80+"
   const topSkill = cachedData?.top_skill?.toUpperCase() || 'REACT'
   const salaryRange = (cachedData && cachedData.rounded_median_min && cachedData.rounded_median_max)
     ? `${cachedData.rounded_median_min}–${cachedData.rounded_median_max}`

@@ -1,6 +1,7 @@
 on:
   schedule:
-    - cron: "0 13 */1 * *"
+    - cron: "0 10 * * *"   # 10 AM Ontario time
+    - cron: "0 17 * * *"   # 5 PM Ontario time
   workflow_dispatch:
 
 jobs:

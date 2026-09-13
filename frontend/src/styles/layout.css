@@ -120,6 +120,29 @@
   display: grid;
   gap: 24px;
 }
+.page-shell > * {
+  animation: dashboard-reveal 220ms ease-out both;
+}
+.page-shell > *:nth-child(1) { animation-delay: 0ms; }
+.page-shell > *:nth-child(2) { animation-delay: 70ms; }
+.page-shell > *:nth-child(3) { animation-delay: 130ms; }
+.page-shell > *:nth-child(4) { animation-delay: 190ms; }
+.page-shell > *:nth-child(5) { animation-delay: 250ms; }
+.page-hero > div,
+.page-hero > aside,
+.page-hero > button {
+  animation: dashboard-reveal 240ms ease-out both;
+}
+.page-hero > aside { animation-delay: 110ms; }
+.page-hero > button { animation-delay: 180ms; }
+@keyframes dashboard-reveal {
+  from {
+    transform: translateY(5px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
 .page-hero {
   background: var(--navy);
   color: #fff;
@@ -318,6 +341,18 @@
   border: 1px solid var(--line);
   border-radius: 15px;
   padding: 18px;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+@media (hover: hover) {
+  .metric-card:hover,
+  .advice-card:hover,
+  .action-card:hover,
+  .chart-card:hover,
+  .data-card:hover {
+    transform: translateY(-3px);
+    border-color: #b8dfe6;
+    box-shadow: 0 12px 26px rgba(10, 26, 47, 0.08);
+  }
 }
 .metric-card span {
   font-size: 11px;
@@ -544,8 +579,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page-shell > *,
+  .page-hero > div,
+  .page-hero > aside,
+  .page-hero > button,
   .hero-continue-icon {
     animation: none;
+  }
+
+  .metric-card,
+  .advice-card,
+  .action-card,
+  .chart-card,
+  .data-card {
+    transition: none;
   }
 }
 

@@ -313,7 +313,11 @@ function ResumeResults({ results, onReset }) {
                 Choose high-fit roles, then tailor one strong proof point for
                 each application.
               </p>
-              <button onClick={onReset} className="report-reset-button">
+              <button
+                onClick={onReset}
+                className="report-reset-button"
+                data-tooltip="Upload a new PDF to create another report"
+              >
                 Analyze another resume
               </button>
             </section>

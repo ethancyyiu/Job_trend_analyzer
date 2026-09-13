@@ -663,29 +663,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .page-shell > *,
-  .page-hero > div,
-  .page-hero > aside,
-  .page-hero > button,
-  .hero-continue-icon {
-    animation: none;
-  }
-
-  .metric-card,
-  .advice-card,
-  .action-card,
-  .chart-card,
-  .data-card {
-    transition: none;
-  }
-
-  .app-main::before,
-  .app-main::after {
-    animation: none;
-  }
-}
-
 /* Daily Trends loading state */
 .loading-page-hero {
   min-height: 220px;

@@ -1254,26 +1254,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .resume-page,
-  .market-snapshot,
-  .market-snapshot-grid article,
-  .market-snapshot-action,
-  .report-section,
-  .report-rail-card {
-    animation: none;
-  }
-
-  .resume-page {
-    opacity: 1;
-    transform: none;
-  }
-
-  .report-action-grid article {
-    transition: none;
-  }
-}
-
 /* Three equal boxes row (side boxes bleed to viewport edges) */
 .three-boxes-row {
   display: grid;

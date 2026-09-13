@@ -100,7 +100,8 @@ async def resume_upload(file: UploadFile = File(...)):
     
     # top jobs that the user qualifies for, for each skills 
     matched_job_ids = query("""
-        SELECT id, title, company, salary_min, salary_max, skills
+        SELECT id, title, company, location, description, salary_min, salary_max,
+               salary_type, posting_url, skills
         FROM postings
         WHERE date_posted >= NOW() - INTERVAL '30 days'
         AND (
@@ -113,7 +114,8 @@ async def resume_upload(file: UploadFile = File(...)):
         """, (resume_skills,))
     
     matched_jobs = []
-    for job_id, title, company, sal_min, sal_max, job_skills in matched_job_ids:
+    for (job_id, title, company, location, description, sal_min, sal_max,
+         salary_type, posting_url, job_skills) in matched_job_ids:
         
         if job_skills:
            total_skills = len(job_skills)
@@ -124,8 +126,12 @@ async def resume_upload(file: UploadFile = File(...)):
         matched_jobs.append({
             "title": title,
             "company": company,
+            "location": location,
+            "description": description,
             "salary_min": sal_min,
             "salary_max": sal_max,
+            "salary_type": salary_type,
+            "posting_url": posting_url,
             "matched_skills": overlap,
             "total_skills": total_skills
         })

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import axios from "axios";
 import "./Resume.css";
 
@@ -186,6 +187,7 @@ function ResumeResults({ results, onReset }) {
     market_snapshot = {},
   } = results;
   const gaps = Object.entries(top_missing_skills);
+  const [selectedJob, setSelectedJob] = useState(null);
   const top = matched_jobs[0];
   const fit = top
     ? Math.round((top.matched_skills / top.total_skills) * 100)
@@ -266,6 +268,7 @@ function ResumeResults({ results, onReset }) {
                     job={job}
                     index={index}
                     key={`${job.title}-${index}`}
+                    onSelect={() => setSelectedJob(job)}
                   />
                 ))}
               </div>
@@ -342,6 +345,12 @@ function ResumeResults({ results, onReset }) {
             )}
           </aside>
         </div>
+        {selectedJob && (
+          <JobDetailsModal
+            job={selectedJob}
+            onClose={() => setSelectedJob(null)}
+          />
+        )}
       </div>
     </div>
   );
@@ -387,7 +396,7 @@ function MarketSnapshot({ snapshot }) {
           <span>Listed pay in matching roles</span>
           <strong>
             {salary
-              ? `${formatCompensation(salary.median_min)}–${formatCompensation(salary.median_max)}`
+              ? `$${formatCompensation(salary.median_min)}–${formatCompensation(salary.median_max)}`
               : "Not enough data"}
           </strong>
           <p>
@@ -427,10 +436,17 @@ function formatCompensation(value) {
   return `${Math.round(amount / 1000)}k`;
 }
 
-function JobCard({ job, index }) {
+function JobCard({ job, index, onSelect }) {
   const fit = Math.round((job.matched_skills / job.total_skills) * 100);
   return (
-    <article className="job-card-result report-job-card">
+    <article
+      className="job-card-result report-job-card"
+      onClick={onSelect}
+      onKeyDown={(event) => event.key === "Enter" && onSelect()}
+      role="button"
+      tabIndex="0"
+      aria-label={`View details for ${job.title} at ${job.company}`}
+    >
       <div className="job-header">
         <div>
           <span className="job-rank">Best fit #{index + 1}</span>
@@ -454,5 +470,56 @@ function JobCard({ job, index }) {
         )}
       </div>
     </article>
+  );
+}
+
+function JobDetailsModal({ job, onClose }) {
+  const salary = job.salary_min && job.salary_max
+    ? `$${formatCompensation(job.salary_min)} – $${formatCompensation(job.salary_max)}${job.salary_type ? ` ${job.salary_type}` : ""}`
+    : "Salary not listed";
+
+  useEffect(() => {
+    const closeOnEscape = (event) => event.key === "Escape" && onClose();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div className="job-details-backdrop" onMouseDown={onClose} role="presentation">
+      <section
+        className="job-details-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="job-details-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
+        <span className="report-eyebrow">Job details</span>
+        <h2 id="job-details-title">{job.title}</h2>
+        <p className="job-details-company">{job.company || "Company not listed"}</p>
+        <div className="job-details-meta">
+          <div><span>Location</span><strong>{job.location || "Location not listed"}</strong></div>
+          <div><span>Salary</span><strong>{salary}</strong></div>
+        </div>
+        <div className="job-details-description">
+          <h3>About this role</h3>
+          <p>{job.description || "A description was not provided for this posting."}</p>
+        </div>
+        {job.posting_url ? (
+          <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">
+            View job posting <span aria-hidden="true">↗</span>
+          </a>
+        ) : (
+          <span className="job-details-link job-details-link-disabled">Job link not available</span>
+        )}
+      </section>
+    </div>
+    ,
+    document.body
   );
 }

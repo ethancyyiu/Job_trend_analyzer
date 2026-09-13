@@ -203,7 +203,7 @@ function ResumeResults({ results, onReset }) {
             </p>
           </div>
           <div className="report-hero-score">
-            <span>Highest salary role you qualify for </span>
+            <span>Highest salary role you qualify for</span>
             <strong>{fit}%</strong>
             <p>{top?.title || "Your top opportunity"}</p>
           </div>

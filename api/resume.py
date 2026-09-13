@@ -102,13 +102,14 @@ async def resume_upload(file: UploadFile = File(...)):
     matched_job_ids = query("""
         SELECT id, title, company, salary_min, salary_max, skills
         FROM postings
-        WHERE (
+        WHERE date_posted >= NOW() - INTERVAL '30 days'
+        AND (
             SELECT COUNT(*)
             FROM unnest(skills) AS s
             WHERE s = ANY(%s)
         ) >= 3
-        ORDER BY salary_max DESC NULLS LAST
-        LIMIT 40
+        ORDER BY date_posted DESC, salary_max DESC NULLS LAST
+        LIMIT 6
         """, (resume_skills,))
     
     matched_jobs = []

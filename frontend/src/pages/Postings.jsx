@@ -79,7 +79,7 @@ export function Postings({ cachedData }) {
                   <td className="postings-link">
                     {row.posting_url ? (
                       <a href={row.posting_url} target="_blank" rel="noreferrer">
-                        Open role
+                        View role
                       </a>
                     ) : (
                       "Unavailable"

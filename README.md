@@ -1,17 +1,19 @@
 # Job Trend Analyzer
-A real time job market tracker built by a first year data science student who wanted to stop guessing what skills are actually in demand.
 
-# What This Project Is
-This project scrapes real LinkedIn job postings, extracts the skills mentioned, stores everything in PostgreSQL, and visualizes hiring trends over time.
+A real-time job market tracker built by a data science student who wanted to stop guessing what skills are actually in demand.
+
+**Live website:** [marketpulsedata.vercel.app](https://marketpulsedata.vercel.app/)
+
+## What This Project Is
+
+This project collects public LinkedIn job postings, extracts the skills mentioned, stores everything in PostgreSQL, and visualizes hiring trends over time. The pipeline also extracts salary information when it is available, categorizes roles, creates short-term forecasts, and powers a resume-matching tool.
 
 Scrape > Clean > Store > Analyze > Visualize.
 
-All automated. All built from scratch.
+## Why I Built It
 
-Link to website: https://marketpulsepro.vercel.app/
-
-# Why I Built It
 I didn’t want another tutorial project. I wanted something that:
+
 - uses real data
 - updates itself
 - forces me to learn scraping, databases, APIs, and frontend
@@ -19,73 +21,135 @@ I didn’t want another tutorial project. I wanted something that:
 
 Building this has taught me way more than any course so far.
 
-# Features
+## Features
 
-## Automated LinkedIn Scraper (Playwright)
-- Logs in automatically
-- Navigates dynamic JS pages
-- Mimics human behavior to avoid bot detection
-- Collects thousands of postings in one run
-- Saves title, company, location, description, post date, etc. into PostgreSQL
+### Automated LinkedIn Scraper (Playwright)
 
-## Skill Extraction Engine
-- Scans every job description for 70+ technologies
+- Collects public job listings for remote and Canada-based software, data, analytics, and machine-learning searches
+- Saves titles, companies, locations, descriptions, posting dates, salary details, and job URLs into PostgreSQL
+- Updates existing postings instead of duplicating the same title, company, and location
+- Runs through GitHub Actions twice a day, with a manual-run option too
+
+### Skill Extraction Engine
+
+- Scans job titles and descriptions for a curated list of technical skills
 - Stores skills as arrays for easy querying
 - Lets me track which skills show up the most over time
 
-## FastAPI Backend
-- Endpoints for trends, top skills, and recent postings
+### Salary + Category Analysis
 
-## React + Recharts Frontend
-- Line charts for posting volume
-- Bar charts for in-demand skills
+- Extracts salary ranges from descriptions when they are listed
+- Shows salary coverage, median ranges, yearly versus hourly pay, and category-level medians
+- Sorts jobs into software engineer, data engineer, machine learning engineer, data scientist, data analyst, or other
 
-## End-to-End Pipeline
-Fully automated from scrape > extract > store > serve > visualize.
-Everything is automated and deployed.
-Link to the website: https://marketpulsepro.vercel.app/
+### Forecasting
 
-# Tech Stack
+- Trains a Prophet model on recent posting data after a completed scrape
+- Saves a seven-day forecast so the dashboard can load it quickly
+- Includes forecasts for the overall market and available job categories
+
+### FastAPI Backend
+
+- Endpoints for trends, forecasts, top skills, salaries, recent postings, and scrape metadata
+- A PDF resume-upload endpoint that finds recognized skills, matching jobs, skill gaps, and salary context
+
+### React + Recharts Frontend
+
+- Charts for posting volume, role categories, forecasts, skills, and salaries
+- A recent-postings view with clickable job cards
+- A resume analyzer built from the same live market data
+
+### End-to-End Pipeline
+
+Fully automated from scrape > extract > store > analyze > forecast > serve > visualize.
+
+## Tech Stack
+
 - Scraper: Playwright
-- Backend: FastAPI
-- Database: PostgreSQL
-- Frontend: React + Recharts
-- ML (coming soon): scikit-learn
+- Backend: FastAPI + Uvicorn
+- Database: PostgreSQL / Supabase
+- Frontend: React + Vite + Recharts
+- Analysis: pandas, Prophet, keyword-based skill extraction, and Gemini for uncategorized role classification
 - Deployment: Vercel (frontend), Render (backend), Supabase (DB)
-- GitHub Actions: automatically scrapes linkedin postings once everyday
-- Website link: https://marketpulsepro.vercel.app/
+- GitHub Actions: runs the scraper pipeline twice daily
 
-# Architecture
-Playwright Scraper > PostgreSQL > FastAPI > React Dashboard
+## Architecture
 
-# How To Run It Locally
+Playwright Scraper > PostgreSQL > Skill / Salary / Category Analysis > Forecast Cache > FastAPI > React Dashboard
 
-## Backend setup
-pip install -r requirements.txt
+## How To Run It Locally
 
-## Frontend setup
+You’ll need Python 3.12+, Node.js 20+, and a PostgreSQL database with the project’s `postings` table already set up.
+
+### Backend + scraper setup
+
+```bash
+python -m pip install -r requirements-dev.txt
+playwright install chromium
+```
+
+### Frontend setup
+
+```bash
 cd frontend
 npm install
+```
 
-## Environment variables
-Create a .env file for your scraper + backend.
+### Environment variables
 
-## Run the scraper
+Copy `.env.example` to `.env` and add your database connection:
+
+```env
+DATABASE_URL=postgresql://user:password@host:port/database
+VITE_API_URL=http://localhost:8000
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+`GEMINI_API_KEY` is needed when the pipeline has to classify job titles that do not match one of the built-in categories.
+
+### Run the scraper
+
+```bash
 python -m scraper.scraper
+```
 
-## Start the backend
+This runs the searches, enriches the saved postings, creates the forecast, and records the completed scrape time. Public job pages can change or rate-limit requests, so the scraper may need maintenance over time.
+
+### Start the backend
+
+```bash
 uvicorn api.main:app --reload
+```
 
-## Start the frontend
+The API is available at `http://localhost:8000`, and FastAPI docs are at `http://localhost:8000/docs`.
+
+### Start the frontend
+
+```bash
 cd frontend
 npm run dev
+```
 
-# Roadmap
-- Make the frontend look better
-- Add ML models to predict hiring trends
-- Salary/pay extraction
-- Better skill extraction (NLP instead of keyword matching)
+## API Endpoints
 
-# Contact + Suggestions
-If you have ideas or suggestions, I’m always down to learn. My linkedin: https://www.linkedin.com/in/ethan-yiu-74668b315  
-Message me anytime :)
+- `GET /trends` — recent posting volume and job-category trends
+- `GET /trends/forecast` — cached seven-day forecast
+- `GET /skills` — top skills and skill concentration
+- `GET /postings` — total posting count and the 50 newest postings
+- `GET /salary` — salary coverage, medians, and category salary data
+- `GET /metadata` — latest successful scrape time
+- `POST /resume_upload` — PDF resume analysis and job matching
+- `GET /health` — health check
+
+## Roadmap
+
+- Keep improving the frontend
+- Add more model training and prediction
+- Provide advice instead of information
+- Add better filtering and more useful market views
+- Improve skill extraction beyond keyword matching
+- Expand the role and location coverage
+
+## Contact + Suggestions
+
+If you have ideas or suggestions, I’m always down to learn. My [LinkedIn](https://www.linkedin.com/in/ethan-yiu-74668b315) is open, message me anytime :)

@@ -109,7 +109,7 @@ async def resume_upload(file: UploadFile = File(...)):
             WHERE s = ANY(%s)
         ) >= 3
         ORDER BY date_posted DESC, salary_max DESC NULLS LAST
-        LIMIT 6
+        LIMIT 40
         """, (resume_skills,))
     
     matched_jobs = []

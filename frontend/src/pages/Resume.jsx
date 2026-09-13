@@ -474,9 +474,15 @@ function JobCard({ job, index, onSelect }) {
 }
 
 function JobDetailsModal({ job, onClose }) {
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const salary = job.salary_min && job.salary_max
     ? `$${formatCompensation(job.salary_min)} – $${formatCompensation(job.salary_max)}${job.salary_type ? ` ${job.salary_type}` : ""}`
     : "Salary not listed";
+  const description = job.description || "A description was not provided for this posting.";
+  const descriptionIsLong = description.length > 700;
+  const displayedDescription = showFullDescription || !descriptionIsLong
+    ? description
+    : `${description.slice(0, 700).trim()}…`;
 
   useEffect(() => {
     const closeOnEscape = (event) => event.key === "Escape" && onClose();
@@ -499,24 +505,31 @@ function JobDetailsModal({ job, onClose }) {
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
-        <span className="report-eyebrow">Job details</span>
-        <h2 id="job-details-title">{job.title}</h2>
-        <p className="job-details-company">{job.company || "Company not listed"}</p>
-        <div className="job-details-meta">
-          <div><span>Location</span><strong>{job.location || "Location not listed"}</strong></div>
-          <div><span>Salary</span><strong>{salary}</strong></div>
+        <div className="job-details-content">
+          <span className="report-eyebrow">Job details</span>
+          <h2 id="job-details-title">{job.title}</h2>
+          <p className="job-details-company">{job.company || "Company not listed"}</p>
+          <div className="job-details-meta">
+            <div><span>Location</span><strong>{job.location || "Location not listed"}</strong></div>
+            <div><span>Salary</span><strong>{salary}</strong></div>
+          </div>
+          <div className="job-details-description">
+            <h3>About this role</h3>
+            <p>{displayedDescription}</p>
+            {descriptionIsLong && (
+              <button className="job-description-toggle" onClick={() => setShowFullDescription((visible) => !visible)}>
+                {showFullDescription ? "View less ↑" : "View more ↓"}
+              </button>
+            )}
+          </div>
+          {job.posting_url ? (
+            <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">
+              View job posting <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <span className="job-details-link job-details-link-disabled">Job link not available</span>
+          )}
         </div>
-        <div className="job-details-description">
-          <h3>About this role</h3>
-          <p>{job.description || "A description was not provided for this posting."}</p>
-        </div>
-        {job.posting_url ? (
-          <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">
-            View job posting <span aria-hidden="true">↗</span>
-          </a>
-        ) : (
-          <span className="job-details-link job-details-link-disabled">Job link not available</span>
-        )}
       </section>
     </div>
     ,

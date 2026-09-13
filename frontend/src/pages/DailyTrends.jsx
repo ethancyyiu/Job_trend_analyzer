@@ -152,6 +152,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                     stroke="#06B6D4"
                     strokeWidth={2}
                     connectNulls
+                    isAnimationActive={true}
                     animationDuration={6000}
                     dot={{ r: 3 }}
                   />
@@ -163,6 +164,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                     strokeWidth={2}
                     strokeDasharray="6 6"
                     connectNulls
+                    isAnimationActive={true}
                     animationDuration={6000}
                     dot={{ r: 3 }}
                   />
@@ -174,6 +176,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         name="Software Engineer"
                         stroke="#0EA5E9"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -185,6 +188,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -198,6 +202,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         dataKey="data engineer"
                         stroke="#22C55E"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -209,6 +214,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -222,6 +228,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         dataKey="machine learning engineer"
                         stroke="#16A34A"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -233,6 +240,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -246,6 +254,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         dataKey="data scientist"
                         stroke="#F59E0B"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -257,6 +266,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -270,6 +280,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         dataKey="data analyst"
                         stroke="#D97706"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -281,6 +292,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -294,6 +306,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         dataKey="others"
                         stroke="#334155"
                         strokeWidth={2}
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />
@@ -305,6 +318,7 @@ export function DailyTrends({ cachedData, forecastData }) {
                         strokeWidth={2}
                         strokeDasharray="6 6"
                         connectNulls
+                        isAnimationActive={true}
                         animationDuration={6000}
                         dot={{ r: 3 }}
                       />

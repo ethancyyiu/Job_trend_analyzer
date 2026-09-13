@@ -58,9 +58,9 @@ export function Postings({ cachedData }) {
           <table className="postings-table">
             <thead>
               <tr>
-                <th>Role to target</th>
-                <th>Employer</th>
-                <th>Location</th>
+                <th className="postings-title">Role to target</th>
+                <th className="postings-employer">Employer</th>
+                <th className="postings-location">Location</th>
                 <th className="postings-date">Posted</th>
                 <th className="postings-link">Posting</th>
               </tr>
@@ -68,11 +68,11 @@ export function Postings({ cachedData }) {
             <tbody>
               {postings.map((row, i) => (
                 <tr key={`${row.title}-${i}`}>
-                  <td>
+                  <td className="postings-title">
                     <div className="job-title">{row.title}</div>
                   </td>
-                  <td>{row.company}</td>
-                  <td>{row.location}</td>
+                  <td className="postings-employer">{row.company}</td>
+                  <td className="postings-location">{row.location}</td>
                   <td className="postings-date">
                     {row.date_posted || row.date || "Recent"}
                   </td>

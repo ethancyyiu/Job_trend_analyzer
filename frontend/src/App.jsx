@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useLayoutEffect} from 'react'
 import {DailyTrends} from "./pages/DailyTrends.jsx"
 import {SkillsView} from "./pages/SkillsView.jsx"
 import {Postings} from "./pages/Postings.jsx"
@@ -17,10 +17,25 @@ export default function App() {
   const [page, setPage] = useState("DailyTrends")
   const [cache, setCache] = useState({})
 
-  // Pages are swapped in place rather than through URL routes, so reset the
-  // document position whenever the active page changes.
+  // Do not let a direct revisit restore the scroll position from a previous
+  // dashboard session. This is restored when the app unmounts.
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    if (!('scrollRestoration' in window.history)) return undefined
+
+    const previousScrollRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration
+    }
+  }, [])
+
+  // Pages are swapped in place rather than through URL routes. Reset once
+  // immediately and once after the browser has finished its initial layout.
+  useLayoutEffect(() => {
+    const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    resetScroll()
+    const frame = window.requestAnimationFrame(resetScroll)
+    return () => window.cancelAnimationFrame(frame)
   }, [page])
 
   useEffect(() => {

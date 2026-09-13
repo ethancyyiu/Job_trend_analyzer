@@ -62,6 +62,7 @@ export function Postings({ cachedData }) {
                 <th>Employer</th>
                 <th>Location</th>
                 <th className="postings-date">Posted</th>
+                <th className="postings-link">Posting</th>
               </tr>
             </thead>
             <tbody>
@@ -74,6 +75,15 @@ export function Postings({ cachedData }) {
                   <td>{row.location}</td>
                   <td className="postings-date">
                     {row.date_posted || row.date || "Recent"}
+                  </td>
+                  <td className="postings-link">
+                    {row.posting_url ? (
+                      <a href={row.posting_url} target="_blank" rel="noreferrer">
+                        Open role
+                      </a>
+                    ) : (
+                      "Unavailable"
+                    )}
                   </td>
                 </tr>
               ))}

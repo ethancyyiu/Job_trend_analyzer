@@ -28,9 +28,9 @@ def save(db, posting):
             cur.execute("""
                 INSERT INTO postings (
                     title, company, location, description, date_scraped, date_posted,
-                    salary_min, salary_max, salary_type
+                    salary_min, salary_max, salary_type, posting_url
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (title, company, location)
                 DO UPDATE SET
                     description = EXCLUDED.description,
@@ -38,13 +38,14 @@ def save(db, posting):
                     salary_max = EXCLUDED.salary_max,
                     salary_type = EXCLUDED.salary_type,
                     date_scraped = EXCLUDED.date_scraped,
-                    date_posted = EXCLUDED.date_posted
+                    date_posted = EXCLUDED.date_posted,
+                    posting_url = COALESCE(EXCLUDED.posting_url, postings.posting_url)
                 RETURNING id;
             """, (
                 posting['title'], posting['company'], posting['location'],
                 posting['description'], date.today(), posting.get('date_posted'),
                 posting.get('salary_min'), posting.get('salary_max'),
-                posting.get('salary_type')
+                posting.get('salary_type'), posting.get('posting_url')
             ))
         db.commit()
         print(f"  saved: {posting['title']} @ {posting['company']}\n")
@@ -81,6 +82,9 @@ def scrape(keyword, location, pages, batch_number):
 
             for card in cards:
                 try:
+                    # The card itself contains the public, job-specific URL.
+                    # Capture it before navigating into the detail panel.
+                    posting_url = card.get_attribute("href")
                     try:
                         card.scroll_into_view_if_needed()
                         card.click(timeout=5000)
@@ -144,6 +148,7 @@ def scrape(keyword, location, pages, batch_number):
                         "salary_min":  salary_min,
                         "salary_max":  salary_max,
                         "salary_type": salary_type,
+                        "posting_url": posting_url,
                     })
 
                 except Exception as e:

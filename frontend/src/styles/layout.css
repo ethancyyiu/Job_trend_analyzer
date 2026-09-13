@@ -420,6 +420,13 @@
   text-align: right;
   white-space: nowrap;
 }
+.postings-link {
+  white-space: nowrap;
+}
+.postings-link a {
+  color: var(--purple, #6d28d9);
+  font-weight: 700;
+}
 .job-title {
   font-weight: 700;
   color: var(--ink);

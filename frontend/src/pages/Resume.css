@@ -868,6 +868,15 @@
   scrollbar-width: thin;
 }
 .job-details-content::-webkit-scrollbar { width: 10px; }
+.job-details-content::-webkit-scrollbar-button,
+.job-details-content::-webkit-scrollbar-button:single-button:vertical:decrement,
+.job-details-content::-webkit-scrollbar-button:single-button:vertical:increment,
+.job-details-content::-webkit-scrollbar-button:vertical:start:decrement,
+.job-details-content::-webkit-scrollbar-button:vertical:end:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
 .job-details-content::-webkit-scrollbar-track { background: transparent; }
 .job-details-content::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 999px; background: #94a3b8; background-clip: padding-box; }
 .job-details-modal h2 { color: #0a1a2f; font-size: clamp(28px, 4vw, 44px); line-height: 1.08; padding-right: 44px; }

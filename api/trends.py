@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, HTTPException, Response
 from api.db import query
 from analysis.predictions import JOB_CATEGORIES
 
@@ -128,7 +128,7 @@ def get_skills():
 @router.get("/postings")
 def get_postings():
     rows = query("""
-        SELECT title, company, location, date_posted, posting_url
+        SELECT id, title, company, location, date_posted, posting_url
         FROM postings
         WHERE date_posted IS NOT NULL
         ORDER BY date_posted DESC
@@ -146,15 +146,42 @@ def get_postings():
     answer = []
     for i in rows:
         item = {
-            "title": i[0],
-            "company": i[1],
-            "location": i[2],
-            "date_posted": str(i[3]) if i[3] else None,
-            "posting_url": i[4],
+            "id": i[0],
+            "title": i[1],
+            "company": i[2],
+            "location": i[3],
+            "date_posted": str(i[4]) if i[4] else None,
+            "posting_url": i[5],
         }
         answer.append(item)
 
     return {"total_postings": int(total_postings), "postings": answer}
+
+@router.get("/postings/{posting_id}")
+def get_posting_details(posting_id: int):
+    rows = query("""
+        SELECT id, title, company, location, description, date_posted,
+               salary_min, salary_max, salary_type, posting_url
+        FROM postings
+        WHERE id = %s;
+    """, (posting_id,))
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="Posting not found")
+
+    row = rows[0]
+    return {
+        "id": row[0],
+        "title": row[1],
+        "company": row[2],
+        "location": row[3],
+        "description": row[4],
+        "date_posted": str(row[5]) if row[5] else None,
+        "salary_min": float(row[6]) if row[6] is not None else None,
+        "salary_max": float(row[7]) if row[7] is not None else None,
+        "salary_type": row[8],
+        "posting_url": row[9],
+    }
 
 @router.get("/salary")
 def get_salary():

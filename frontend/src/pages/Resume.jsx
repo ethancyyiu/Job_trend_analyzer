@@ -40,13 +40,12 @@ export function ResumeAnalyzer() {
         <section className="upload-hero">
           <div className="upload-hero-copy">
             <span className="upload-eyebrow">
-              <i /> Career intelligence, personalized
+              <i /> Resume match
             </span>
-            <h1>Find the roles your resume is already built for.</h1>
+            <h1>See how your resume lines up with current roles.</h1>
             <p>
-              Upload your resume and we’ll turn it into a clear job-search
-              strategy: where you fit, what you’re missing, and the next move
-              worth making.
+              Upload your resume to see where it fits, which skills are missing,
+              and which roles may be worth looking at.
             </p>
             <div className="upload-proof">
               <span className="proof-avatars">
@@ -54,7 +53,7 @@ export function ResumeAnalyzer() {
                 <b>M</b>
                 <b>A</b>
               </span>
-              Built from live market signals—not generic advice.
+              Based on current job-posting data.
             </div>
           </div>
           <div
@@ -198,10 +197,10 @@ function ResumeResults({ results, onReset }) {
         <section className="resume-report-hero">
           <div className="report-hero-copy">
             <span className="report-eyebrow">Your career fit report</span>
-            <h1>Turn your experience into your next opportunity.</h1>
+            <h1>How your resume compares with current roles.</h1>
             <p>
-              We mapped your resume against the market and isolated the moves
-              most likely to improve your outcomes.
+              We compared your experience with the roles we’re tracking and
+              pulled out the main matches and gaps.
             </p>
           </div>
           <div className="report-hero-score">

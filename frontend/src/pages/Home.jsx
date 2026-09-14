@@ -18,9 +18,9 @@ export default function Home({ setPage, cachedData }) {
         <section className="home-hero">
           <div className="home-hero-copy">
             <span className="home-eyebrow">Job Trend Analyzer</span>
-            <h1>Build hiring strategy with real market signal, not guesswork.</h1>
+            <h1>A clearer view of the job market.</h1>
             <p>
-              Track the latest posting momentum, skill demand, and salary movement in one clean product experience. Job Trend Analyzer helps talent teams stay ahead of market shifts so they can hire faster, smarter, and with confidence.
+              Check recent job postings, in-demand skills, and listed salary ranges in one place. Use it to get a better sense of what employers are looking for.
             </p>
             <div className="home-hero-actions">
               <button className="feature-btn" onClick={() => setPage("DailyTrends")}>View Daily Trends</button>
@@ -36,7 +36,7 @@ export default function Home({ setPage, cachedData }) {
                 <div className="home-hero-panel-stats">
                   <div className="hero-stat">
                     <strong>{totalPostings}</strong>
-                    <span>Postings indexed</span>
+                    <span>Postings collected</span>
                   </div>
                   <div className="hero-stat">
                     <strong>{skillsCount}</strong>

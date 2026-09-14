@@ -46,15 +46,15 @@ export function Salary({ cachedData }) {
   return (
     <main className="page-shell">
       <PageHero
-        eyebrow="Pay strategy"
-        title="Know your range before the conversation starts."
-        description="Turn compensation data into a confident negotiation position and a clear filter for opportunities."
+        eyebrow="Salary"
+        title="Get a sense of the pay range."
+        description="Check listed salaries before you apply or talk numbers, and use them as one factor when comparing roles."
         decision={
           coverage
-            ? `Anchor around ${median}.`
-            : "Compare roles before naming a number."
+            ? `A useful reference point is ${median}.`
+            : "Compare similar roles before naming a number."
         }
-        decisionDetail="Use role-specific ranges as your starting point, then adjust for location and your proof of impact."
+        decisionDetail="Start with similar roles, then factor in location and your experience."
       />
       <AdviceRow
         meaning={{

@@ -7,11 +7,11 @@ export function Postings({ cachedData }) {
   return (
     <main className="page-shell">
       <PageHero
-        eyebrow="Opportunity radar"
-        title="Target roles with a reason to apply."
-        description="The job feed is organized as your action queue: use it to decide where a tailored application has the best chance."
-        decision={`Start with ${freshTitle}.`}
-        decisionDetail="It is among the most recently indexed opportunities in your market."
+        eyebrow="Job postings"
+        title="Roles worth a closer look."
+        description="Use this list to find jobs that fit, then decide which ones are worth tailoring an application for."
+        decision={`Take a look at ${freshTitle}.`}
+        decisionDetail="It is one of the newer roles in your market."
       />
       <AdviceRow
         meaning={{
@@ -41,7 +41,7 @@ export function Postings({ cachedData }) {
         <div className="metric-card">
           <span>Market depth</span>
           <strong>{cachedData?.total_postings ?? "—"}</strong>
-          <p>Total postings indexed</p>
+          <p>Total postings collected</p>
         </div>
       </section>
       <section className="data-card">

@@ -13,11 +13,11 @@ export function SkillsView({ cachedData }) {
   return (
     <main className="page-shell">
       <PageHero
-        eyebrow="Skill strategy"
-        title="Build the skills that open more doors."
-        description="Translate employer demand into a focused learning plan instead of chasing every trend."
-        decision={`Prioritize ${topSkill} first.`}
-        decisionDetail="It is the clearest current signal in the roles we’re tracking."
+        eyebrow="Skills"
+        title="See which skills show up most often."
+        description="Use the data to choose what to work on next, without trying to chase every trend."
+        decision={`Start with ${topSkill}.`}
+        decisionDetail="It comes up most often in the roles we’re tracking."
       />
       <AdviceRow
         meaning={{

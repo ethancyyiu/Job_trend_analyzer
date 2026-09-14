@@ -75,15 +75,15 @@ export function DailyTrends({ cachedData, forecastData }) {
   return (
     <main className="page-shell">
       <PageHero
-        eyebrow="Market outlook"
-        title="Read the market, then make your move."
-        description="A daily pulse of hiring momentum, translated into a decision about where to put your effort."
+        eyebrow="Daily trends"
+        title="See how hiring has been changing."
+        description="Look at recent posting activity to help decide how broadly to search and where to spend your time."
         decision={
           change >= 0
-            ? "Keep your search active—demand is holding or growing."
-            : "Be more selective and tailor every application."
+            ? "Keep looking—posting activity is steady or up."
+            : "Be more selective with the roles you apply for."
         }
-        decisionDetail={`${Math.abs(change)}% movement from the prior day is a signal to adjust your pace, not panic.`}
+        decisionDetail={`${Math.abs(change)}% change from the previous day is useful context, not a verdict.`}
       />
       <AdviceRow
         meaning={{

@@ -1,5 +1,5 @@
 import re
-from analysis.gemini_extractor_salary import gemini_extract
+from analysis.gemini_extractor_salary  import gemini_extract
 import time 
 
 GEMINI_SALARY_MIN_THRESHOLD = 3_000_000

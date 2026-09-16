@@ -12,6 +12,14 @@ import { useState } from "react";
 import { CategoryToggle } from "../components/CategoryToggle";
 import { AdviceRow, PageHero } from "../components/AdviceModules";
 
+function sortByDate(rows, getDate) {
+  return [...rows].sort((left, right) => {
+    const leftTime = Date.parse(getDate(left) ?? "");
+    const rightTime = Date.parse(getDate(right) ?? "");
+    return (Number.isNaN(leftTime) ? 0 : leftTime) - (Number.isNaN(rightTime) ? 0 : rightTime);
+  });
+}
+
 export function DailyTrends({ cachedData, forecastData }) {
   const [active, setActive] = useState([
     "software engineer",
@@ -21,7 +29,11 @@ export function DailyTrends({ cachedData, forecastData }) {
     "data analyst",
     "others",
   ]);
-  const data = Array.isArray(cachedData) ? cachedData : [];
+  // The API orders these already, but sorting defensively keeps the chart and
+  // latest-activity metrics correct if a cached or proxied response is not.
+  const data = Array.isArray(cachedData)
+    ? sortByDate(cachedData, (row) => row.date)
+    : [];
   const isLoading = cachedData === undefined;
   const latest = Number(data.at(-1)?.count || 0);
   const previous = Number(data.at(-2)?.count || 0);
@@ -29,7 +41,7 @@ export function DailyTrends({ cachedData, forecastData }) {
     ? Math.round(((latest - previous) / previous) * 100)
     : 0;
   const forecast = Array.isArray(forecastData?.forecast)
-    ? forecastData.forecast
+    ? sortByDate(forecastData.forecast, (row) => row.ds ?? row.date)
     : [];
   const categoryForecasts = forecastData?.category_forecasts ?? {};
   const lastDataIndex = data.length - 1;

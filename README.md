@@ -45,7 +45,7 @@ Building this has taught me way more than any course so far.
 ### Forecasting
 
 - Trains a Prophet model on recent posting data after a completed scrape
-- Saves a seven-day forecast so the dashboard can load it quickly
+- Retains every seven-day forecast snapshot for backtesting while serving the latest one quickly
 - Includes forecasts for the overall market and available job categories
 
 ### FastAPI Backend
@@ -133,7 +133,7 @@ npm run dev
 ## API Endpoints
 
 - `GET /trends` — recent posting volume and job-category trends
-- `GET /trends/forecast` — cached seven-day forecast
+- `GET /trends/forecast` — latest cached seven-day forecast
 - `GET /skills` — top skills and skill concentration
 - `GET /postings` — total posting count and the 50 newest postings
 - `GET /salary` — salary coverage, medians, and category salary data

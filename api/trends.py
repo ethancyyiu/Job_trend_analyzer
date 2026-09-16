@@ -73,6 +73,10 @@ def get_forecast(response: Response):
             SELECT payload
             FROM forecast_cache
             WHERE cache_key = 'daily_trends'
+            -- Do not depend on the new id column here: the writer migrates
+            -- older databases on its next successful forecast run.
+            ORDER BY generated_at DESC
+            LIMIT 1
         """)
     except Exception:
         # The scraper creates this table. Until its first successful run, the

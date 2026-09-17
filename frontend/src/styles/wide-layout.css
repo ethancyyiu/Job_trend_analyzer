@@ -1,0 +1,18 @@
+/* Center the migrated dashboard pages and give wide screens a fuller canvas. */
+.app-shell.overview-shell .app-content {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.app-shell.overview-shell .overview-page,
+.app-shell.overview-shell .jobs-page,
+.app-shell.overview-shell .skills-page,
+.app-shell.overview-shell .salary-page,
+.app-shell.overview-shell .trends-page,
+.app-shell.overview-shell .resume-upload-container,
+.app-shell.overview-shell .resume-results-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+}

@@ -52,7 +52,7 @@ export function Postings({ cachedData }) {
     <div className="jobs-table-wrap"><table className="jobs-table"><thead><tr><th>Role</th><th>Company</th><th>Location</th><th>Posted</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
       {loading && !activeData && <tr><td colSpan="5" className="jobs-empty">Loading job postings...</td></tr>}
       {!loading && activeData && postings.length === 0 && <tr><td colSpan="5" className="jobs-empty">No results match the current filters.</td></tr>}
-      {postings.map((posting) => <tr key={posting.id} onClick={() => setSelectedPosting(posting)}><td>{posting.title}</td><td>{posting.company || "-"}</td><td>{posting.location || "-"}</td><td>{posting.date_posted || "Recent"}</td><td><button onClick={(event) => { event.stopPropagation(); setSelectedPosting(posting); }}>View role</button></td></tr>)}
+      {postings.map((posting) => <tr key={posting.id} onClick={() => setSelectedPosting(posting)}><td data-label="Role">{posting.title}</td><td data-label="Company">{posting.company || "-"}</td><td data-label="Location">{posting.location || "-"}</td><td data-label="Posted">{posting.date_posted || "Recent"}</td><td data-label=""><button onClick={(event) => { event.stopPropagation(); setSelectedPosting(posting); }}>View role</button></td></tr>)}
     </tbody></table></div>
     {activeData?.has_more && <button className="jobs-load-more" onClick={loadMore} disabled={loading}>{loading ? "Loading..." : "Load more roles"}</button>}
     {selectedPosting && <PostingDetailsModal posting={selectedPosting} onClose={() => setSelectedPosting(null)} />}

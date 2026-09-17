@@ -1,89 +1,31 @@
-import {Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,} from "recharts";
-import { AdviceRow, PageHero } from "../components/AdviceModules";
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import "./SkillsView.css";
+
+const formatNumber = (value) => Number(value || 0).toLocaleString();
 
 export function SkillsView({ cachedData }) {
-  const skills = cachedData?.skills || [];
-  const ranked = [...skills]
-    .sort((a, b) => Number(b.count) - Number(a.count))
-    .map((item) => ({ ...item, skill: String(item.skill).toUpperCase() }));
-  const topSkill = ranked[0]?.skill || "your strongest market skill";
-  const concentration = cachedData?.concentration
-    ? Number(cachedData.concentration).toFixed(1)
-    : "—";
-  return (
-    <main className="page-shell">
-      <PageHero
-        eyebrow="Skills"
-        title="See which skills show up most often."
-        description="Use the data to choose what to work on next, without trying to chase every trend."
-        decision={`Start with ${topSkill}.`}
-        decisionDetail="It comes up most often in the roles we’re tracking."
-      />
-      <AdviceRow
-        meaning={{
-          title: "Demand is concentrated—focus creates leverage.",
-          body: `The top three skills represent ${concentration}% of tracked demand. A deliberate core skill stack will be more valuable than a long, unfocused list.`,
-        }}
-        actions={{
-          title: "Make this week count",
-          items: [
-            `Audit your evidence of ${topSkill} on your resume.`,
-            "Choose one adjacent skill to pair with your core expertise.",
-            "Create one portfolio proof point before applying.",
-          ],
-        }}
-      />
-      <section className="metric-grid">
-        <div className="metric-card">
-          <span>Best next skill</span>
-          <strong>{topSkill}</strong>
-          <p>Highest demand in current roles</p>
-        </div>
-        <div className="metric-card">
-          <span>Options to explore</span>
-          <strong>{skills.length}</strong>
-          <p>Distinct skills in the market</p>
-        </div>
-        <div className="metric-card">
-          <span>Focus signal</span>
-          <strong>{concentration}%</strong>
-          <p>Demand held by the top three</p>
-        </div>
-      </section>
-      <section className="chart-card">
-        <div className="chart-card-header">
-          <div>
-            <div className="module-kicker">Skill map</div>
-            <h2>Where your learning effort will travel furthest</h2>
-            <p>Use this as a prioritization guide, not a checklist.</p>
-          </div>
-        </div>
-        <div style={{ height: 390 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={ranked}
-              margin={{ top: 8, right: 8, left: -22, bottom: 10 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="#dce5ef"
-              />
-              <XAxis dataKey="skill" tick={{ fontSize: 11 }} interval={0} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {ranked.map((entry, index) => (
-                  <Cell
-                    key={entry.skill}
-                    fill={index < 3 ? "#06B6D4" : "#88ddea"}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-    </main>
-  );
+  const ranked = [...(cachedData?.skills || [])].sort((a, b) => Number(b.count) - Number(a.count)).map((item) => ({ skill: String(item.skill), count: Number(item.count) || 0 }));
+  const chartSkills = ranked.slice(0, 10);
+  const total = ranked.reduce((sum, skill) => sum + skill.count, 0);
+  const concentration = cachedData?.concentration == null ? null : Number(cachedData.concentration);
+
+  return <main className="skills-page">
+    <header className="skills-header"><h1>Skills</h1><p>Demand across the skills found in your tracked job postings.</p></header>
+    <section className="skills-summary" aria-label="Skills summary">
+      <Summary label="Top skill" value={ranked[0]?.skill || "-"} note="highest posting count" />
+      <Summary label="Skills tracked" value={cachedData ? ranked.length : "-"} note="in the current ranking" />
+      <Summary label="Top-three share" value={concentration == null ? "-" : `${concentration.toFixed(1)}%`} note="of tracked demand" />
+    </section>
+    <section className="skills-grid">
+      <div><Heading title="Demand by skill" caption="Posting count for each tracked skill" />
+        <div className="skills-chart">{cachedData === undefined ? <div className="skills-state">Loading skills...</div> : ranked.length ? <ResponsiveContainer width="100%" height="100%"><BarChart data={chartSkills} layout="vertical" margin={{ top: 0, right: 18, left: 0, bottom: 0 }}><CartesianGrid horizontal={false} stroke="#E4E4E7" /><XAxis type="number" axisLine={false} tickLine={false} tickFormatter={(value) => `${Math.round(value / 1000)}k`} /><YAxis type="category" dataKey="skill" axisLine={false} tickLine={false} width={100} /><Tooltip formatter={(value) => [formatNumber(value), "Postings"]} cursor={{ fill: "#F1F1F3" }} /><Bar dataKey="count" radius={[0, 2, 2, 0]} maxBarSize={16}>{chartSkills.map((skill, index) => <Cell key={skill.skill} fill={index === 0 ? "#D97706" : "#A1A1AA"} fillOpacity={index === 0 ? 1 : 0.62} />)}</Bar></BarChart></ResponsiveContainer> : <div className="skills-state">No skill data is available yet.</div>}</div>
+      </div>
+      <div><Heading title="Skill details" caption="Share of tracked skill mentions" />
+        <div className="skills-table-wrap"><table className="skills-table"><thead><tr><th>Skill</th><th>Postings</th><th>Share</th></tr></thead><tbody>{ranked.map((skill) => <tr key={skill.skill}><td>{skill.skill}</td><td>{formatNumber(skill.count)}</td><td>{total ? `${((skill.count / total) * 100).toFixed(1)}%` : "-"}</td></tr>)}</tbody></table></div>
+      </div>
+    </section>
+  </main>;
 }
+
+function Summary({ label, value, note }) { return <article><span>{label}</span><strong>{value}</strong><small>{note}</small></article>; }
+function Heading({ title, caption }) { return <div className="skills-section-heading"><h2>{title}</h2><p>{caption}</p></div>; }

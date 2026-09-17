@@ -46,7 +46,7 @@ export default function Overview({ trends, skills, postings }) {
       </header>
 
       <section className="overview-stats" aria-label="Market statistics">
-        <Stat label="Total postings" value={postings ? formatNumber(postings.all_time_total ?? postings.total_postings) : '—'} note="tracked listings" />
+        <Stat label="Recent postings" value={postings ? formatNumber(postings.total_postings) : '—'} note="posted in the last 30 days" />
         <Stat label="Recent companies" value={postings ? formatNumber(companyCount) : '—'} note="among the latest 50 roles" />
         <Stat label="Latest activity" value={Array.isArray(trends) ? formatNumber(latest) : '—'} note={momentum === null ? 'new postings in the latest period' : `${momentum >= 0 ? '+' : ''}${momentum.toFixed(1)}% vs prior period`} accent />
       </section>

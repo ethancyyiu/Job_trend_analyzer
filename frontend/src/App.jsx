@@ -1,4 +1,4 @@
-import {useState, useEffect, useLayoutEffect} from 'react'
+import {useState, useEffect, useLayoutEffect, useRef} from 'react'
 import {DailyTrends} from "./pages/DailyTrends.jsx"
 import {SkillsView} from "./pages/SkillsView.jsx"
 import {Postings} from "./pages/Postings.jsx"
@@ -24,6 +24,7 @@ const pageToRoute = Object.fromEntries(Object.entries(routeToPage).map(([route, 
 export default function App() {
   const [page, setPage] = useState(() => routeToPage[window.location.pathname] || 'Overview')
   const [cache, setCache] = useState({})
+  const requestedEndpoints = useRef(new Set())
 
   // Do not let a direct revisit restore the scroll position from a previous
   // dashboard session. This is restored when the app unmounts.
@@ -59,8 +60,18 @@ export default function App() {
   }, [page])
 
   useEffect(() => {
-    const endpoints = ['/trends', '/trends/forecast', '/skills', '/postings', '/salary', '/metadata']
+    const endpointsByPage = {
+      Overview: ['/trends', '/skills', '/postings', '/metadata'],
+      DailyTrends: ['/trends', '/trends/forecast', '/metadata'],
+      SkillsView: ['/skills', '/metadata'],
+      Postings: ['/postings', '/metadata'],
+      Salary: ['/salary', '/metadata'],
+      ResumeAnalyzer: ['/metadata'],
+    }
+    const endpoints = endpointsByPage[page] || []
     endpoints.forEach((endpoint) => {
+      if (requestedEndpoints.current.has(endpoint)) return
+      requestedEndpoints.current.add(endpoint)
       axios.get(`${API_BASE}${endpoint}`).then(function (res) {
         setCache((prev) => ({ ...prev, [endpoint]: res.data }))
       }).catch(function (error) {
@@ -68,7 +79,7 @@ export default function App() {
         setCache((prev) => ({ ...prev, [endpoint]: null }))
       })
     })
-  }, [])
+  }, [page])
 
   let showing_page
   if (page === "Overview") showing_page = <Overview trends={cache['/trends']} skills={cache['/skills']} postings={cache['/postings']} />

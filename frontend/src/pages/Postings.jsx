@@ -9,11 +9,13 @@ export function Postings({ cachedData }) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [data, setData] = useState(cachedData);
+  const [hasLoadedMore, setHasLoadedMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
+    if (!search && !location) return undefined;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => {
       setLoading(true);
@@ -26,30 +28,33 @@ export function Postings({ cachedData }) {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [search, location]);
 
-  const postings = data?.postings || [];
+  const isDefaultQuery = !search && !location;
+  const activeData = isDefaultQuery && !hasLoadedMore ? cachedData : data;
+  const postings = activeData?.postings || [];
   const locations = ["", ...new Set(postings.map((posting) => posting.location).filter(Boolean))];
   const loadMore = () => {
-    if (!data?.next_cursor || loading) return;
+    if (!activeData?.has_more || loading) return;
+    setHasLoadedMore(true);
     setLoading(true);
-    axios.get(`${API_BASE}/postings`, { params: { days: 30, limit: 50, search: search || undefined, location: location || undefined, cursor: data.next_cursor } })
-      .then((response) => setData((current) => ({ ...response.data, postings: [...(current?.postings || []), ...response.data.postings] })))
+    axios.get(`${API_BASE}/postings`, { params: { days: 30, page: (activeData.page || 1) + 1, limit: 50, search: search || undefined, location: location || undefined } })
+      .then((response) => setData((current) => ({ ...response.data, postings: [...(current?.postings || activeData.postings || []), ...response.data.postings] })))
       .catch(() => setLoadError("More postings could not be loaded."))
       .finally(() => setLoading(false));
   };
 
   return <main className="jobs-page">
-    <header className="jobs-header"><h1>Job Postings</h1><p>{data ? `${data.total_postings.toLocaleString()} roles posted in the last 30 days.` : "Loading tracked listings..."}</p></header>
+    <header className="jobs-header"><h1>Job Postings</h1><p>{activeData ? `${activeData.total_postings.toLocaleString()} roles posted in the last 30 days.` : "Loading tracked listings..."}</p></header>
     <section className="jobs-filters" aria-label="Filter job postings">
-      <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search title, company, location..." aria-label="Search job postings" />
-      <select value={location} onChange={(event) => setLocation(event.target.value)} aria-label="Filter by location"><option value="">All locations</option>{locations.slice(1).map((option) => <option key={option}>{option}</option>)}</select>
+      <input value={search} onChange={(event) => { setSearch(event.target.value); setData(null); setHasLoadedMore(false); }} placeholder="Search title, company, location..." aria-label="Search job postings" />
+      <select value={location} onChange={(event) => { setLocation(event.target.value); setData(null); setHasLoadedMore(false); }} aria-label="Filter by location"><option value="">All locations</option>{locations.slice(1).map((option) => <option key={option}>{option}</option>)}</select>
     </section>
     {loadError && <p className="jobs-error">{loadError}</p>}
     <div className="jobs-table-wrap"><table className="jobs-table"><thead><tr><th>Role</th><th>Company</th><th>Location</th><th>Posted</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
-      {loading && !data && <tr><td colSpan="5" className="jobs-empty">Loading job postings...</td></tr>}
-      {!loading && data && postings.length === 0 && <tr><td colSpan="5" className="jobs-empty">No results match the current filters.</td></tr>}
+      {loading && !activeData && <tr><td colSpan="5" className="jobs-empty">Loading job postings...</td></tr>}
+      {!loading && activeData && postings.length === 0 && <tr><td colSpan="5" className="jobs-empty">No results match the current filters.</td></tr>}
       {postings.map((posting) => <tr key={posting.id} onClick={() => setSelectedPosting(posting)}><td>{posting.title}</td><td>{posting.company || "-"}</td><td>{posting.location || "-"}</td><td>{posting.date_posted || "Recent"}</td><td><button onClick={(event) => { event.stopPropagation(); setSelectedPosting(posting); }}>View role</button></td></tr>)}
     </tbody></table></div>
-    {data?.next_cursor && <button className="jobs-load-more" onClick={loadMore} disabled={loading}>{loading ? "Loading..." : "Load more roles"}</button>}
+    {activeData?.has_more && <button className="jobs-load-more" onClick={loadMore} disabled={loading}>{loading ? "Loading..." : "Load more roles"}</button>}
     {selectedPosting && <PostingDetailsModal posting={selectedPosting} onClose={() => setSelectedPosting(null)} />}
   </main>;
 }

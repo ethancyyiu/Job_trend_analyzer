@@ -111,7 +111,7 @@ def get_skills():
     rows = all_rows[:20]
 
     total = 0
-    for i in rows:
+    for i in all_rows:
         total += i[1]
     
     top_three = 0
@@ -131,7 +131,7 @@ def get_skills():
     return {"skills": answer, "concentration": concentration_percent}
 
 @router.get("/postings")
-def get_postings(days: int = Query(30, ge=1, le=365), limit: int = Query(50, ge=1, le=100), cursor: str | None = None, search: str | None = Query(None, max_length=100), location: str | None = Query(None, max_length=120)):
+def get_postings(days: int = Query(30, ge=1, le=365), page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100), search: str | None = Query(None, max_length=100), location: str | None = Query(None, max_length=120)):
     start_date = date.today() - timedelta(days=days)
     where = ["date_posted IS NOT NULL", "date_posted >= %s"]
     params = [start_date]
@@ -142,26 +142,16 @@ def get_postings(days: int = Query(30, ge=1, le=365), limit: int = Query(50, ge=
     if location and location.strip():
         where.append("location = %s")
         params.append(location.strip())
-    if cursor:
-        try:
-            cursor_date, cursor_id = cursor.split(",", 1)
-            params.extend([date.fromisoformat(cursor_date), int(cursor_id)])
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=400, detail="Invalid postings cursor")
-        where.append("(date_posted, id) < (%s, %s)")
     where_sql = " AND ".join(where)
     rows = query(f"""
         SELECT id, title, company, location, date_posted, posting_url
         FROM postings
         WHERE {where_sql}
         ORDER BY date_posted DESC, id DESC
-        LIMIT %s;
-    """, (*params, limit))
+        LIMIT %s OFFSET %s;
+    """, (*params, limit, (page - 1) * limit))
     
-    count_where = [condition for condition in where if "(date_posted, id)" not in condition]
-    count_params = params[:-2] if cursor else params
-    result = query(f"SELECT COUNT(*) FROM postings WHERE {' AND '.join(count_where)}", count_params)
-    all_time_result = query("SELECT COUNT(*) FROM postings WHERE date_posted IS NOT NULL")
+    result = query(f"SELECT COUNT(*) FROM postings WHERE {where_sql}", params)
     
     total_postings = result[0][0]
 
@@ -177,8 +167,7 @@ def get_postings(days: int = Query(30, ge=1, le=365), limit: int = Query(50, ge=
         }
         answer.append(item)
 
-    next_cursor = f"{rows[-1][4].isoformat()},{rows[-1][0]}" if len(rows) == limit and rows[-1][4] else None
-    return {"total_postings": int(total_postings), "all_time_total": int(all_time_result[0][0]), "days": days, "limit": limit, "next_cursor": next_cursor, "postings": answer}
+    return {"total_postings": int(total_postings), "days": days, "page": page, "limit": limit, "has_more": page * limit < total_postings, "postings": answer}
 
 @router.get("/postings/{posting_id}")
 def get_posting_details(posting_id: int):

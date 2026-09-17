@@ -3,6 +3,7 @@ from analysis.gemini_extractor_salary  import gemini_extract
 import time 
 
 GEMINI_SALARY_MIN_THRESHOLD = 3_000_000
+GEMINI_SALARY_MAX_THRESHOLD = 10000
 
 
 def extract_salary(text):
@@ -51,7 +52,11 @@ def extract_salary(text):
             
         low = usd(low_raw, matches[0])
         high = usd(high_raw, matches[1])
-        if sal_type == 'hourly' or low > GEMINI_SALARY_MIN_THRESHOLD:
+        if (
+            sal_type == 'hourly'
+            or low > GEMINI_SALARY_MIN_THRESHOLD
+            or (sal_type == 'yearly' and high < GEMINI_SALARY_MAX_THRESHOLD)
+        ):
             time.sleep(10)
             data = gemini_extract(text)
             return data["salary_min"], data["salary_max"], data["salary_type"]
@@ -67,7 +72,11 @@ def extract_salary(text):
         sal_type = get_type(s, val_raw)
         
         val = usd(val_raw, s)
-        if sal_type == 'hourly' or val > GEMINI_SALARY_MIN_THRESHOLD:
+        if (
+            sal_type == 'hourly'
+            or val > GEMINI_SALARY_MIN_THRESHOLD
+            or (sal_type == 'yearly' and val < GEMINI_SALARY_MAX_THRESHOLD)
+        ):
             time.sleep(10)
             data = gemini_extract(text)
             return data["salary_min"], data["salary_max"], data["salary_type"]

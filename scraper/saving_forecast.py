@@ -6,6 +6,31 @@ from analysis.predictions import build_forecast
 
 load_dotenv()
 
+
+def migrate_forecast_primary_key(cur):
+    """One-time migration from the old one-row forecast cache."""
+    cur.execute("""
+        DO $$
+        DECLARE primary_key_name TEXT;
+        BEGIN
+            SELECT conname INTO primary_key_name
+            FROM pg_constraint
+            WHERE conrelid = 'forecast_cache'::regclass
+              AND contype = 'p'
+              AND pg_get_constraintdef(oid) LIKE '%cache_key%';
+
+            IF primary_key_name IS NOT NULL THEN
+                EXECUTE format(
+                    'ALTER TABLE forecast_cache DROP CONSTRAINT %I',
+                    primary_key_name
+                );
+                ALTER TABLE forecast_cache
+                ADD CONSTRAINT forecast_cache_pkey PRIMARY KEY (id);
+            END IF;
+        END $$;
+    """)
+
+
 # save the forecast and not overwrite it for backtesting
 def generate_and_save_forecast():
     print("Generating daily forecast...")
@@ -14,6 +39,7 @@ def generate_and_save_forecast():
     db = psycopg2.connect(db_url)
     try:
         with db.cursor() as cur:
+            migrate_forecast_primary_key(cur)
             cur.execute("""
                 INSERT INTO forecast_cache (cache_key, payload, generated_at)
                 VALUES ('daily_trends', %s, NOW())

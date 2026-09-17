@@ -1,10 +1,11 @@
 export default function Nav({ page, setPage }) {
   const items = [
-    { key: "DailyTrends", label: "Market outlook" },
-    { key: "ResumeAnalyzer", label: "My next move" },
-    { key: "SkillsView", label: "Skills to build" },
-    { key: "Postings", label: "Roles to target" },
-    { key: "Salary", label: "Pay guidance" },
+    { key: "Overview", label: "Overview" },
+    { key: "Postings", label: "Job Postings" },
+    { key: "SkillsView", label: "Skills" },
+    { key: "Salary", label: "Salaries" },
+    { key: "DailyTrends", label: "Trends" },
+    { key: "ResumeAnalyzer", label: "Career Advisor" },
   ];
 
   return (

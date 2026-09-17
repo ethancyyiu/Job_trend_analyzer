@@ -12,7 +12,7 @@ function formatLastScrapedAt(value) {
 
 export default function TopBar({ page, lastScrapedAt, onMenuClick }) {
   const name =
-    page === "SkillsView" ? "Skills" : page.replace(/([A-Z])/g, " $1").trim();
+    page === "SkillsView" ? "Skills" : page === "Overview" ? "Overview" : page.replace(/([A-Z])/g, " $1").trim();
   return (
     <div className="topbar-root">
       <div className="topbar-inner">

@@ -7,14 +7,22 @@ import Layout from "./components/Layout.jsx"
 import axios from 'axios'
 import {Analytics} from "@vercel/analytics/react"
 import {ResumeAnalyzer} from "./pages/Resume.jsx"
+import Overview from "./pages/Overview.jsx"
 
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
+const routeToPage = {
+  '/overview': 'Overview',
+  '/jobs': 'Postings',
+  '/skills': 'SkillsView',
+  '/salary': 'Salary',
+  '/trends': 'DailyTrends',
+  '/advisor': 'ResumeAnalyzer',
+}
+const pageToRoute = Object.fromEntries(Object.entries(routeToPage).map(([route, page]) => [page, route]))
 
 export default function App() {
-  // The dashboard is the product's primary job-to-be-done, so users arrive
-  // directly at the market signal instead of a promotional landing page.
-  const [page, setPage] = useState("DailyTrends")
+  const [page, setPage] = useState(() => routeToPage[window.location.pathname] || 'Overview')
   const [cache, setCache] = useState({})
 
   // Do not let a direct revisit restore the scroll position from a previous
@@ -28,6 +36,18 @@ export default function App() {
       window.history.scrollRestoration = previousScrollRestoration
     }
   }, [])
+
+  useEffect(() => {
+    const onPopState = () => setPage(routeToPage[window.location.pathname] || 'Overview')
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  const navigate = (nextPage) => {
+    const route = pageToRoute[nextPage]
+    if (route && window.location.pathname !== route) window.history.pushState({}, '', route)
+    setPage(nextPage)
+  }
 
   // Pages are swapped in place rather than through URL routes. Reset once
   // immediately and once after the browser has finished its initial layout.
@@ -51,7 +71,8 @@ export default function App() {
   }, [])
 
   let showing_page
-  if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} forecastData={cache['/trends/forecast']} />
+  if (page === "Overview") showing_page = <Overview trends={cache['/trends']} skills={cache['/skills']} postings={cache['/postings']} />
+  else if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} forecastData={cache['/trends/forecast']} />
   else if (page === "SkillsView") showing_page = <SkillsView cachedData={cache['/skills']} />
   else if (page === "Salary") showing_page = <Salary cachedData={cache['/salary']} />
   else if (page === "ResumeAnalyzer") showing_page = <ResumeAnalyzer />
@@ -59,7 +80,7 @@ export default function App() {
 
   return (
     <div style = {{fontFamily: "Inter, sans-serif", padding: "0", width: "100%"}}>
-      <Layout page={page} setPage={setPage} lastScrapedAt={cache['/metadata']?.last_scraped_at}>
+      <Layout page={page} setPage={navigate} lastScrapedAt={cache['/metadata']?.last_scraped_at}>
         {showing_page}
       </Layout>
       <Analytics />

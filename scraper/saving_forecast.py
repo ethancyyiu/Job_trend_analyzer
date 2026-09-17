@@ -10,6 +10,10 @@ load_dotenv()
 def migrate_forecast_primary_key(cur):
     """One-time migration from the old one-row forecast cache."""
     cur.execute("""
+        ALTER TABLE forecast_cache
+        ADD COLUMN IF NOT EXISTS id BIGSERIAL
+    """)
+    cur.execute("""
         DO $$
         DECLARE primary_key_name TEXT;
         BEGIN

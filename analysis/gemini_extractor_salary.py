@@ -66,7 +66,10 @@ Rules
        * HKD (HK$) → USD: multiply by 0.13
 
        * If currency is already USD ($), keep as-is.
-       * If currency is unknown, assume USD.
+       * If currency is not explicit, use the posting's wording, country, location,
+         and currency conventions to make your best judgment before converting to USD.
+         If it remains genuinely ambiguous, return null for salary_min, salary_max,
+         and salary_type; do not default to USD.
 
    - Apply currency conversion BEFORE converting weekly/monthly/daily → yearly.
 

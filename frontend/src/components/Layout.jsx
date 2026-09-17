@@ -8,7 +8,7 @@ export default function Layout({ page, setPage, lastScrapedAt, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className={`app-shell ${['Overview', 'Postings', 'SkillsView'].includes(page) ? 'overview-shell' : ''}`}>
+    <div className={`app-shell ${['Overview', 'Postings', 'SkillsView', 'Salary', 'DailyTrends'].includes(page) ? 'overview-shell' : ''}`}>
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}

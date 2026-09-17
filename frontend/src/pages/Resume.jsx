@@ -35,9 +35,13 @@ export function ResumeAnalyzer() {
   if (results)
     return <ResumeResults results={results} onReset={() => setResults(null)} />;
   return (
-    <div className="resume-page resume-upload-page">
+    <div className="resume-page resume-upload-page advisor-page">
       <div className="resume-upload-container">
-        <section className="upload-hero">
+        <header className="advisor-page-header">
+          <h1>Career Advisor</h1>
+          <p>Use your resume and current market data to identify matching roles and high-value skill gaps.</p>
+        </header>
+        <section className="upload-hero legacy-upload-hero">
           <div className="upload-hero-copy">
             <span className="upload-eyebrow">
               <i /> Resume match
@@ -101,9 +105,12 @@ export function ResumeAnalyzer() {
             </div>
           </div>
         </section>
-        <div className="card resume-card upload-panel">
+        <AdvisorCompanion />
+        <div className="card resume-card upload-panel" id="resume-upload">
           <div className="page-header resume-page-header">
-            <h2>Start with your resume</h2>
+            <span>Resume analysis</span>
+            <h2>Upload your resume</h2>
+            <p>PDF only. Your report uses live job-posting data.</p>
           </div>
           <div className="upload-section">
             <label htmlFor="file-input" className="upload-box upload-label">
@@ -159,6 +166,20 @@ export function ResumeAnalyzer() {
       </div>
     </div>
   );
+}
+
+function AdvisorCompanion() {
+  const [targetRole, setTargetRole] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const roles = ["Software engineer", "Data engineer", "Machine learning engineer", "Data scientist", "Data analyst"];
+  const skills = ["Python", "SQL", "React", "AWS", "Docker", "Machine learning"];
+  const toggleSkill = (skill) => setSelectedSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
+  const continueToUpload = () => document.getElementById("resume-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  return <section className="advisor-companion" aria-labelledby="advisor-companion-title">
+    <div className="advisor-companion-copy"><span>Career advisor</span><h2 id="advisor-companion-title">Set your direction, then verify it with your resume.</h2><p>Choose a role and note the skills you want to emphasize. Your uploaded resume remains the source for live matches, gaps, and recommendations.</p></div>
+    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{skills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div><button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
+  </section>;
 }
 
 function InfoCard({ label, title, copy, icon, accent }) {

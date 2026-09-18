@@ -1,18 +1,22 @@
 function formatLastScrapedAt(value) {
-  if (!value) return "Loading last scrape...";
+  if (!value) return "Loading last scrape..."
 
-  const timestamp = new Date(value);
-  if (Number.isNaN(timestamp.getTime())) return "Last scrape unavailable";
+  const timestamp = new Date(value)
+  if (Number.isNaN(timestamp.getTime())) return "Last scrape unavailable"
 
   return `Last scrape: ${new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(timestamp)}`;
+  }).format(timestamp)}`
 }
 
-export default function TopBar({ page, lastScrapedAt, onMenuClick }) {
-  const name =
-    page === "SkillsView" ? "Skills" : page === "Overview" ? "Overview" : page.replace(/([A-Z])/g, " $1").trim();
+export default function TopBar({ page, lastScrapedAt, onMenuClick, sidebarOpen }) {
+  const name = page === "SkillsView"
+    ? "Skills"
+    : page === "Overview"
+      ? "Overview"
+      : page.replace(/([A-Z])/g, " $1").trim()
+
   return (
     <div className="topbar-root">
       <div className="topbar-inner">
@@ -20,9 +24,12 @@ export default function TopBar({ page, lastScrapedAt, onMenuClick }) {
           <button
             className="menu-btn"
             onClick={onMenuClick}
-            aria-label="Open navigation"
+            aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={sidebarOpen}
           >
-            ☰
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
           </button>
           <div className="topbar-page">{name}</div>
         </div>
@@ -31,5 +38,5 @@ export default function TopBar({ page, lastScrapedAt, onMenuClick }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 @media (max-width: 900px) {
   .app-shell.overview-shell .app-content {
-    padding: 20px 16px 40px;
+    padding: 20px 12px 40px;
   }
 
   .overview-header,
@@ -96,6 +96,16 @@
 }
 
 @media (max-width: 640px) {
+  .app-content,
+  .app-shell.overview-shell .app-content {
+    /* Keep a small safe gutter while allowing each page to use the phone width. */
+    padding-inline: 8px;
+  }
+
+  .topbar-inner {
+    padding-inline: 10px;
+  }
+
   .jobs-table-wrap {
     overflow: visible;
   }

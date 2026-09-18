@@ -16,7 +16,7 @@ export default function Layout({ page, setPage, lastScrapedAt, children }) {
         <Sidebar page={page} lastScrapedAt={lastScrapedAt} setPage={(p) => { setPage(p); setSidebarOpen(false) }} />
       </aside>
       <div className="app-main">
-        <TopBar page={page} lastScrapedAt={lastScrapedAt} onMenuClick={() => setSidebarOpen(o => !o)} />
+        <TopBar page={page} lastScrapedAt={lastScrapedAt} sidebarOpen={sidebarOpen} onMenuClick={() => setSidebarOpen(o => !o)} />
         <div className="app-content">{children}</div>
       </div>
     </div>

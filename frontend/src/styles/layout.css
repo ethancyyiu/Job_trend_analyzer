@@ -631,16 +631,34 @@
     margin-left: 0;
   }
   .menu-btn {
-    display: block;
-    border: 0;
-    background: transparent;
-    font-size: 23px;
+    display: inline-grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .menu-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+  .menu-btn:focus-visible {
+    outline: 3px solid rgba(6, 182, 212, 0.4);
+    outline-offset: 2px;
   }
   .topbar-inner {
     padding: 0 18px;
   }
   .app-content {
-    padding: 20px 16px;
+    padding: 20px 12px;
   }
   .page-hero,
   .advice-grid {
@@ -662,6 +680,16 @@
   }
   .topbar-sync {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-content {
+    padding-inline: 8px;
+  }
+
+  .topbar-inner {
+    padding-inline: 10px;
   }
 }
 

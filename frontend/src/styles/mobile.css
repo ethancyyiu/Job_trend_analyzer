@@ -1,4 +1,60 @@
 @media (max-width: 900px) {
+  /* Mobile navigation follows the dashboard's clean, Figma-style light rail. */
+  .app-shell.overview-shell .app-sidebar {
+    width: min(86vw, 320px);
+    padding: 18px 12px;
+    background: #fff;
+    border-right: 1px solid #e4e4e7;
+    box-shadow: 18px 0 42px rgba(15, 23, 42, 0.16);
+  }
+
+  .app-shell.overview-shell .sidebar-brand {
+    padding: 0 8px 18px;
+    border-bottom: 1px solid #e4e4e7;
+  }
+
+  .app-shell.overview-shell .brand-name {
+    color: #111;
+  }
+
+  .app-shell.overview-shell .brand-name small {
+    display: block;
+    color: #71717a;
+  }
+
+  .app-shell.overview-shell .sidebar-nav {
+    padding: 10px 0;
+  }
+
+  .app-shell.overview-shell .nav-vertical {
+    gap: 3px;
+  }
+
+  .app-shell.overview-shell .nav-item {
+    padding: 11px 12px;
+    border: 0;
+    border-radius: 9px;
+    color: #52525b;
+    font-weight: 600;
+  }
+
+  .app-shell.overview-shell .nav-item:hover {
+    background: #f4f4f5;
+    color: #111;
+  }
+
+  .app-shell.overview-shell .nav-item.active {
+    background: #ecfeff;
+    color: #0e7490;
+    box-shadow: inset 3px 0 #06b6d4;
+  }
+
+  .app-shell.overview-shell .sidebar-footer {
+    padding: 14px 8px 0;
+    border-top: 1px solid #e4e4e7;
+    color: #a1a1aa;
+  }
+
   .app-shell.overview-shell .app-content {
     padding: 20px 12px 40px;
   }
@@ -100,6 +156,17 @@
   .app-shell.overview-shell .app-content {
     /* Keep a small safe gutter while allowing each page to use the phone width. */
     padding-inline: 8px;
+  }
+
+  .app-shell.overview-shell .overview-page,
+  .app-shell.overview-shell .jobs-page,
+  .app-shell.overview-shell .skills-page,
+  .app-shell.overview-shell .salary-page,
+  .app-shell.overview-shell .trends-page,
+  .app-shell.overview-shell .resume-upload-container,
+  .app-shell.overview-shell .resume-results-container {
+    max-width: none;
+    width: 100%;
   }
 
   .topbar-inner {

@@ -123,12 +123,49 @@ def get_skills():
     else:
         concentration_percent = 0
 
+    momentum_rows = query("""
+        WITH current_period AS (
+            SELECT unnest(skills) AS skill, COUNT(*) AS count
+            FROM postings
+            WHERE date_posted >= CURRENT_DATE - INTERVAL '30 days'
+            GROUP BY skill
+        ), previous_period AS (
+            SELECT unnest(skills) AS skill, COUNT(*) AS count
+            FROM postings
+            WHERE date_posted >= CURRENT_DATE - INTERVAL '60 days'
+              AND date_posted < CURRENT_DATE - INTERVAL '30 days'
+            GROUP BY skill
+        )
+        SELECT COALESCE(current_period.skill, previous_period.skill) AS skill,
+               COALESCE(current_period.count, 0) AS current_count,
+               COALESCE(previous_period.count, 0) AS previous_count
+        FROM current_period
+        FULL OUTER JOIN previous_period ON current_period.skill = previous_period.skill
+    """)
+
+    momentum = [
+        {
+            "skill": row[0],
+            "current_count": int(row[1]),
+            "previous_count": int(row[2]),
+            "change": int(row[1]) - int(row[2]),
+        }
+        for row in momentum_rows
+    ]
+    rising = sorted((item for item in momentum if item["change"] > 0), key=lambda item: item["change"], reverse=True)[:3]
+    falling = sorted((item for item in momentum if item["change"] < 0), key=lambda item: item["change"])[:3]
+
     answer = []
     for i in rows:
         item = {"skill": i[0], "count": i[1]}
         answer.append(item)
 
-    return {"skills": answer, "concentration": concentration_percent}
+    return {
+        "skills": answer,
+        "concentration": concentration_percent,
+        "total_mentions": total,
+        "momentum": {"rising": rising, "falling": falling},
+    }
 
 @router.get("/postings")
 def get_postings(days: int = Query(30, ge=1, le=365), page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100), search: str | None = Query(None, max_length=100), location: str | None = Query(None, max_length=120)):
@@ -275,6 +312,49 @@ def get_salary():
     for i in each_median:
         item = {"title": i[0], "median_minimum": i[1], "median_maximum": i[2]}
         each_category_median.append(item)
+
+    salary_bands = query("""
+        WITH yearly_salaries AS (
+            SELECT COALESCE((salary_min + salary_max) / 2, salary_min, salary_max) AS midpoint
+            FROM postings
+            WHERE salary_type = 'yearly'
+              AND (salary_min IS NOT NULL OR salary_max IS NOT NULL)
+        ), banded AS (
+            SELECT CASE
+                WHEN midpoint < 50000 THEN 'Under $50k'
+                WHEN midpoint < 75000 THEN '$50k - $75k'
+                WHEN midpoint < 100000 THEN '$75k - $100k'
+                WHEN midpoint < 125000 THEN '$100k - $125k'
+                WHEN midpoint < 150000 THEN '$125k - $150k'
+                ELSE '$150k and above'
+            END AS label,
+            CASE
+                WHEN midpoint < 50000 THEN 1
+                WHEN midpoint < 75000 THEN 2
+                WHEN midpoint < 100000 THEN 3
+                WHEN midpoint < 125000 THEN 4
+                WHEN midpoint < 150000 THEN 5
+                ELSE 6
+            END AS position
+            FROM yearly_salaries
+        )
+        SELECT label, COUNT(*) AS count
+        FROM banded
+        GROUP BY label, position
+        ORDER BY position
+    """)
+
+    coverage_by_role = query("""
+        SELECT COALESCE(job_category, 'Uncategorized') AS role,
+               COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL) AS disclosed_count,
+               COUNT(*) AS posting_count
+        FROM postings
+        GROUP BY job_category
+        HAVING COUNT(*) > 0
+        ORDER BY (COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL))::numeric / COUNT(*) DESC,
+                 disclosed_count DESC
+        LIMIT 5
+    """)
     
     return {
         "sample": sample,
@@ -290,6 +370,11 @@ def get_salary():
         "yearly_percentage": yearly_percentage,
         
         "each_category_median": each_category_median,
+        "salary_bands": [{"label": row[0], "count": int(row[1])} for row in salary_bands],
+        "coverage_by_role": [
+            {"role": row[0], "disclosed_count": int(row[1]), "posting_count": int(row[2])}
+            for row in coverage_by_role
+        ],
         
         "total_postings": total,
     }

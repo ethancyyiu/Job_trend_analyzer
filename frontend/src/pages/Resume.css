@@ -90,6 +90,7 @@
 }
 .advisor-skill-options button {
   padding: 4px 8px;
+  text-transform: uppercase;
   border: 1px solid #e4e4e7;
   border-radius: 4px;
   background: #fff;
@@ -497,6 +498,7 @@
 }
 .skill-name {
   font-size: 13px;
+  text-transform: uppercase;
 }
 .skill-tags {
   display: flex;
@@ -505,6 +507,7 @@
 }
 .skill-tag-yours {
   padding: 4px 8px;
+  text-transform: uppercase;
   border-radius: 4px;
   background: #f1f1f3;
   color: #52525b;
@@ -519,6 +522,7 @@
 }
 .skill-opportunity h4 {
   margin: 0 0 5px;
+  text-transform: uppercase;
   font:
     500 13px Inter,
     sans-serif;

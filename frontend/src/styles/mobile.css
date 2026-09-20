@@ -290,21 +290,25 @@
     min-width: 480px;
   }
 
+  .overview-skills-scroll,
   .overview-table-wrap,
+  .skills-chart-scroll,
   .skills-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    /* Reserve space after the final column so it does not meet the page edge. */
-    padding-right: 16px;
+    /* Keep wide content in a visibly bounded scroll area with end padding. */
+    padding-inline: 12px;
     padding-bottom: 8px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
     overscroll-behavior-inline: contain;
   }
 
-  .skills-chart-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 16px;
-    padding-bottom: 8px;
-    overscroll-behavior-inline: contain;
+  .overview-skills-scroll .overview-skills {
+    width: 360px;
+    min-width: 360px;
   }
 
   .skills-chart-scroll .skills-chart {

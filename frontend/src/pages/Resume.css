@@ -94,6 +94,26 @@
   flex-wrap: wrap;
   gap: 5px;
 }
+.advisor-skills-loading,
+.advisor-skills-error {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  color: #71717a;
+  font-size: 12px;
+}
+.advisor-skills-loading::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  margin-right: 7px;
+  border: 2px solid #e4e4e7;
+  border-top-color: #d97706;
+  border-radius: 50%;
+  animation: advisor-skills-spin 700ms linear infinite;
+}
+.advisor-skills-error { color: #a16207; }
+@keyframes advisor-skills-spin { to { transform: rotate(360deg); } }
 .advisor-skill-options button {
   padding: 4px 8px;
   text-transform: uppercase;

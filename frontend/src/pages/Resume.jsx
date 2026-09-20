@@ -11,10 +11,16 @@ export function ResumeAnalyzer() {
   const [targetRole, setTargetRole] = useState("");
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [trackedSkills, setTrackedSkills] = useState([]);
+  const [trackedSkillsStatus, setTrackedSkillsStatus] = useState("loading");
   const API_BASE = import.meta.env.VITE_API_URL || "";
 
   useEffect(() => {
-    axios.get(`${API_BASE}/resume_skills`).then((response) => setTrackedSkills(response.data?.skills || [])).catch(() => setTrackedSkills([]));
+    axios.get(`${API_BASE}/resume_skills`)
+      .then((response) => {
+        setTrackedSkills(response.data?.skills || []);
+        setTrackedSkillsStatus("ready");
+      })
+      .catch(() => setTrackedSkillsStatus("error"));
   }, [API_BASE]);
 
   useEffect(() => {
@@ -114,7 +120,7 @@ export function ResumeAnalyzer() {
             </div>
           </div>
         </section>
-        <AdvisorCompanion targetRole={targetRole} setTargetRole={setTargetRole} selectedSkills={selectedSkills} setSelectedSkills={setSelectedSkills} trackedSkills={trackedSkills} />
+        <AdvisorCompanion targetRole={targetRole} setTargetRole={setTargetRole} selectedSkills={selectedSkills} setSelectedSkills={setSelectedSkills} trackedSkills={trackedSkills} trackedSkillsStatus={trackedSkillsStatus} />
         <div className="card resume-card upload-panel" id="resume-upload">
           <div className="page-header resume-page-header">
             <span>Resume analysis</span>
@@ -177,17 +183,17 @@ export function ResumeAnalyzer() {
   );
 }
 
-function AdvisorCompanion({ targetRole, setTargetRole, selectedSkills, setSelectedSkills, trackedSkills }) {
+function AdvisorCompanion({ targetRole, setTargetRole, selectedSkills, setSelectedSkills, trackedSkills, trackedSkillsStatus }) {
   const [showAllSkills, setShowAllSkills] = useState(false);
   const roles = ["Software engineer", "Data engineer", "Machine learning engineer", "Data scientist", "Data analyst"];
-  const skills = trackedSkills.length ? trackedSkills : ["Python", "SQL", "React", "AWS", "Docker", "Machine learning"];
+  const skills = trackedSkills;
   const visibleSkills = showAllSkills ? skills : skills.slice(0, 6);
   const toggleSkill = (skill) => setSelectedSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
   const continueToUpload = () => document.getElementById("resume-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return <section className={`advisor-companion${showAllSkills ? " advisor-companion-expanded" : ""}`} aria-labelledby="advisor-companion-title">
     <div className="advisor-companion-copy"><span>Career advisor</span><h2 id="advisor-companion-title">Set your direction, then verify it with your resume.</h2><p>Choose a role and note the skills you want to emphasize. Your uploaded resume remains the source for live matches, gaps, and recommendations.</p></div>
-    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{visibleSkills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div>{skills.length > 6 && <button type="button" className="advisor-skills-toggle" onClick={() => setShowAllSkills((visible) => !visible)}>{showAllSkills ? "Show fewer skills" : `Select more skills (${skills.length})`}</button>}<button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
+    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{trackedSkillsStatus === "loading" ? <span className="advisor-skills-loading">Loading tracked skills…</span> : trackedSkillsStatus === "error" ? <span className="advisor-skills-error">Skills are unavailable. Please refresh and try again.</span> : visibleSkills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div>{trackedSkillsStatus === "ready" && skills.length > 6 && <button type="button" className="advisor-skills-toggle" onClick={() => setShowAllSkills((visible) => !visible)}>{showAllSkills ? "Show fewer skills" : `Select more skills (${skills.length})`}</button>}<button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
   </section>;
 }
 

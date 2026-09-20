@@ -62,7 +62,8 @@ export default function App() {
 
   useEffect(() => {
     const endpointsByPage = {
-      Overview: ['/trends', '/skills', '/postings', '/metadata'],
+      // Warm the expensive salary aggregation while the initial dashboard is shown.
+      Overview: ['/trends', '/skills', '/postings', '/salary', '/metadata'],
       DailyTrends: ['/trends', '/trends/forecast', '/metadata'],
       SkillsView: ['/skills', '/metadata'],
       Postings: ['/postings', '/metadata'],

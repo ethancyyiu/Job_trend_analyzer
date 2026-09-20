@@ -1,9 +1,15 @@
 from datetime import date, timedelta
+from threading import Lock
+from time import monotonic
 from fastapi import APIRouter, HTTPException, Query, Response
 from api.db import query
 from analysis.predictions import JOB_CATEGORIES
 
 router = APIRouter()
+
+SALARY_CACHE_SECONDS = 300
+_salary_cache = {"expires_at": 0.0, "payload": None}
+_salary_cache_lock = Lock()
 
 @router.get("/trends")
 def get_trends():
@@ -233,151 +239,104 @@ def get_posting_details(posting_id: int):
     }
 
 @router.get("/salary")
-def get_salary():
-    # sample testing query
-    sample = query(""" 
-        SELECT salary_min, salary_max, salary_type
-        FROM postings
-        WHERE (salary_min IS NOT NULL OR salary_max IS NOT NULL)
-        AND salary_type IS NOT NULL
-        LIMIT 10; 
-    """)
-    
-    # how much of total postings have salary data
-    coverage = query(""" 
-        SELECT
-            COUNT(*) AS total,
-            COUNT(*) FILTER (WHERE salary_min IS NOT NULL) AS has_salary
-        FROM postings;
-    """)
-    
-    total = coverage[0][0]
-    has_salary = coverage[0][1]
-    
-    if total and total > 0:
-        coverage_percent = has_salary / total * 100
-    else:
-        coverage_percent = 0
-    
-    # yearly vs hourly percentage comparison
-    type_amount = query("""
-        SELECT salary_type, COUNT(*) AS count 
-        FROM postings
-        WHERE salary_type IS NOT NULL
-        GROUP BY salary_type;                    
-    """)
-    
-    type_dictionary = {}
-    for types in type_amount:
-        salary_type = types[0]
-        count = types[1]
-        type_dictionary[salary_type] = count
-        
-    hourly = type_dictionary.get("hourly", 0)
-    yearly = type_dictionary.get("yearly", 0)
-    
-    combined = hourly + yearly
-    
-    if combined > 0:
-        hourly_percentage = hourly / combined * 100
-        yearly_percentage = yearly / combined * 100
-    else:
-        hourly_percentage = 0
-        yearly_percentage = 0
-        
-    # median of salary_min and salary_max
-    median = query("""
-        SELECT 
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_min,
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_max
-        FROM postings
-        WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL;          
-    """)
-    
-    median_min = median[0][0]
-    median_max = median[0][1]
-    
-    # find median of salary_min and salary_max of each job category
-    each_median = query("""
-        SELECT 
-            job_category,
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min) AS median_minimum,
-            percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max) AS median_maximum
-        FROM postings
-        WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL
-        GROUP BY job_category
-    """)
-    
-    each_category_median = []
-    for i in each_median:
-        item = {"title": i[0], "median_minimum": i[1], "median_maximum": i[2]}
-        each_category_median.append(item)
+def get_salary(response: Response):
+    """Return cached salary metrics assembled from small, readable queries."""
+    now = monotonic()
+    with _salary_cache_lock:
+        if _salary_cache["payload"] is not None and now < _salary_cache["expires_at"]:
+            response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+            return _salary_cache["payload"]
 
-    salary_bands = query("""
-        WITH yearly_salaries AS (
-            SELECT COALESCE((salary_min + salary_max) / 2, salary_min, salary_max) AS midpoint
+        total, has_salary, median_min, median_max = query("""
+            SELECT COUNT(*),
+                   COUNT(*) FILTER (WHERE salary_min IS NOT NULL),
+                   percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min)
+                       FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL),
+                   percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max)
+                       FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL)
             FROM postings
-            WHERE salary_type = 'yearly'
-              AND (salary_min IS NOT NULL OR salary_max IS NOT NULL)
-        ), banded AS (
-            SELECT CASE
-                WHEN midpoint < 50000 THEN 'Under $50k'
-                WHEN midpoint < 75000 THEN '$50k - $75k'
-                WHEN midpoint < 100000 THEN '$75k - $100k'
-                WHEN midpoint < 125000 THEN '$100k - $125k'
-                WHEN midpoint < 150000 THEN '$125k - $150k'
-                ELSE '$150k and above'
-            END AS label,
-            CASE
-                WHEN midpoint < 50000 THEN 1
-                WHEN midpoint < 75000 THEN 2
-                WHEN midpoint < 100000 THEN 3
-                WHEN midpoint < 125000 THEN 4
-                WHEN midpoint < 150000 THEN 5
-                ELSE 6
-            END AS position
-            FROM yearly_salaries
-        )
-        SELECT label, COUNT(*) AS count
-        FROM banded
-        GROUP BY label, position
-        ORDER BY position
-    """)
+        """)[0]
 
-    coverage_by_role = query("""
-        SELECT COALESCE(job_category, 'Uncategorized') AS role,
-               COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL) AS disclosed_count,
-               COUNT(*) AS posting_count
-        FROM postings
-        GROUP BY job_category
-        HAVING COUNT(*) > 0
-        ORDER BY (COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL))::numeric / COUNT(*) DESC,
-                 disclosed_count DESC
-        LIMIT 5
-    """)
-    
-    return {
-        "sample": sample,
-        "coverage_percentage": coverage_percent,
-        "coverage_count": has_salary,
-        
-        "median_min": median_min,
-        "median_max": median_max,
-        
-        "hourly_count": hourly,
-        "yearly_count": yearly,
-        "hourly_percentage": hourly_percentage,
-        "yearly_percentage": yearly_percentage,
-        
-        "each_category_median": each_category_median,
-        "salary_bands": [{"label": row[0], "count": int(row[1])} for row in salary_bands],
-        "coverage_by_role": [
+        type_counts = dict(query("""
+            SELECT salary_type, COUNT(*)
+            FROM postings
+            WHERE salary_type IS NOT NULL
+            GROUP BY salary_type
+        """))
+        hourly = type_counts.get("hourly", 0)
+        yearly = type_counts.get("yearly", 0)
+        pay_type_total = hourly + yearly
+
+        each_category_median = [
+            {"title": row[0], "median_minimum": row[1], "median_maximum": row[2]}
+            for row in query("""
+                SELECT COALESCE(job_category, 'Uncategorized'),
+                       percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_min),
+                       percentile_cont(0.5) WITHIN GROUP (ORDER BY salary_max)
+                FROM postings
+                WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL
+                GROUP BY job_category
+            """)
+        ]
+
+        salary_bands = [
+            {"label": row[0], "count": int(row[1])}
+            for row in query("""
+                WITH yearly_salaries AS (
+                    SELECT COALESCE((salary_min + salary_max) / 2, salary_min, salary_max) AS midpoint
+                    FROM postings
+                    WHERE salary_type = 'yearly'
+                      AND (salary_min IS NOT NULL OR salary_max IS NOT NULL)
+                )
+                SELECT CASE
+                           WHEN midpoint < 50000 THEN 'Under $50k'
+                           WHEN midpoint < 75000 THEN '$50k - $75k'
+                           WHEN midpoint < 100000 THEN '$75k - $100k'
+                           WHEN midpoint < 125000 THEN '$100k - $125k'
+                           WHEN midpoint < 150000 THEN '$125k - $150k'
+                           ELSE '$150k and above'
+                       END AS label,
+                       COUNT(*) AS count
+                FROM yearly_salaries
+                GROUP BY label
+                ORDER BY MIN(midpoint)
+            """)
+        ]
+
+        coverage_by_role = [
             {"role": row[0], "disclosed_count": int(row[1]), "posting_count": int(row[2])}
-            for row in coverage_by_role
-        ],
-        
-        "total_postings": total,
-    }
+            for row in query("""
+                SELECT COALESCE(job_category, 'Uncategorized'),
+                       COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL),
+                       COUNT(*)
+                FROM postings
+                GROUP BY job_category
+                ORDER BY (COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL))::numeric / COUNT(*) DESC,
+                         COUNT(*) FILTER (WHERE salary_min IS NOT NULL OR salary_max IS NOT NULL) DESC
+                LIMIT 5
+            """)
+        ]
+
+        payload = {
+            "coverage_percentage": has_salary / total * 100 if total else 0,
+            "coverage_count": has_salary,
+            "median_min": median_min,
+            "median_max": median_max,
+            "hourly_count": hourly,
+            "yearly_count": yearly,
+            "hourly_percentage": hourly / pay_type_total * 100 if pay_type_total else 0,
+            "yearly_percentage": yearly / pay_type_total * 100 if pay_type_total else 0,
+            "each_category_median": each_category_median,
+            "salary_bands": salary_bands,
+            "coverage_by_role": coverage_by_role,
+            "total_postings": total,
+        }
+
+        _salary_cache["payload"] = payload
+        _salary_cache["expires_at"] = now + SALARY_CACHE_SECONDS
+
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+    return payload
     
 @router.get("/home")
 def home():

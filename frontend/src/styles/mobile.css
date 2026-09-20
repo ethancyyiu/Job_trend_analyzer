@@ -293,6 +293,23 @@
   .overview-table-wrap,
   .skills-table-wrap {
     -webkit-overflow-scrolling: touch;
+    /* Reserve space after the final column so it does not meet the page edge. */
+    padding-right: 16px;
+    padding-bottom: 8px;
+    overscroll-behavior-inline: contain;
+  }
+
+  .skills-chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 16px;
+    padding-bottom: 8px;
+    overscroll-behavior-inline: contain;
+  }
+
+  .skills-chart-scroll .skills-chart {
+    width: 480px;
+    min-width: 480px;
   }
 
   .overview-stats article,

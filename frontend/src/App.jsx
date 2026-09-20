@@ -8,6 +8,7 @@ import axios from 'axios'
 import {Analytics} from "@vercel/analytics/react"
 import {ResumeAnalyzer} from "./pages/Resume.jsx"
 import Overview from "./pages/Overview.jsx"
+import './styles/mobile.css'
 
 
 const API_BASE = import.meta.env.VITE_API_URL || ''

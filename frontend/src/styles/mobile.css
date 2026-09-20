@@ -1,29 +1,62 @@
 @media (max-width: 900px) {
-  /* Mobile navigation follows the dashboard's clean, Figma-style light rail. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  /* Use a compact top navigation with a full-width menu, matching the profile's mobile pattern. */
+  .topbar-root {
+    height: 58px;
+  }
+
+  .topbar-inner {
+    padding-inline: 12px;
+  }
+
+  .topbar-left {
+    width: 100%;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+  }
+
+  .menu-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  /* The sidebar becomes a top-down menu on phones instead of a narrow side rail. */
   .app-shell.overview-shell .app-sidebar {
-    width: min(86vw, 320px);
-    padding: 18px 12px;
+    inset: 58px 0 auto;
+    width: 100%;
+    max-height: calc(100dvh - 58px);
+    padding: 8px 12px 16px;
     background: #fff;
-    border-right: 1px solid #e4e4e7;
-    box-shadow: 18px 0 42px rgba(15, 23, 42, 0.16);
+    border: 0;
+    border-bottom: 1px solid #e4e4e7;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    overflow-y: auto;
+    transform: translateY(-125%);
+    transition: transform 180ms ease;
+  }
+
+  .app-shell.overview-shell .app-sidebar.sidebar-open {
+    left: 0;
+    transform: translateY(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
   }
 
   .app-shell.overview-shell .sidebar-brand {
-    padding: 0 8px 18px;
-    border-bottom: 1px solid #e4e4e7;
-  }
-
-  .app-shell.overview-shell .brand-name {
-    color: #111;
-  }
-
-  .app-shell.overview-shell .brand-name small {
-    display: block;
-    color: #71717a;
+    display: none;
   }
 
   .app-shell.overview-shell .sidebar-nav {
-    padding: 10px 0;
+    padding: 0;
   }
 
   .app-shell.overview-shell .nav-vertical {
@@ -50,13 +83,14 @@
   }
 
   .app-shell.overview-shell .sidebar-footer {
-    padding: 14px 8px 0;
-    border-top: 1px solid #e4e4e7;
-    color: #a1a1aa;
+    display: none;
   }
 
   .app-shell.overview-shell .app-content {
-    padding: 20px 12px 40px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 18px 10px 40px;
   }
 
   .overview-header,
@@ -155,7 +189,7 @@
   .app-content,
   .app-shell.overview-shell .app-content {
     /* Keep a small safe gutter while allowing each page to use the phone width. */
-    padding-inline: 8px;
+    padding-inline: 6px;
   }
 
   .app-shell.overview-shell .overview-page,
@@ -170,7 +204,7 @@
   }
 
   .topbar-inner {
-    padding-inline: 10px;
+    padding-inline: 8px;
   }
 
   .jobs-table-wrap {

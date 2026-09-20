@@ -61,6 +61,12 @@
   gap: 9px;
   align-content: start;
 }
+.advisor-companion-expanded {
+  grid-template-columns: 1fr;
+}
+.advisor-companion-expanded .advisor-companion-copy {
+  max-width: 680px;
+}
 .advisor-companion-form label,
 .advisor-label {
   color: #71717a;

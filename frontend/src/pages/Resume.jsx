@@ -247,31 +247,6 @@ function ResumeResults({ results, onReset }) {
         <MarketSnapshot snapshot={market_snapshot} />
         <div className="resume-report-layout">
           <div className="resume-report-main">
-            <section className="report-section report-section-dark">
-              <div className="report-section-heading">
-                <div>
-                  <span className="report-eyebrow">Recommended actions</span>
-                  <h2>Make these moves first</h2>
-                </div>
-              </div>
-              <div className="report-action-grid">
-                <Action
-                  number="01"
-                  title="Apply with intention"
-                  copy="Start with your strongest-fit roles and tailor your opening resume bullets."
-                />
-                <Action
-                  number="02"
-                  title="Close one strategic gap"
-                  copy="Build one in-demand skill into a visible portfolio proof point."
-                />
-                <Action
-                  number="03"
-                  title="Lead with your edge"
-                  copy="Move your strongest matching skills to the top of your resume."
-                />
-              </div>
-            </section>
             <section className="report-section">
               <div className="report-section-heading">
                 <div>
@@ -435,15 +410,6 @@ function MarketSnapshot({ snapshot }) {
   );
 }
 
-function Action({ number, title, copy }) {
-  return (
-    <article>
-      <span>{number}</span>
-      <h3>{title}</h3>
-      <p>{copy}</p>
-    </article>
-  );
-}
 function formatCompensation(value) {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return "—";

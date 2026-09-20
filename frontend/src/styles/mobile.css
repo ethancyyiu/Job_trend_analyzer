@@ -84,9 +84,10 @@
   }
 
   .app-shell.overview-shell .nav-item.active {
-    background: #ecfeff;
-    color: #0e7490;
-    box-shadow: inset 3px 0 #06b6d4;
+    /* Match the dashboard's orange active state instead of the old blue accent. */
+    background: #fff7ed;
+    color: #92400e;
+    box-shadow: inset 3px 0 #d97706;
   }
 
   .app-shell.overview-shell .sidebar-footer {

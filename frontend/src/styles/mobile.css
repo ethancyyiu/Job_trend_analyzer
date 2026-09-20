@@ -97,7 +97,8 @@
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 18px 10px 40px;
+    /* Give page content a comfortable gutter on tablets and small laptops. */
+    padding: 18px 16px 40px;
   }
 
   .overview-header,
@@ -195,8 +196,8 @@
 @media (max-width: 640px) {
   .app-content,
   .app-shell.overview-shell .app-content {
-    /* Keep a small safe gutter while allowing each page to use the phone width. */
-    padding-inline: 6px;
+    /* Keep cards, tables, and page copy clear of the phone's screen edges. */
+    padding-inline: 16px;
   }
 
   .app-shell.overview-shell .overview-page,

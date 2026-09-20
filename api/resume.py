@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 import PyPDF2
 import os
+import re
 from api.db import query
 from analysis.skill_extractor import extract_skills
 from io import BytesIO
@@ -10,13 +11,24 @@ router = APIRouter()
 @router.get("/resume_skills")
 def get_resume_skills():
     rows = query("""
-        SELECT DISTINCT ON (LOWER(skill.value)) skill.value
+        SELECT DISTINCT skill.value
         FROM postings
         CROSS JOIN LATERAL unnest(skills) AS skill(value)
         WHERE skill.value IS NOT NULL AND BTRIM(skill.value) <> ''
-        ORDER BY LOWER(skill.value), skill.value
+        ORDER BY skill.value
     """)
-    return {"skills": [row[0] for row in rows]}
+    skills_by_key = {}
+    for row in rows:
+        skill = row[0].strip()
+        # Postings retain source variations such as "fast api" / "fastapi"
+        # and "ci/cd" / "cicd" for extraction coverage. The picker only
+        # needs one choice for each of those equivalent forms.
+        normalized_key = re.sub(r"[\s./_-]+", "", skill).casefold()
+        current = skills_by_key.get(normalized_key)
+        if current is None or len(skill) < len(current):
+            skills_by_key[normalized_key] = skill
+
+    return {"skills": sorted(skills_by_key.values(), key=str.casefold)}
 
 def extract_text_from_pdf(file_bytes):
     try:

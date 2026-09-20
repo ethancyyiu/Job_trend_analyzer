@@ -100,7 +100,7 @@ async def resume_upload(file: UploadFile = File(...)):
     
     # top jobs that the user qualifies for, for each skills 
     matched_job_ids = query("""
-        SELECT id, title, company, location, description, salary_min, salary_max,
+        SELECT id, title, company, location, description, date_posted, salary_min, salary_max,
                salary_type, posting_url, skills
         FROM postings
         WHERE date_posted >= NOW() - INTERVAL '30 days'
@@ -114,7 +114,7 @@ async def resume_upload(file: UploadFile = File(...)):
         """, (resume_skills,))
     
     matched_jobs = []
-    for (job_id, title, company, location, description, sal_min, sal_max,
+    for (job_id, title, company, location, description, date_posted, sal_min, sal_max,
          salary_type, posting_url, job_skills) in matched_job_ids:
         
         if job_skills:
@@ -128,6 +128,7 @@ async def resume_upload(file: UploadFile = File(...)):
             "company": company,
             "location": location,
             "description": description,
+            "date_posted": str(date_posted) if date_posted else None,
             "salary_min": sal_min,
             "salary_max": sal_max,
             "salary_type": salary_type,

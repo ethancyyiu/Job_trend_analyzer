@@ -4,6 +4,14 @@ import axios from "axios";
 import "./Postings.css";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
+const formatSalary = (job) => {
+  const minimum = job.salary_min == null ? Number.NaN : Number(job.salary_min);
+  const maximum = job.salary_max == null ? Number.NaN : Number(job.salary_max);
+  if (!Number.isFinite(minimum) && !Number.isFinite(maximum)) return "Not listed";
+  const amount = (value) => `$${Math.round(value).toLocaleString()}`;
+  const range = Number.isFinite(minimum) && Number.isFinite(maximum) ? `${amount(minimum)} - ${amount(maximum)}` : amount(Number.isFinite(minimum) ? minimum : maximum);
+  return `${range}${job.salary_type === "hourly" ? " / hr" : job.salary_type === "yearly" ? " / yr" : ""}`;
+};
 
 export function Postings({ cachedData }) {
   const [search, setSearch] = useState("");
@@ -78,5 +86,5 @@ function PostingDetailsModal({ posting, onClose }) {
   const description = job?.description || "A description was not provided for this posting.";
   const isLong = description.length > 700;
   const displayedDescription = showFullDescription || !isLong ? description : `${description.slice(0, 700).trim()}...`;
-  return createPortal(<div className="posting-details-backdrop" onMouseDown={onClose} role="presentation"><section className="posting-details-modal" role="dialog" aria-modal="true" aria-labelledby="posting-details-title" onMouseDown={(event) => event.stopPropagation()}><button className="posting-details-close" onClick={onClose} aria-label="Close role details">x</button><div className="posting-details-content">{!job && !error && <p className="posting-details-state">Loading role details...</p>}{error && <p className="posting-details-state">{error}</p>}{job && <><span className="module-kicker">Role details</span><h2 id="posting-details-title">{job.title}</h2><p className="posting-details-company">{job.company || "Company not listed"}</p><div className="posting-details-meta"><div><span>Location</span><strong>{job.location || "Not listed"}</strong></div><div><span>Posted</span><strong>{job.date_posted || "Recent"}</strong></div></div><div className="posting-details-description"><h3>About this role</h3><p>{displayedDescription}</p>{isLong && <button className="posting-description-toggle" onClick={() => setShowFullDescription((visible) => !visible)}>{showFullDescription ? "View less" : "View more"}</button>}</div>{job.posting_url ? <a className="posting-details-link" href={job.posting_url} target="_blank" rel="noreferrer">View job posting</a> : <span className="posting-details-link posting-details-link-disabled">Job link not available</span>}</>}</div></section></div>, document.body);
+  return createPortal(<div className="posting-details-backdrop" onMouseDown={onClose} role="presentation"><section className="posting-details-modal" role="dialog" aria-modal="true" aria-labelledby="posting-details-title" onMouseDown={(event) => event.stopPropagation()}><button className="posting-details-close" onClick={onClose} aria-label="Close role details">×</button><div className="posting-details-content">{!job && !error && <p className="posting-details-state">Loading role details...</p>}{error && <p className="posting-details-state">{error}</p>}{job && <><span className="posting-details-eyebrow">Role details</span><h2 id="posting-details-title">{job.title}</h2><p className="posting-details-company">{job.company || "Company not listed"}</p><div className="posting-details-meta"><div><span>Location</span><strong>{job.location || "Not listed"}</strong></div><div><span>Posted</span><strong>{job.date_posted || "Recent"}</strong></div><div><span>Salary</span><strong>{formatSalary(job)}</strong></div></div><div className="posting-details-description"><h3>About this role</h3><p>{displayedDescription}</p>{isLong && <button className="posting-description-toggle" onClick={() => setShowFullDescription((visible) => !visible)}>{showFullDescription ? "View less" : "View more"}</button>}</div>{job.posting_url ? <a className="posting-details-link" href={job.posting_url} target="_blank" rel="noreferrer">View job posting</a> : <span className="posting-details-link posting-details-link-disabled">Job link not available</span>}</>}</div></section></div>, document.body);
 }

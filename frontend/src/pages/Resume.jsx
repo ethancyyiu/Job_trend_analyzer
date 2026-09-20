@@ -353,12 +353,9 @@ function ResumeResults({ results, onReset }) {
                   .map(([skill, jobs]) => (
                     <div className="skill-opportunity" key={skill}>
                       <h4>{skill}</h4>
-                      <p>
-                        {jobs
-                          .slice(0, 2)
-                          .map((job) => `${job.title} · ${job.company}`)
-                          .join("\n")}
-                      </p>
+                      <ul>
+                        {jobs.slice(0, 2).map((job) => <li key={`${job.title}-${job.company}`}>- {job.title} · {job.company}</li>)}
+                      </ul>
                     </div>
                   ))}
               </section>
@@ -495,6 +492,7 @@ function JobCard({ job, index, onSelect }) {
 
 function JobDetailsModal({ job, onClose }) {
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const postedDate = job.date_posted ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(job.date_posted)) : "Recent";
   const salary = job.salary_min && job.salary_max
     ? `$${formatCompensation(job.salary_min)} – $${formatCompensation(job.salary_max)}${job.salary_type ? ` ${job.salary_type}` : ""}`
     : "Salary not listed";
@@ -526,11 +524,12 @@ function JobDetailsModal({ job, onClose }) {
       >
         <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
         <div className="job-details-content">
-          <span className="report-eyebrow">Job details</span>
+          <span className="job-details-eyebrow">Job details</span>
           <h2 id="job-details-title">{job.title}</h2>
           <p className="job-details-company">{job.company || "Company not listed"}</p>
           <div className="job-details-meta">
             <div><span>Location</span><strong>{job.location || "Location not listed"}</strong></div>
+            <div><span>Posted</span><strong>{postedDate}</strong></div>
             <div><span>Salary</span><strong>{salary}</strong></div>
           </div>
           <div className="job-details-description">

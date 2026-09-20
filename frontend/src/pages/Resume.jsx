@@ -8,7 +8,14 @@ export function ResumeAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [targetRole, setTargetRole] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [trackedSkills, setTrackedSkills] = useState([]);
   const API_BASE = import.meta.env.VITE_API_URL || "";
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/resume_skills`).then((response) => setTrackedSkills(response.data?.skills || [])).catch(() => setTrackedSkills([]));
+  }, [API_BASE]);
 
   useEffect(() => {
     if (results) window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -21,6 +28,8 @@ export function ResumeAnalyzer() {
     try {
       const body = new FormData();
       body.append("file", file);
+      if (targetRole) body.append("target_role", targetRole);
+      selectedSkills.forEach((skill) => body.append("emphasis_skills", skill));
       const response = await axios.post(`${API_BASE}/resume_upload`, body, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -105,7 +114,7 @@ export function ResumeAnalyzer() {
             </div>
           </div>
         </section>
-        <AdvisorCompanion />
+        <AdvisorCompanion targetRole={targetRole} setTargetRole={setTargetRole} selectedSkills={selectedSkills} setSelectedSkills={setSelectedSkills} trackedSkills={trackedSkills} />
         <div className="card resume-card upload-panel" id="resume-upload">
           <div className="page-header resume-page-header">
             <span>Resume analysis</span>
@@ -168,17 +177,17 @@ export function ResumeAnalyzer() {
   );
 }
 
-function AdvisorCompanion() {
-  const [targetRole, setTargetRole] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState([]);
+function AdvisorCompanion({ targetRole, setTargetRole, selectedSkills, setSelectedSkills, trackedSkills }) {
+  const [showAllSkills, setShowAllSkills] = useState(false);
   const roles = ["Software engineer", "Data engineer", "Machine learning engineer", "Data scientist", "Data analyst"];
-  const skills = ["Python", "SQL", "React", "AWS", "Docker", "Machine learning"];
+  const skills = trackedSkills.length ? trackedSkills : ["Python", "SQL", "React", "AWS", "Docker", "Machine learning"];
+  const visibleSkills = showAllSkills ? skills : skills.slice(0, 6);
   const toggleSkill = (skill) => setSelectedSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
   const continueToUpload = () => document.getElementById("resume-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return <section className="advisor-companion" aria-labelledby="advisor-companion-title">
     <div className="advisor-companion-copy"><span>Career advisor</span><h2 id="advisor-companion-title">Set your direction, then verify it with your resume.</h2><p>Choose a role and note the skills you want to emphasize. Your uploaded resume remains the source for live matches, gaps, and recommendations.</p></div>
-    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{skills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div><button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
+    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{visibleSkills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div>{skills.length > 6 && <button type="button" className="advisor-skills-toggle" onClick={() => setShowAllSkills((visible) => !visible)}>{showAllSkills ? "Show fewer skills" : `Select more skills (${skills.length})`}</button>}<button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
   </section>;
 }
 
@@ -205,12 +214,13 @@ function ResumeResults({ results, onReset }) {
     top_missing_skills = {},
     skill_opportunities = {},
     market_snapshot = {},
+    focus = {},
   } = results;
   const gaps = Object.entries(top_missing_skills);
   const [selectedJob, setSelectedJob] = useState(null);
   const top = matched_jobs[0];
   const fit = top
-    ? Math.round((top.matched_skills / top.total_skills) * 100)
+    ? Number(top.fit_score ?? Math.round((top.matched_skills / top.total_skills) * 100))
     : 0;
   return (
     <div className="resume-page resume-results-page">
@@ -244,6 +254,7 @@ function ResumeResults({ results, onReset }) {
             </div>
           </div>
         </section>
+        {(focus.target_role || focus.emphasis_skills?.length) && <div className="report-focus"><span>Your focus</span>{focus.target_role && <strong>{focus.target_role}</strong>}{focus.emphasis_skills?.length ? <small>{focus.emphasis_skills.map((skill) => skill.toUpperCase()).join(" · ")}</small> : null}</div>}
         <MarketSnapshot snapshot={market_snapshot} />
         <div className="resume-report-layout">
           <div className="resume-report-main">
@@ -420,7 +431,7 @@ function formatCompensation(value) {
 }
 
 function JobCard({ job, index, onSelect }) {
-  const fit = Math.round((job.matched_skills / job.total_skills) * 100);
+  const fit = Number(job.fit_score ?? Math.round((job.matched_skills / job.total_skills) * 100));
   return (
     <article
       className="job-card-result report-job-card"
@@ -445,6 +456,7 @@ function JobCard({ job, index, onSelect }) {
         <span>
           {job.matched_skills} of {job.total_skills} skills matched
         </span>
+        {job.priority_matches > 0 && <span>{job.priority_matches} priority match{job.priority_matches === 1 ? "" : "es"}</span>}
         {job.salary_min && job.salary_max && (
           <strong>
             {formatCompensation(job.salary_min)} –{" "}

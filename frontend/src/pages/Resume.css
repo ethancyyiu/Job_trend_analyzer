@@ -105,6 +105,16 @@
   background: #111;
   color: #fff;
 }
+.advisor-skills-toggle {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #a16207;
+  cursor: pointer;
+  font: 500 12px Inter, sans-serif;
+}
+.advisor-skills-toggle:hover { color: #92400e; text-decoration: underline; }
 .advisor-continue,
 .upload-button,
 .report-reset-button {
@@ -270,6 +280,31 @@
   font:
     600 36px "JetBrains Mono",
     monospace;
+}
+.report-focus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-left: 2px solid #d97706;
+  background: #fafafa;
+}
+.report-focus span {
+  color: #a1a1aa;
+  font: 500 10px Inter, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.report-focus strong {
+  color: #111;
+  font: 500 12px Inter, sans-serif;
+  text-transform: capitalize;
+}
+.report-focus small {
+  color: #71717a;
+  font: 11px "JetBrains Mono", monospace;
 }
 .report-stat-grid {
   grid-column: 1/-1;

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 import PyPDF2
 import os
 from api.db import query
@@ -6,6 +6,17 @@ from analysis.skill_extractor import extract_skills
 from io import BytesIO
 
 router = APIRouter()
+
+@router.get("/resume_skills")
+def get_resume_skills():
+    rows = query("""
+        SELECT DISTINCT ON (LOWER(skill.value)) skill.value
+        FROM postings
+        CROSS JOIN LATERAL unnest(skills) AS skill(value)
+        WHERE skill.value IS NOT NULL AND BTRIM(skill.value) <> ''
+        ORDER BY LOWER(skill.value), skill.value
+    """)
+    return {"skills": [row[0] for row in rows]}
 
 def extract_text_from_pdf(file_bytes):
     try:
@@ -19,7 +30,11 @@ def extract_text_from_pdf(file_bytes):
 
     
 @router.post("/resume_upload")
-async def resume_upload(file: UploadFile = File(...)):
+async def resume_upload(
+    file: UploadFile = File(...),
+    target_role: str | None = Form(None),
+    emphasis_skills: list[str] = Form([]),
+):
     if file.content_type != "application/pdf":
         raise HTTPException(status_code = 400, detail = "Only PDF are allowed")
     
@@ -33,6 +48,10 @@ async def resume_upload(file: UploadFile = File(...)):
     
     if not resume_skills:
         raise HTTPException(status_code = 400, detail = "Could not extract skills")
+
+    target_role = target_role.strip().lower() if target_role and target_role.strip() else None
+    emphasis_skills = list(dict.fromkeys(skill.strip() for skill in emphasis_skills if skill.strip()))
+    emphasis_skills_lower = {skill.lower() for skill in emphasis_skills}
     
     #all the skills in DB
     all_skills_result = query("""
@@ -80,10 +99,11 @@ async def resume_upload(file: UploadFile = File(...)):
         SELECT unnest(skills) AS skill, COUNT(*) as count
         FROM postings
         WHERE skills IS NOT NULL AND skills != '{}'
+        AND (%s IS NULL OR job_category = %s)
         GROUP BY skill
         ORDER BY count DESC
-        LIMIT 30
-    """)
+        LIMIT 100
+    """, (target_role, target_role))
     
     all_market_skills = {}
     for row in missing_skills_result:
@@ -97,11 +117,21 @@ async def resume_upload(file: UploadFile = File(...)):
     for skill, count in all_market_skills.items():
         if skill.lower() not in resume_skills_lower:
             missing_skills[skill] = count
+
+    prioritized_missing_skills = {
+        skill: count for skill, count in missing_skills.items()
+        if skill.lower() in emphasis_skills_lower
+    }
+    remaining_missing_skills = {
+        skill: count for skill, count in missing_skills.items()
+        if skill.lower() not in emphasis_skills_lower
+    }
+    missing_skills = {**prioritized_missing_skills, **remaining_missing_skills}
     
     # top jobs that the user qualifies for, for each skills 
     matched_job_ids = query("""
         SELECT id, title, company, location, description, date_posted, salary_min, salary_max,
-               salary_type, posting_url, skills
+               salary_type, posting_url, skills, job_category
         FROM postings
         WHERE date_posted >= NOW() - INTERVAL '30 days'
         AND (
@@ -109,20 +139,24 @@ async def resume_upload(file: UploadFile = File(...)):
             FROM unnest(skills) AS s
             WHERE s = ANY(%s)
         ) >= 3
-        ORDER BY date_posted DESC, salary_max DESC NULLS LAST
+        ORDER BY CASE WHEN %s IS NOT NULL AND job_category = %s THEN 0 ELSE 1 END,
+                 date_posted DESC, salary_max DESC NULLS LAST
         LIMIT 40
-        """, (resume_skills,))
+        """, (resume_skills, target_role, target_role))
     
     matched_jobs = []
     for (job_id, title, company, location, description, date_posted, sal_min, sal_max,
-         salary_type, posting_url, job_skills) in matched_job_ids:
+         salary_type, posting_url, job_skills, job_category) in matched_job_ids:
         
         if job_skills:
            total_skills = len(job_skills)
         else:
             total_skills = 0 
         
-        overlap = len(set(job_skills) & set(resume_skills))
+        matched_skill_names = {skill.lower() for skill in job_skills} & set(resume_skills_lower)
+        overlap = len(matched_skill_names)
+        emphasis_matches = len(matched_skill_names & emphasis_skills_lower)
+        fit_score = min(100, round((overlap / total_skills) * 100 + emphasis_matches * 5)) if total_skills else 0
         matched_jobs.append({
             "title": title,
             "company": company,
@@ -134,7 +168,10 @@ async def resume_upload(file: UploadFile = File(...)):
             "salary_type": salary_type,
             "posting_url": posting_url,
             "matched_skills": overlap,
-            "total_skills": total_skills
+            "total_skills": total_skills,
+            "fit_score": fit_score,
+            "priority_matches": emphasis_matches,
+            "job_category": job_category,
         })
 
     market_total = query("""
@@ -207,6 +244,7 @@ async def resume_upload(file: UploadFile = File(...)):
         "resume_skills": resume_skills,
         "matched_jobs": matched_jobs,
         "top_missing_skills": dict(list(missing_skills.items())[:14]),
+        "focus": {"target_role": target_role, "emphasis_skills": emphasis_skills},
         "skill_opportunities": job_matches,
         "market_snapshot": {
             "market_total": market_total,

@@ -12,6 +12,7 @@ export default defineConfig({
       '/salary': 'http://localhost:8000',
       '/metadata': 'http://localhost:8000',
       '/resume_upload': 'http://localhost:8000',
+      '/resume_skills': 'http://localhost:8000',
     }
   }
 })

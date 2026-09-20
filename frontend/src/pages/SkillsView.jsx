@@ -1,11 +1,18 @@
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./SkillsView.css";
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
 export function SkillsView({ cachedData }) {
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 640px)").matches);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 640px)");
+    const updateViewport = () => setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener("change", updateViewport);
+    return () => mediaQuery.removeEventListener("change", updateViewport);
+  }, []);
   const ranked = [...(cachedData?.skills || [])].sort((a, b) => Number(b.count) - Number(a.count)).map((item) => ({ skill: String(item.skill), count: Number(item.count) || 0 }));
   const chartSkills = ranked.slice(0, 10);
   const detailSkills = showAllSkills ? ranked : chartSkills;
@@ -24,7 +31,7 @@ export function SkillsView({ cachedData }) {
     </section>
     <section className="skills-grid">
       <div><Heading title="Demand by skill" caption="Posting count for each tracked skill" />
-        <div className="skills-chart-scroll"><div className="skills-chart">{cachedData === undefined ? <div className="skills-state">Loading skills...</div> : ranked.length ? <ResponsiveContainer width="100%" height="100%"><BarChart data={chartSkills} layout="vertical" margin={{ top: 0, right: 18, left: 0, bottom: 0 }}><CartesianGrid horizontal={false} stroke="#E4E4E7" /><XAxis type="number" axisLine={false} tickLine={false} tickFormatter={(value) => `${Math.round(value / 1000)}k`} /><YAxis type="category" dataKey="skill" axisLine={false} tickLine={false} tickFormatter={(value) => String(value).toUpperCase()} width={100} /><Tooltip formatter={(value) => [formatNumber(value), "Postings"]} cursor={{ fill: "#F1F1F3" }} /><Bar dataKey="count" radius={[0, 2, 2, 0]} maxBarSize={16}>{chartSkills.map((skill, index) => <Cell key={skill.skill} fill={index === 0 ? "#D97706" : "#A1A1AA"} fillOpacity={index === 0 ? 1 : 0.62} />)}</Bar></BarChart></ResponsiveContainer> : <div className="skills-state">No skill data is available yet.</div>}</div></div>
+        <div className="skills-chart-scroll"><div className="skills-chart">{cachedData === undefined ? <div className="skills-state">Loading skills...</div> : ranked.length ? <ResponsiveContainer width="100%" height="100%"><BarChart data={chartSkills} layout="vertical" margin={{ top: 0, right: 18, left: 0, bottom: 0 }}><CartesianGrid horizontal={false} stroke="#E4E4E7" /><XAxis type="number" axisLine={false} tickLine={false} tickFormatter={(value) => `${Math.round(value / 1000)}k`} /><YAxis type="category" dataKey="skill" axisLine={false} tickLine={false} tickFormatter={(value) => String(value).toUpperCase()} width={isMobile ? 72 : 100} tick={{ fontSize: isMobile ? 10 : 12 }} /><Tooltip formatter={(value) => [formatNumber(value), "Postings"]} cursor={{ fill: "#F1F1F3" }} /><Bar dataKey="count" radius={[0, 2, 2, 0]} maxBarSize={16}>{chartSkills.map((skill, index) => <Cell key={skill.skill} fill={index === 0 ? "#D97706" : "#A1A1AA"} fillOpacity={index === 0 ? 1 : 0.62} />)}</Bar></BarChart></ResponsiveContainer> : <div className="skills-state">No skill data is available yet.</div>}</div></div>
       </div>
       <div><Heading title="Skill details" caption={showAllSkills ? "Share of all tracked skill mentions" : "Top 10 skills - share of tracked mentions"} />
         <div className="skills-table-wrap"><table className="skills-table"><thead><tr><th>Skill</th><th>Postings</th><th>Share</th></tr></thead><tbody>{detailSkills.map((skill) => <tr key={skill.skill}><td>{skill.skill.toUpperCase()}</td><td>{formatNumber(skill.count)}</td><td>{total ? `${((skill.count / total) * 100).toFixed(1)}%` : "-"}</td></tr>)}</tbody></table></div>

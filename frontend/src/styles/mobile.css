@@ -300,6 +300,7 @@
     -webkit-overflow-scrolling: touch;
     /* Keep wide content in a visibly bounded scroll area with end padding. */
     padding-inline: 12px;
+    padding-top: 12px;
     padding-bottom: 8px;
     border: 1px solid #e4e4e7;
     border-radius: 8px;

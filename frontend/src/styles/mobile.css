@@ -19,6 +19,13 @@
     flex-direction: row-reverse;
   }
 
+  /* Overview's desktop rail adds a left margin; remove it before showing mobile. */
+  .app-shell.overview-shell .app-main {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
   .menu-btn {
     width: 44px;
     height: 44px;

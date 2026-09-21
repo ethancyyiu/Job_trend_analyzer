@@ -74,7 +74,7 @@ def scrape(keyword, location, pages, batch_number):
             # close login page 
             print("escaping from login")
             page.keyboard.press("Escape")
-            page.wait_for_timeout(random.randint(10000, 15000))
+            page.wait_for_timeout(random.randint(7000, 10000))
 
             cards = page.query_selector_all("a.base-card__full-link")
             page.wait_for_timeout(random.randint(10000, 15000))
@@ -96,7 +96,7 @@ def scrape(keyword, location, pages, batch_number):
                             print("Card click failed, skipping ->", e)
                             continue
 
-                    page.wait_for_timeout(5500)
+                    page.wait_for_timeout(5000)
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")

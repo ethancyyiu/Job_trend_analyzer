@@ -245,6 +245,10 @@
     background: #fff;
   }
 
+  .jobs-table tr.jobs-posting-row-today {
+    background: #fffbeb;
+  }
+
   .jobs-table td {
     display: grid;
     grid-template-columns: 88px minmax(0, 1fr);

@@ -174,10 +174,13 @@ def get_skills():
     }
 
 @router.get("/postings")
-def get_postings(days: int = Query(30, ge=1, le=365), page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100), search: str | None = Query(None, max_length=100), location: str | None = Query(None, max_length=120)):
-    start_date = date.today() - timedelta(days=days)
-    where = ["date_posted IS NOT NULL", "date_posted >= %s"]
-    params = [start_date]
+def get_postings(days: int = Query(30, ge=1, le=365), all_time: bool = Query(False), page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100), search: str | None = Query(None, max_length=100), location: str | None = Query(None, max_length=120)):
+    where = ["date_posted IS NOT NULL"]
+    params = []
+    if not all_time:
+        start_date = date.today() - timedelta(days=days - 1)
+        where.append("date_posted >= %s")
+        params.append(start_date)
     if search and search.strip():
         where.append("(title ILIKE %s OR company ILIKE %s OR location ILIKE %s)")
         value = f"%{search.strip()}%"
@@ -210,7 +213,7 @@ def get_postings(days: int = Query(30, ge=1, le=365), page: int = Query(1, ge=1)
         }
         answer.append(item)
 
-    return {"total_postings": int(total_postings), "days": days, "page": page, "limit": limit, "has_more": page * limit < total_postings, "postings": answer}
+    return {"total_postings": int(total_postings), "days": None if all_time else days, "page": page, "limit": limit, "has_more": page * limit < total_postings, "postings": answer}
 
 @router.get("/postings/{posting_id}")
 def get_posting_details(posting_id: int):

@@ -4,6 +4,17 @@ import axios from "axios";
 import "./Postings.css";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
+const isPostedToday = (datePosted) => {
+  if (!datePosted) return false;
+  const today = new Date();
+  const todayString = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+  return datePosted.slice(0, 10) === todayString;
+};
+
 const formatSalary = (job) => {
   const minimum = job.salary_min == null ? Number.NaN : Number(job.salary_min);
   const maximum = job.salary_max == null ? Number.NaN : Number(job.salary_max);
@@ -16,51 +27,53 @@ const formatSalary = (job) => {
 export function Postings({ cachedData }) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
-  const [data, setData] = useState(cachedData);
+  const [dateRange, setDateRange] = useState("all");
+  const [data, setData] = useState(null);
   const [hasLoadedMore, setHasLoadedMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    if (!search && !location) return undefined;
+    if (!search && !location && dateRange === "30") return undefined;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => {
       setLoading(true);
       setLoadError(null);
-      axios.get(`${API_BASE}/postings`, { params: { days: 30, limit: 50, search: search || undefined, location: location || undefined }, signal: controller.signal })
+      axios.get(`${API_BASE}/postings`, { params: { days: dateRange === "all" ? undefined : Number(dateRange), all_time: dateRange === "all" || undefined, limit: 50, search: search || undefined, location: location || undefined }, signal: controller.signal })
         .then((response) => setData(response.data))
         .catch((error) => { if (error.code !== "ERR_CANCELED") setLoadError("Job postings could not be loaded."); })
         .finally(() => setLoading(false));
     }, search || location ? 250 : 0);
     return () => { window.clearTimeout(timeout); controller.abort(); };
-  }, [search, location]);
+  }, [search, location, dateRange]);
 
-  const isDefaultQuery = !search && !location;
-  const activeData = isDefaultQuery && !hasLoadedMore ? cachedData : data;
+  const canUseCachedData = !search && !location && dateRange === "30";
+  const activeData = canUseCachedData && !hasLoadedMore ? cachedData : data;
   const postings = activeData?.postings || [];
   const locations = ["", ...new Set(postings.map((posting) => posting.location).filter(Boolean))];
   const loadMore = () => {
     if (!activeData?.has_more || loading) return;
     setHasLoadedMore(true);
     setLoading(true);
-    axios.get(`${API_BASE}/postings`, { params: { days: 30, page: (activeData.page || 1) + 1, limit: 50, search: search || undefined, location: location || undefined } })
+    axios.get(`${API_BASE}/postings`, { params: { days: dateRange === "all" ? undefined : Number(dateRange), all_time: dateRange === "all" || undefined, page: (activeData.page || 1) + 1, limit: 50, search: search || undefined, location: location || undefined } })
       .then((response) => setData((current) => ({ ...response.data, postings: [...(current?.postings || activeData.postings || []), ...response.data.postings] })))
       .catch(() => setLoadError("More postings could not be loaded."))
       .finally(() => setLoading(false));
   };
 
   return <main className="jobs-page">
-    <header className="jobs-header"><h1>Job Postings</h1><p>{activeData ? `${activeData.total_postings.toLocaleString()} roles posted in the last 30 days.` : "Loading tracked listings..."}</p></header>
+    <header className="jobs-header"><h1>Job Postings</h1><p>{activeData ? `${activeData.total_postings.toLocaleString()} roles posted ${dateRange === "all" ? "all time" : dateRange === "1" ? "today" : dateRange === "3" ? "in the last 3 days" : dateRange === "7" ? "this week" : "in the last 2 weeks"}.` : "Loading tracked listings..."}</p></header>
     <section className="jobs-filters" aria-label="Filter job postings">
       <input value={search} onChange={(event) => { setSearch(event.target.value); setData(null); setHasLoadedMore(false); }} placeholder="Search title, company, location..." aria-label="Search job postings" />
       <select value={location} onChange={(event) => { setLocation(event.target.value); setData(null); setHasLoadedMore(false); }} aria-label="Filter by location"><option value="">All locations</option>{locations.slice(1).map((option) => <option key={option}>{option}</option>)}</select>
+      <select value={dateRange} onChange={(event) => { setDateRange(event.target.value); setData(null); setHasLoadedMore(false); }} aria-label="Filter by posting date"><option value="all">All time</option><option value="1">Today</option><option value="3">3 days</option><option value="7">This week</option><option value="14">2 weeks</option></select>
     </section>
     {loadError && <p className="jobs-error">{loadError}</p>}
     <div className="jobs-table-wrap"><table className="jobs-table"><thead><tr><th>Role</th><th>Company</th><th>Location</th><th>Posted</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
       {loading && !activeData && <tr><td colSpan="5" className="jobs-empty">Loading job postings...</td></tr>}
       {!loading && activeData && postings.length === 0 && <tr><td colSpan="5" className="jobs-empty">No results match the current filters.</td></tr>}
-      {postings.map((posting, index) => <tr key={posting.id} className="jobs-posting-row" style={{ animationDelay: `${Math.min(index, 14) * 25}ms` }} onClick={() => setSelectedPosting(posting)}><td data-label="Role">{posting.title}</td><td data-label="Company">{posting.company || "-"}</td><td data-label="Location">{posting.location || "-"}</td><td data-label="Posted">{posting.date_posted || "Recent"}</td><td data-label=""><button onClick={(event) => { event.stopPropagation(); setSelectedPosting(posting); }}>View role</button></td></tr>)}
+      {postings.map((posting, index) => <tr key={posting.id} className={`jobs-posting-row${isPostedToday(posting.date_posted) ? " jobs-posting-row-today" : ""}`} style={{ animationDelay: `${Math.min(index, 14) * 25}ms` }} onClick={() => setSelectedPosting(posting)}><td data-label="Role">{posting.title}</td><td data-label="Company">{posting.company || "-"}</td><td data-label="Location">{posting.location || "-"}</td><td data-label="Posted">{posting.date_posted || "Recent"}</td><td data-label=""><button onClick={(event) => { event.stopPropagation(); setSelectedPosting(posting); }}>View role</button></td></tr>)}
     </tbody></table></div>
     {activeData?.has_more && <button className="jobs-load-more" onClick={loadMore} disabled={loading}>{loading ? "Loading..." : "Load more roles"}</button>}
     {selectedPosting && <PostingDetailsModal posting={selectedPosting} onClose={() => setSelectedPosting(null)} />}

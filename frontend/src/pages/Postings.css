@@ -13,8 +13,8 @@
 .jobs-table-wrap { overflow-x: auto; }.jobs-table { width: 100%; min-width: 680px; border-collapse: collapse; }.jobs-table th { padding: 0 16px 10px 0; color: #a1a1aa; text-align: left; font: 500 11px Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; }.jobs-table td { padding: 10px 16px 10px 0; border-top: 1px solid #f1f1f3; color: #71717a; font-size: 12.5px; }.jobs-table td:first-child { color: #111; font-size: 13px; font-weight: 500; }.jobs-table td:nth-child(4) { color: #a1a1aa; font: 11.5px 'JetBrains Mono', monospace; white-space: nowrap; }.jobs-table tr:not(:has(.jobs-empty)) { cursor: pointer; }.jobs-table tbody tr:not(:has(.jobs-empty)):hover { background: #f1f1f3; }.jobs-table button { padding: 0; border: 0; background: transparent; color: #92400e; cursor: pointer; font: 500 12px Inter, sans-serif; white-space: nowrap; }.jobs-table button:hover { text-decoration: underline; }.jobs-empty { padding: 40px 0; text-align: center; color: #71717a !important; }
 .jobs-error { margin: -8px 0 16px; color: #b45309; font-size: 13px; }
 .jobs-posting-row { animation: jobs-posting-waterfall 300ms ease-out both; }
-.jobs-posting-row-today { background: rgb(255 233 0 / 28%); }
-.jobs-table tbody .jobs-posting-row-today:hover { background: rgb(255 233 0 / 42%); }
+.jobs-table tbody tr.jobs-posting-row-today { background-color: rgb(255 233 0 / 8%) !important; }
+.jobs-table tbody tr.jobs-posting-row-today:hover { background-color: rgb(255 233 0 / 20%) !important; }
 @keyframes jobs-posting-waterfall { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .jobs-posting-row { animation: none; } }
 .jobs-load-more { display: block; margin: 24px auto 0; padding: 8px 13px; border: 1px solid #d97706; border-radius: 6px; background: #fff; color: #92400e; cursor: pointer; font: 500 13px Inter, sans-serif; }.jobs-load-more:hover:not(:disabled) { background: #fef3c7; }.jobs-load-more:disabled { cursor: wait; opacity: .65; }

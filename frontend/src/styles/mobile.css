@@ -246,7 +246,7 @@
   }
 
   .jobs-table tr.jobs-posting-row-today {
-    background: #fffbeb;
+    background: rgb(255 233 0 / 28%);
   }
 
   .jobs-table td {

@@ -164,20 +164,19 @@ def scrape(keyword, location, pages, batch_number):
 
 
 if __name__ == "__main__":
-    scrape("data scientist", "remote", 2, 1)
-    scrape("data scientist", "canada", 2, 3)
+    scrape("software engineer intern", "canada", 2, 1)
+    scrape("software developer intern", "canada", 2, 3)
+    scrape("software engineering co-op", "canada", 2, 5)
+    scrape("frontend developer intern", "canada", 2, 7)
+    scrape("backend developer intern", "canada", 2, 9)
+    scrape("full stack developer intern", "canada", 2, 11)
 
-    scrape("software engineer", "remote", 2, 5)
-    scrape("software engineer", "canada", 2, 7)
-
-    scrape("data engineer", "remote", 2, 9)
-    scrape("data engineer", "canada", 2, 11)
-
-    scrape("machine learning engineer", "remote", 2, 13)
-    scrape("machine learning engineer", "canada", 2, 15)
-    
-    scrape("data analyst", "remote", 2, 17)
-    scrape("data analyst", "canada", 2, 19)
+    scrape("data analyst intern", "canada", 2, 13)
+    scrape("data science intern", "canada", 2, 15)
+    scrape("data engineer intern", "canada", 2, 17)
+    scrape("data analytics co-op", "canada", 2, 19)
+    scrape("machine learning intern", "canada", 2, 21)
+    scrape("AI intern", "canada", 2, 23)
     run()
     category_extractor()
     generate_and_save_forecast()

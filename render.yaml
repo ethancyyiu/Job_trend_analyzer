@@ -7,4 +7,6 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: TYPESAFE_API_KEY
+        sync: false
     autoDeploy: true

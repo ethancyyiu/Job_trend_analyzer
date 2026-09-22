@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Resume.css";
 
@@ -72,6 +72,16 @@ export function ResumeAnalyzer() {
       documentId={document.id}
       apiBase={API_BASE}
       onBack={() => setStep("review")}
+      onViewRecommendations={() => setStep("results")}
+    />;
+  }
+
+  if (step === "results" && document) {
+    return <RecommendationResults
+      documentId={document.id}
+      apiBase={API_BASE}
+      onBack={() => setStep("preferences")}
+      onStartOver={reset}
     />;
   }
 
@@ -176,7 +186,7 @@ function ResumeTextReview({ document, resumeText, setResumeText, apiBase, onCont
   );
 }
 
-function JobPreferencesForm({ documentId, apiBase, onBack }) {
+function JobPreferencesForm({ documentId, apiBase, onBack, onViewRecommendations }) {
   const [form, setForm] = useState(EMPTY_PREFERENCES);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -257,12 +267,93 @@ function JobPreferencesForm({ documentId, apiBase, onBack }) {
           {saved && <p className="save-confirmation" role="status">Preferences saved. Recommendations will be enabled in the next step.</p>}
           <div className="resume-text-actions">
             <button type="button" className="text-button" onClick={onBack}>Back to resume text</button>
-            <button type="submit" className="upload-button" disabled={saving}>{saving ? "Saving preferences…" : "Save preferences"}</button>
+            <div className="preference-actions">
+              {saved && <button type="button" className="text-button" onClick={onViewRecommendations}>View recommendations</button>}
+              <button type="submit" className="upload-button" disabled={saving}>{saving ? "Saving preferences…" : "Save preferences"}</button>
+            </div>
           </div>
         </form>
       </div>
     </div>
   );
+}
+
+function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
+  const [status, setStatus] = useState("loading");
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isCurrent = true;
+    axios.post(`${apiBase}/resume_documents/${documentId}/recommendations`)
+      .then((response) => {
+        if (!isCurrent) return;
+        setData(response.data);
+        setStatus("ready");
+      })
+      .catch((requestError) => {
+        if (!isCurrent) return;
+        setError(requestError.response?.data?.detail || "Could not load recommendations. Try again.");
+        setStatus("error");
+      });
+    return () => { isCurrent = false; };
+  }, [apiBase, documentId]);
+
+  if (status === "loading") {
+    return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
+      <section className="resume-card recommendation-state"><span className="recommendation-spinner" aria-hidden="true" /><h2>Scoring your best active matches</h2><p>We are comparing the strongest catalog candidates against your saved resume and preferences.</p></section>
+    </RecommendationShell>;
+  }
+  if (status === "error") {
+    return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
+      <section className="resume-card recommendation-state"><h2>Recommendations are unavailable</h2><p className="error-message">{error}</p><button type="button" className="upload-button" onClick={() => window.location.reload()}>Try again</button></section>
+    </RecommendationShell>;
+  }
+
+  const recommendations = data?.recommendations || [];
+  if (!recommendations.length) {
+    return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
+      <section className="resume-card recommendation-state"><h2>No active matches yet</h2><p>There are no active catalog jobs that meet your saved requirements. Try broadening your preferences or check back after the next scrape.</p></section>
+    </RecommendationShell>;
+  }
+
+  return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
+    <section className="recommendation-heading">
+      <span>Step 3 of 3</span>
+      <h1>Your best job matches</h1>
+      <p>Ranked by Jev fit score, then confidence, from {data.candidate_count} eligible active jobs.</p>
+    </section>
+    {data.batch_errors?.length > 0 && <p className="recommendation-warning">Some jobs could not be scored, so this list may be incomplete. Please try again later.</p>}
+    <div className="recommendation-grid">
+      {recommendations.map((job, index) => <RecommendationCard key={job.job_id} job={job} index={index} />)}
+    </div>
+  </RecommendationShell>;
+}
+
+function RecommendationShell({ children, onBack, onStartOver }) {
+  return <div className="resume-page resume-upload-page advisor-page"><div className="resume-upload-container"><header className="advisor-page-header"><h1>Job recommendations</h1><p>Active roles matched to your resume and saved preferences.</p></header>{children}<div className="recommendation-footer"><button type="button" className="text-button" onClick={onBack}>Edit preferences</button><button type="button" className="text-button" onClick={onStartOver}>Use a different resume</button></div></div></div>;
+}
+
+function RecommendationCard({ job, index }) {
+  const confidence = typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "Confidence unavailable";
+  return <article className="recommendation-card">
+    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{job.fit_score}/4 fit</strong></div>
+    <h2>{job.title}</h2>
+    <p className="recommendation-company">{job.company || "Company not listed"}</p>
+    <dl className="recommendation-meta">
+      <div><dt>Location</dt><dd>{job.location || "Not listed"}</dd></div>
+      <div><dt>Salary</dt><dd>{formatSalary(job)}</dd></div>
+    </dl>
+    <div className="recommendation-card-footer"><span className={job.match_label === "possible match" ? "possible-match" : "confirmed-match"}>{job.match_label}</span><span>{confidence}</span></div>
+    {job.posting_url ? <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">Apply / view details</a> : <span className="job-details-link job-details-link-disabled">Details unavailable</span>}
+  </article>;
+}
+
+function formatSalary(job) {
+  if (job.salary_min == null && job.salary_max == null) return "Not listed";
+  const amount = (value) => `$${Math.round(Number(value)).toLocaleString()}`;
+  const range = job.salary_min != null && job.salary_max != null ? `${amount(job.salary_min)}–${amount(job.salary_max)}` : amount(job.salary_min ?? job.salary_max);
+  return `${range}${job.salary_type ? ` / ${job.salary_type}` : ""}`;
 }
 
 function SelectField({ label, name, value, onChange, options }) {

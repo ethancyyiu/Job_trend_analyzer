@@ -320,6 +320,129 @@
   color: #166534;
   font-size: 13px;
 }
+.preference-actions,
+.recommendation-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.recommendation-heading {
+  margin-bottom: 20px;
+}
+.recommendation-heading > span,
+.recommendation-card-topline span {
+  color: #d97706;
+  font: 500 11px "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.recommendation-heading h1 {
+  margin: 8px 0;
+  font: 600 25px/1.2 Inter, sans-serif;
+  letter-spacing: -0.03em;
+}
+.recommendation-heading p,
+.recommendation-state p,
+.recommendation-company {
+  margin: 0;
+  color: #71717a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.recommendation-card,
+.recommendation-state {
+  padding: 22px;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  background: #fff;
+}
+.recommendation-card-topline,
+.recommendation-card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.recommendation-card-topline strong {
+  color: #92400e;
+  font: 600 14px "JetBrains Mono", monospace;
+}
+.recommendation-card h2 {
+  margin: 14px 0 4px;
+  font: 600 18px/1.25 Inter, sans-serif;
+  letter-spacing: -0.02em;
+}
+.recommendation-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 20px 0;
+}
+.recommendation-meta div {
+  padding: 10px;
+  border: 1px solid #f1f1f3;
+  border-radius: 6px;
+  background: #fafafa;
+}
+.recommendation-meta dt {
+  color: #a1a1aa;
+  font: 500 10px Inter, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.recommendation-meta dd {
+  margin: 5px 0 0;
+  color: #18181b;
+  font: 500 12px/1.4 "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.recommendation-card-footer {
+  color: #71717a;
+  font-size: 12px;
+}
+.possible-match,
+.confirmed-match {
+  padding: 4px 7px;
+  border-radius: 4px;
+  font: 500 11px Inter, sans-serif;
+  text-transform: uppercase;
+}
+.possible-match { background: #fef3c7; color: #92400e; }
+.confirmed-match { background: #ecfdf5; color: #166534; }
+.recommendation-card .job-details-link {
+  margin-top: 20px;
+}
+.recommendation-warning {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-left: 2px solid #d97706;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+}
+.recommendation-state {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+.recommendation-state h2 { margin: 0; font: 600 18px Inter, sans-serif; }
+.recommendation-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e4e4e7;
+  border-top-color: #d97706;
+  border-radius: 50%;
+  animation: advisor-skills-spin 700ms linear infinite;
+}
+.recommendation-footer {
+  justify-content: space-between;
+  margin-top: 20px;
+}
 .three-boxes-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -846,5 +969,13 @@
   }
   .preferences-field-wide {
     grid-column: auto;
+  }
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+  .recommendation-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
 }

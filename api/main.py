@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.trends import router as trends_router
 from api.resume import router as resume_router 
+from api.recommendations import router as recommendations_router
 
 app = FastAPI()
 
@@ -9,3 +10,4 @@ app.add_middleware(CORSMiddleware, allow_origins = ["*"], allow_methods = ["*"],
 
 app.include_router(trends_router)
 app.include_router(resume_router)  
+app.include_router(recommendations_router)

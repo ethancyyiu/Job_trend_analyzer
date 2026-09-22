@@ -403,7 +403,7 @@ function RecommendationShell({ children, onBack, onStartOver }) {
 }
 
 const formatJevFit = (score) => `${((Number(score) / 4) * 10).toFixed(1)}/10`;
-const formatJevConfidence = (confidence) => typeof confidence === "number" ? `${(confidence * 10).toFixed(1)}/10 confidence` : "Confidence unavailable";
+const formatJevConfidence = (confidence) => typeof confidence === "number" ? `${(confidence * 100).toFixed(0)}% confidence` : "Confidence unavailable";
 
 function RecommendationCard({ job, index, onSelect }) {
   const confidence = formatJevConfidence(job.confidence);

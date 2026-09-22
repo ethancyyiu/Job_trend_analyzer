@@ -26,6 +26,10 @@ class JobRecommendation(BaseModel):
     salary_min: float | None = None
     salary_max: float | None = None
     posting_url: str | None = None
+    requirements: list[str] = Field(default_factory=list)
+    nice_to_haves: list[str] = Field(default_factory=list)
+    responsibilities: str | None = None
+    description: str | None = None
     fit_score: float = Field(ge=0, le=4)
     confidence: float | None = Field(default=None, ge=0, le=1)
     match_label: str
@@ -96,6 +100,10 @@ def _merge_ranked_results(
             salary_min=candidate.job.salary_min,
             salary_max=candidate.job.salary_max,
             posting_url=candidate.job.posting_url,
+            requirements=candidate.job.requirements,
+            nice_to_haves=candidate.job.nice_to_haves,
+            responsibilities=candidate.job.responsibilities,
+            description=candidate.job.description,
             fit_score=score.score,
             confidence=score.confidence,
             match_label=(

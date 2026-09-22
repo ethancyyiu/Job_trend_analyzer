@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import axios from "axios";
 import "./Resume.css";
 
@@ -283,6 +284,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   useEffect(() => {
     let isCurrent = true;
@@ -326,8 +328,9 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
     </section>
     {data.batch_errors?.length > 0 && <p className="recommendation-warning">Some jobs could not be scored, so this list may be incomplete. Please try again later.</p>}
     <div className="recommendation-grid">
-      {recommendations.map((job, index) => <RecommendationCard key={job.job_id} job={job} index={index} />)}
+      {recommendations.map((job, index) => <RecommendationCard key={job.job_id} job={job} index={index} onSelect={() => setSelectedJob(job)} />)}
     </div>
+    {selectedJob && <RecommendationDetailsModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
   </RecommendationShell>;
 }
 
@@ -335,7 +338,7 @@ function RecommendationShell({ children, onBack, onStartOver }) {
   return <div className="resume-page resume-upload-page advisor-page"><div className="resume-upload-container"><header className="advisor-page-header"><h1>Job recommendations</h1><p>Active roles matched to your resume and saved preferences.</p></header>{children}<div className="recommendation-footer"><button type="button" className="text-button" onClick={onBack}>Edit preferences</button><button type="button" className="text-button" onClick={onStartOver}>Use a different resume</button></div></div></div>;
 }
 
-function RecommendationCard({ job, index }) {
+function RecommendationCard({ job, index, onSelect }) {
   const confidence = typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "Confidence unavailable";
   return <article className="recommendation-card">
     <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{Number(job.fit_score).toFixed(1)}/4 fit</strong></div>
@@ -346,7 +349,7 @@ function RecommendationCard({ job, index }) {
       <div><dt>Salary</dt><dd>{formatSalary(job)}</dd></div>
     </dl>
     <div className="recommendation-card-footer"><span className={job.match_label === "possible match" ? "possible-match" : "confirmed-match"}>{job.match_label}</span><span>{confidence}</span></div>
-    {job.posting_url ? <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">Apply / view details</a> : <span className="job-details-link job-details-link-disabled">Details unavailable</span>}
+    <button type="button" className="job-details-link recommendation-details-button" onClick={onSelect}>Apply / view details</button>
   </article>;
 }
 
@@ -355,6 +358,50 @@ function formatSalary(job) {
   const amount = (value) => `$${Math.round(Number(value)).toLocaleString()}`;
   const range = job.salary_min != null && job.salary_max != null ? `${amount(job.salary_min)}–${amount(job.salary_max)}` : amount(job.salary_min ?? job.salary_max);
   return `${range}${job.salary_type ? ` / ${job.salary_type}` : ""}`;
+}
+
+function RecommendationDetailsModal({ job, onClose }) {
+  useEffect(() => {
+    const closeOnEscape = (event) => event.key === "Escape" && onClose();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [onClose]);
+
+  const details = job.responsibilities || job.description || "A detailed description was not provided for this posting.";
+  return createPortal(
+    <div className="job-details-backdrop" onMouseDown={onClose} role="presentation">
+      <section className="job-details-modal" role="dialog" aria-modal="true" aria-labelledby="recommendation-details-title" onMouseDown={(event) => event.stopPropagation()}>
+        <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
+        <div className="job-details-content">
+          <span className="job-details-eyebrow">Job details · {job.match_label}</span>
+          <h2 id="recommendation-details-title">{job.title}</h2>
+          <p className="job-details-company">{job.company || "Company not listed"}</p>
+          <div className="job-details-meta">
+            <div><span>Location</span><strong>{job.location || "Not listed"}</strong></div>
+            <div><span>Salary</span><strong>{formatSalary(job)}</strong></div>
+            <div><span>Jev fit</span><strong>{Number(job.fit_score).toFixed(1)}/4 · {typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "confidence unavailable"}</strong></div>
+          </div>
+          <div className="job-details-description">
+            <h3>About this role</h3>
+            <p>{details}</p>
+          </div>
+          {job.requirements?.length > 0 && <JobDetailList title="Requirements" items={job.requirements} />}
+          {job.nice_to_haves?.length > 0 && <JobDetailList title="Nice to have" items={job.nice_to_haves} />}
+          {job.posting_url ? <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">Apply to this role</a> : <span className="job-details-link job-details-link-disabled">Application link unavailable</span>}
+        </div>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+
+function JobDetailList({ title, items }) {
+  return <div className="recommendation-detail-list"><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></div>;
 }
 
 function SelectField({ label, name, value, onChange, options }) {

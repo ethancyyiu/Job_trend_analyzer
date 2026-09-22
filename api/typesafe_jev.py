@@ -40,7 +40,7 @@ class JevConfigurationError(RuntimeError):
 
 class JevScoreResult(BaseModel):
     job_id: int
-    score: int | None = Field(default=None, ge=0, le=4)
+    score: float | None = Field(default=None, ge=0, le=4)
     confidence: float | None = Field(default=None, ge=0, le=1)
     input_tokens: int | None = Field(default=None, ge=0)
     error: str | None = None
@@ -207,7 +207,6 @@ class TypeSafeJevClient:
                 isinstance(score, bool)
                 or not isinstance(score, (int, float))
                 or not 0 <= score <= 4
-                or not float(score).is_integer()
             ):
                 results.append(JevScoreResult(
                     job_id=candidate.job.id,
@@ -224,7 +223,7 @@ class TypeSafeJevClient:
                     confidence_value = float(confidence)
             results.append(JevScoreResult(
                 job_id=candidate.job.id,
-                score=int(score),
+                score=float(score),
                 confidence=confidence_value,
                 input_tokens=input_tokens if isinstance(input_tokens, int) else None,
                 error=confidence_error,

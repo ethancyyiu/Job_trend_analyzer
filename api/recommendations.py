@@ -26,7 +26,7 @@ class JobRecommendation(BaseModel):
     salary_min: float | None = None
     salary_max: float | None = None
     posting_url: str | None = None
-    fit_score: int = Field(ge=0, le=4)
+    fit_score: float = Field(ge=0, le=4)
     confidence: float | None = Field(default=None, ge=0, le=1)
     match_label: str
 

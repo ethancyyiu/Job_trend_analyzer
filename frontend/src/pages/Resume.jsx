@@ -282,6 +282,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
   const [status, setStatus] = useState("loading");
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let isCurrent = true;
@@ -297,7 +298,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
         setStatus("error");
       });
     return () => { isCurrent = false; };
-  }, [apiBase, documentId]);
+  }, [apiBase, documentId, retryCount]);
 
   if (status === "loading") {
     return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
@@ -306,7 +307,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
   }
   if (status === "error") {
     return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
-      <section className="resume-card recommendation-state"><h2>Recommendations are unavailable</h2><p className="error-message">{error}</p><button type="button" className="upload-button" onClick={() => window.location.reload()}>Try again</button></section>
+      <section className="resume-card recommendation-state"><h2>Recommendations are unavailable</h2><p className="error-message">{error}</p><button type="button" className="upload-button" onClick={() => { setStatus("loading"); setRetryCount((count) => count + 1); }}>Try again</button></section>
     </RecommendationShell>;
   }
 
@@ -337,7 +338,7 @@ function RecommendationShell({ children, onBack, onStartOver }) {
 function RecommendationCard({ job, index }) {
   const confidence = typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "Confidence unavailable";
   return <article className="recommendation-card">
-    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{job.fit_score}/4 fit</strong></div>
+    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{Number(job.fit_score).toFixed(1)}/4 fit</strong></div>
     <h2>{job.title}</h2>
     <p className="recommendation-company">{job.company || "Company not listed"}</p>
     <dl className="recommendation-meta">

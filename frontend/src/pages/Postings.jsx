@@ -21,7 +21,7 @@ const formatSalary = (job) => {
   if (!Number.isFinite(minimum) && !Number.isFinite(maximum)) return "Not listed";
   const amount = (value) => `$${Math.round(value).toLocaleString()}`;
   const range = Number.isFinite(minimum) && Number.isFinite(maximum) ? `${amount(minimum)} - ${amount(maximum)}` : amount(Number.isFinite(minimum) ? minimum : maximum);
-  return `${range}${job.salary_type === "hourly" ? " / hr" : job.salary_type === "yearly" ? " / yr" : ""}`;
+  return `${range} USD${job.salary_type === "hourly" ? " / hr" : job.salary_type === "yearly" ? " / yr" : ""}`;
 };
 
 export function Postings({ cachedData }) {

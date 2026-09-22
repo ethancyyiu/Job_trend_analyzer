@@ -232,30 +232,30 @@ function JobPreferencesForm({ documentId, apiBase, onBack, onViewRecommendations
           <div className="page-header resume-page-header">
             <span>Step 2 of 3</span>
             <h2>What should we look for?</h2>
-            <p>Leave a field open if it should not limit your search.</p>
+            <p>Leave a field blank, or choose “No preference,” when it should not limit your search.</p>
           </div>
           <div className="preferences-grid">
             <label className="preferences-field preferences-field-wide">
               <span>Target job titles</span>
-              <input name="target_job_titles" value={form.target_job_titles} onChange={updateField} placeholder="e.g. Data analyst, Business intelligence analyst" />
+              <input name="target_job_titles" value={form.target_job_titles} onChange={updateField} placeholder="e.g. Data analyst, BI analyst — leave blank if none" />
               <small>Separate multiple titles with commas.</small>
             </label>
             <label className="preferences-field preferences-field-wide">
               <span>Preferred locations</span>
-              <input name="preferred_locations" value={form.preferred_locations} onChange={updateField} placeholder="e.g. Toronto, Ontario, Canada" />
+              <input name="preferred_locations" value={form.preferred_locations} onChange={updateField} placeholder="e.g. Toronto, Vancouver — leave blank if none" />
               <small>Separate multiple locations with commas.</small>
             </label>
             <label className="preferences-field preferences-field-wide">
               <span>Skills to prioritize</span>
-              <input name="prioritized_skills" value={form.prioritized_skills} onChange={updateField} placeholder="e.g. Python, SQL, AWS" />
-              <small>Optional. Separate multiple skills with commas; they break otherwise equal matches.</small>
+              <input name="prioritized_skills" value={form.prioritized_skills} onChange={updateField} placeholder="e.g. Python, SQL, AWS — leave blank if none" />
+              <small>Separate multiple skills with commas; they break otherwise equal matches.</small>
             </label>
             <SelectField label="Work arrangement" name="remote_preference" value={form.remote_preference} onChange={updateField} options={[["no_preference", "No preference"], ["remote", "Remote"], ["hybrid", "Hybrid"], ["on_site", "On-site"]]} />
             <SelectField label="Work authorization" name="work_authorization" value={form.work_authorization} onChange={updateField} options={[["no_preference", "No preference"], ["authorized", "Authorized to work"], ["requires_sponsorship", "Require sponsorship"]]} />
             <label className="preferences-field">
-              <span>Minimum acceptable salary</span>
+              <span>Minimum acceptable salary (USD)</span>
               <div className="salary-preference-inputs">
-                <input name="minimum_salary" type="number" min="0" step="1000" value={form.minimum_salary} onChange={updateField} placeholder="e.g. 80000" />
+                <input name="minimum_salary" type="number" min="0" step="1000" value={form.minimum_salary} onChange={updateField} placeholder="e.g. 80000 — leave blank if none" />
                 <select name="salary_type" value={form.salary_type} onChange={updateField} aria-label="Salary period">
                   <option value="yearly">per year</option>
                   <option value="hourly">per hour</option>
@@ -357,10 +357,12 @@ function formatSalary(job) {
   if (job.salary_min == null && job.salary_max == null) return "Not listed";
   const amount = (value) => `$${Math.round(Number(value)).toLocaleString()}`;
   const range = job.salary_min != null && job.salary_max != null ? `${amount(job.salary_min)}–${amount(job.salary_max)}` : amount(job.salary_min ?? job.salary_max);
-  return `${range}${job.salary_type ? ` / ${job.salary_type}` : ""}`;
+  return `${range} USD${job.salary_type ? ` / ${job.salary_type}` : ""}`;
 }
 
 function RecommendationDetailsModal({ job, onClose }) {
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
   useEffect(() => {
     const closeOnEscape = (event) => event.key === "Escape" && onClose();
     const previousOverflow = document.body.style.overflow;
@@ -372,36 +374,35 @@ function RecommendationDetailsModal({ job, onClose }) {
     };
   }, [onClose]);
 
-  const details = job.responsibilities || job.description || "A detailed description was not provided for this posting.";
+  const details = job.description || "A detailed description was not provided for this posting.";
+  const isLongDescription = details.length > 700;
+  const displayedDetails = showFullDescription || !isLongDescription
+    ? details
+    : `${details.slice(0, 700).trim()}...`;
   return createPortal(
-    <div className="job-details-backdrop" onMouseDown={onClose} role="presentation">
-      <section className="job-details-modal" role="dialog" aria-modal="true" aria-labelledby="recommendation-details-title" onMouseDown={(event) => event.stopPropagation()}>
-        <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
-        <div className="job-details-content">
-          <span className="job-details-eyebrow">Job details · {job.match_label}</span>
+    <div className="posting-details-backdrop" onMouseDown={onClose} role="presentation">
+      <section className="posting-details-modal" role="dialog" aria-modal="true" aria-labelledby="recommendation-details-title" onMouseDown={(event) => event.stopPropagation()}>
+        <button className="posting-details-close" onClick={onClose} aria-label="Close job details">×</button>
+        <div className="posting-details-content">
+          <span className="posting-details-eyebrow">Job details · {job.match_label}</span>
           <h2 id="recommendation-details-title">{job.title}</h2>
-          <p className="job-details-company">{job.company || "Company not listed"}</p>
-          <div className="job-details-meta">
+          <p className="posting-details-company">{job.company || "Company not listed"}</p>
+          <div className="posting-details-meta">
             <div><span>Location</span><strong>{job.location || "Not listed"}</strong></div>
             <div><span>Salary</span><strong>{formatSalary(job)}</strong></div>
             <div><span>Jev fit</span><strong>{Number(job.fit_score).toFixed(1)}/4 · {typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "confidence unavailable"}</strong></div>
           </div>
-          <div className="job-details-description">
+          <div className="posting-details-description">
             <h3>About this role</h3>
-            <p>{details}</p>
+            <p>{displayedDetails}</p>
+            {isLongDescription && <button type="button" className="posting-description-toggle" onClick={() => setShowFullDescription((visible) => !visible)}>{showFullDescription ? "View fewer details ↑" : "View more details ↓"}</button>}
           </div>
-          {job.requirements?.length > 0 && <JobDetailList title="Requirements" items={job.requirements} />}
-          {job.nice_to_haves?.length > 0 && <JobDetailList title="Nice to have" items={job.nice_to_haves} />}
-          {job.posting_url ? <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">Apply to this role</a> : <span className="job-details-link job-details-link-disabled">Application link unavailable</span>}
+          {job.posting_url ? <a className="posting-details-link" href={job.posting_url} target="_blank" rel="noreferrer">View job posting <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg></a> : <span className="posting-details-link posting-details-link-disabled">Job link not available</span>}
         </div>
       </section>
     </div>,
     document.body,
   );
-}
-
-function JobDetailList({ title, items }) {
-  return <div className="recommendation-detail-list"><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></div>;
 }
 
 function SelectField({ label, name, value, onChange, options }) {

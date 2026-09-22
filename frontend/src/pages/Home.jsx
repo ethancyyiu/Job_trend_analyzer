@@ -103,7 +103,7 @@ export default function Home({ setPage, cachedData }) {
             </div>
             <h3>Understand compensation trends quickly</h3>
             <p>Track pay-range shifts so offers remain competitive across markets.</p>
-            <div className="card-meta"><span className="meta-pill">Range</span><strong>{salaryRange}</strong></div>
+            <div className="card-meta"><span className="meta-pill">Range</span><strong>{salaryRange} USD</strong></div>
           </div>
         </section>
       </div>

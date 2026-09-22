@@ -24,3 +24,4 @@
 @keyframes posting-details-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes posting-details-enter { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 640px) { .posting-details-backdrop { padding: 16px; } .posting-details-modal { max-height: calc(100vh - 32px); } .posting-details-meta { grid-template-columns: 1fr; } }
+.posting-details-close { display: grid; place-items: center; padding: 0; }

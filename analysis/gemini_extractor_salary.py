@@ -10,6 +10,8 @@ load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
+EMPTY_SALARY = {"salary_min": None, "salary_max": None, "salary_type": None}
+
 
 def call_gemini_api_with_retry(client, prompt, max_retries = 5, delay = 60):
     for attempt in range(1, max_retries + 1):
@@ -102,21 +104,30 @@ Rules
     Now extract salary information from the job posting: {description}
 
     """
-    response = call_gemini_api_with_retry(client, prompt)
-    if response is None:
-        return {"salary_min": None, "salary_max": None, "salary_type": None}
+    # A salary is optional metadata. Never let an unavailable or malformed
+    # model response discard the otherwise valid posting in the scraper.
+    try:
+        response = call_gemini_api_with_retry(client, prompt)
+        if response is None:
+            return EMPTY_SALARY.copy()
 
-    result = response.text.strip()
-    data = json.loads(result)
+        data = json.loads(response.text.strip())
+        salary_min = data["salary_min"]
+        salary_max = data["salary_max"]
+        salary_type = data["salary_type"]
 
-    salary_min = data["salary_min"]
-    salary_max = data["salary_max"]
-    salary_type = data["salary_type"]
-    #raw_text = data["raw_text"]
+        if salary_type not in {"hourly", "yearly", None}:
+            raise ValueError(f"unexpected salary type: {salary_type!r}")
+        for name, value in (("salary_min", salary_min), ("salary_max", salary_max)):
+            if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float))):
+                raise ValueError(f"{name} must be a number or null")
 
-    return {"salary_min": salary_min,
-            "salary_max": salary_max,
-            "salary_type": salary_type}
+        return {"salary_min": salary_min,
+                "salary_max": salary_max,
+                "salary_type": salary_type}
+    except Exception as exc:
+        print(f"Gemini salary extraction failed; saving posting without salary: {exc}")
+        return EMPTY_SALARY.copy()
             # ,"raw_text": raw_text
 
 # can also ask it to generate the

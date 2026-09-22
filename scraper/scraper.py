@@ -10,6 +10,7 @@ import re
 import logging
 from analysis.salary_extractor import extract_salary
 from analysis.skill_extractor import extract_skills, run
+from analysis.job_details_extractor import extract_job_details, ensure_posting_detail_columns
 from analysis.category_extractor import category_extractor 
 from scraper.saving_forecast import generate_and_save_forecast
 from scraper.record_time import record_successful_scrape
@@ -28,15 +29,19 @@ def save(db, posting):
             cur.execute("""
                 INSERT INTO postings (
                     title, company, location, description, date_scraped, date_posted,
-                    salary_min, salary_max, salary_type, posting_url
+                    salary_min, salary_max, salary_type, posting_url,
+                    requirements, nice_to_haves, responsibilities
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (title, company, location)
                 DO UPDATE SET
                     description = EXCLUDED.description,
                     salary_min = EXCLUDED.salary_min,
                     salary_max = EXCLUDED.salary_max,
                     salary_type = EXCLUDED.salary_type,
+                    requirements = EXCLUDED.requirements,
+                    nice_to_haves = EXCLUDED.nice_to_haves,
+                    responsibilities = EXCLUDED.responsibilities,
                     date_scraped = EXCLUDED.date_scraped,
                     date_posted = EXCLUDED.date_posted,
                     posting_url = COALESCE(EXCLUDED.posting_url, postings.posting_url)
@@ -45,7 +50,9 @@ def save(db, posting):
                 posting['title'], posting['company'], posting['location'],
                 posting['description'], date.today(), posting.get('date_posted'),
                 posting.get('salary_min'), posting.get('salary_max'),
-                posting.get('salary_type'), posting.get('posting_url')
+                posting.get('salary_type'), posting.get('posting_url'),
+                posting.get('requirements', []), posting.get('nice_to_haves', []),
+                posting.get('responsibilities')
             ))
         db.commit()
         print(f"  saved: {posting['title']} @ {posting['company']}\n")
@@ -56,6 +63,7 @@ def save(db, posting):
 
 def scrape(keyword, location, pages, batch_number):
     db = get_db()
+    ensure_posting_detail_columns(db)
     with sync_playwright() as p:
         browser = p.chromium.launch(headless = True)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -96,7 +104,7 @@ def scrape(keyword, location, pages, batch_number):
                             print("Card click failed, skipping ->", e)
                             continue
 
-                    page.wait_for_timeout(5000)
+                    page.wait_for_timeout(4500)
                     
                     print("escaping from login")
                     page.keyboard.press("Escape")
@@ -139,6 +147,7 @@ def scrape(keyword, location, pages, batch_number):
                     print(f"min={salary_min}, max={salary_max}, type={salary_type}")
                     print(f"on page: {batch_number}")
 
+                    details = extract_job_details(description)
                     save(db, {
                         "title":    title,
                         "company":  company,
@@ -149,6 +158,9 @@ def scrape(keyword, location, pages, batch_number):
                         "salary_max":  salary_max,
                         "salary_type": salary_type,
                         "posting_url": posting_url,
+                        "requirements": details["requirements"],
+                        "nice_to_haves": details["nice_to_haves"],
+                        "responsibilities": details["responsibilities"],
                     })
 
                 except Exception as e:
@@ -165,18 +177,18 @@ def scrape(keyword, location, pages, batch_number):
 
 if __name__ == "__main__":
     scrape("software engineer intern", "canada", 2, 1)
-    scrape("software developer intern", "canada", 2, 3)
-    scrape("software engineering co-op", "canada", 2, 5)
-    scrape("frontend developer intern", "canada", 2, 7)
-    scrape("backend developer intern", "canada", 2, 9)
-    scrape("full stack developer intern", "canada", 2, 11)
+    scrape("software developer intern", "canada", 1, 3)
+    scrape("software engineering co-op", "canada", 2, 4)
+    scrape("frontend developer intern", "canada", 1, 6)
+    scrape("backend developer intern", "canada", 2, 7)
+    scrape("full stack developer intern", "canada", 1, 9)
 
-    scrape("data analyst intern", "canada", 2, 13)
-    scrape("data science intern", "canada", 2, 15)
-    scrape("data engineer intern", "canada", 2, 17)
-    scrape("data analytics co-op", "canada", 2, 19)
-    scrape("machine learning intern", "canada", 2, 21)
-    scrape("AI intern", "canada", 2, 23)
+    scrape("data analyst intern", "canada", 2, 10)
+    scrape("data science intern", "canada", 2, 12)
+    scrape("data engineer intern", "canada", 2, 14)
+    scrape("data analytics co-op", "canada", 1, 16)
+    scrape("machine learning intern", "canada", 2, 17)
+    scrape("AI intern", "canada", 2, 19)
     run()
     category_extractor()
     generate_and_save_forecast()

@@ -13,8 +13,32 @@ const EMPTY_PREFERENCES = {
   salary_type: "yearly",
 };
 
+const ADVISOR_WORKFLOW_STEPS = [
+  { title: "Upload & confirm resume content" },
+  { title: "Choose your preferences" },
+  { title: "View recommendations" },
+];
+
 function splitPreferenceList(value) {
   return [...new Set(value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean))];
+}
+
+function AdvisorWorkflow({ currentStep }) {
+  const activeIndex = currentStep === "preferences" ? 1 : currentStep === "results" ? 2 : 0;
+
+  return (
+    <section className="advisor-workflow" aria-label="Recommendation process">
+      {ADVISOR_WORKFLOW_STEPS.map((label, index) => {
+        const state = index === activeIndex ? "is-active" : index < activeIndex ? "is-complete" : "";
+        return (
+          <article className={`advisor-workflow-step ${state}`} key={label.title} aria-current={index === activeIndex ? "step" : undefined}>
+            <span>Step {String(index + 1).padStart(2, "0")}</span>
+            <strong>{label.title}</strong>
+          </article>
+        );
+      })}
+    </section>
+  );
 }
 
 export function ResumeAnalyzer() {
@@ -23,7 +47,9 @@ export function ResumeAnalyzer() {
   const [resumeText, setResumeText] = useState("");
   const [step, setStep] = useState("upload");
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState(null);
+  const [reviewError, setReviewError] = useState(null);
   const API_BASE = import.meta.env.VITE_API_URL || "";
 
   const uploadResume = async () => {
@@ -41,11 +67,29 @@ export function ResumeAnalyzer() {
       });
       setDocument(response.data);
       setResumeText(response.data.raw_text);
-      setStep("review");
+      setReviewError(null);
     } catch (requestError) {
       setError(requestError.response?.data?.detail || "Upload failed. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const confirmResumeText = async () => {
+    if (!document || !resumeText.trim()) {
+      setReviewError("Resume text cannot be empty.");
+      return;
+    }
+    setConfirming(true);
+    setReviewError(null);
+    try {
+      const response = await axios.put(`${API_BASE}/resume_documents/${document.id}`, { raw_text: resumeText });
+      setResumeText(response.data.raw_text);
+      setStep("preferences");
+    } catch (requestError) {
+      setReviewError(requestError.response?.data?.detail || "Could not save your resume text. Try again.");
+    } finally {
+      setConfirming(false);
     }
   };
 
@@ -54,25 +98,15 @@ export function ResumeAnalyzer() {
     setDocument(null);
     setResumeText("");
     setError(null);
+    setReviewError(null);
     setStep("upload");
   };
-
-  if (step === "review" && document) {
-    return <ResumeTextReview
-      document={document}
-      resumeText={resumeText}
-      setResumeText={setResumeText}
-      apiBase={API_BASE}
-      onContinue={() => setStep("preferences")}
-      onStartOver={reset}
-    />;
-  }
 
   if (step === "preferences" && document) {
     return <JobPreferencesForm
       documentId={document.id}
       apiBase={API_BASE}
-      onBack={() => setStep("review")}
+      onBack={() => setStep("upload")}
       onViewRecommendations={() => setStep("results")}
     />;
   }
@@ -93,7 +127,9 @@ export function ResumeAnalyzer() {
           <h1>Job recommendations from your resume</h1>
           <p>Upload a PDF, review the extracted text, then set the roles and conditions that matter to you.</p>
         </header>
-        <section className="resume-card upload-panel" aria-labelledby="resume-upload-heading">
+        <AdvisorWorkflow currentStep="upload" />
+        <div className="resume-upload-review-grid">
+          <section className="resume-card upload-panel" aria-labelledby="resume-upload-heading">
           <div className="page-header resume-page-header">
             <span>Step 1 of 3</span>
             <h2 id="resume-upload-heading">Upload your resume</h2>
@@ -113,7 +149,10 @@ export function ResumeAnalyzer() {
                 const selected = event.target.files[0];
                 if (selected?.type === "application/pdf" || selected?.name?.toLowerCase().endsWith(".pdf")) {
                   setFile(selected);
+                  setDocument(null);
+                  setResumeText("");
                   setError(null);
+                  setReviewError(null);
                 } else {
                   setFile(null);
                   setError("Please select a PDF file.");
@@ -127,13 +166,36 @@ export function ResumeAnalyzer() {
               {loading ? "Extracting resume text…" : "Upload and review text"}
             </button>
           </div>
-        </section>
+          </section>
+          <section className="resume-card resume-text-review" aria-labelledby="resume-text-heading">
+            <div className="page-header resume-page-header">
+              <span>Confirm your content</span>
+              <h2 id="resume-text-heading">Review extracted text</h2>
+              <p>{document ? "Correct anything that did not transfer cleanly before continuing." : "Your extracted resume text will appear here after upload."}</p>
+            </div>
+            <textarea
+              className="resume-text-area"
+              value={resumeText}
+              onChange={(event) => setResumeText(event.target.value)}
+              aria-label="Extracted resume text"
+              placeholder="Upload a PDF to review its extracted text."
+              disabled={!document}
+            />
+            {reviewError && <p className="error-message">{reviewError}</p>}
+            <div className="resume-text-actions">
+              <span className="resume-confirmation-note">{document ? "Confirm the content when it looks right." : "Waiting for a resume upload."}</span>
+              <button type="button" className="upload-button" onClick={confirmResumeText} disabled={!document || confirming || !resumeText.trim()}>
+                {confirming ? "Saving text" : "Confirm and continue"}
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
 }
 
-function ResumeTextReview({ document, resumeText, setResumeText, apiBase, onContinue, onStartOver }) {
+export function ResumeTextReview({ document, resumeText, setResumeText, apiBase, onContinue, onStartOver }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -162,6 +224,7 @@ function ResumeTextReview({ document, resumeText, setResumeText, apiBase, onCont
           <h1>Review your resume text</h1>
           <p>We extracted the text from <strong>{document.filename}</strong>. Correct anything that did not transfer cleanly.</p>
         </header>
+        <AdvisorWorkflow currentStep="upload" />
         <section className="resume-card resume-text-review" aria-labelledby="resume-text-heading">
           <div className="page-header resume-page-header">
             <span>Step 1 of 3</span>
@@ -228,6 +291,7 @@ function JobPreferencesForm({ documentId, apiBase, onBack, onViewRecommendations
           <h1>Set your job preferences</h1>
           <p>Your resume text is saved. These preferences determine which jobs are eligible for recommendations.</p>
         </header>
+        <AdvisorWorkflow currentStep="preferences" />
         <form className="resume-card preferences-form" onSubmit={savePreferences}>
           <div className="page-header resume-page-header">
             <span>Step 2 of 3</span>
@@ -335,7 +399,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
 }
 
 function RecommendationShell({ children, onBack, onStartOver }) {
-  return <div className="resume-page resume-upload-page advisor-page"><div className="resume-upload-container"><header className="advisor-page-header"><h1>Job recommendations</h1><p>Active roles matched to your resume and saved preferences.</p></header>{children}<div className="recommendation-footer"><button type="button" className="text-button" onClick={onBack}>Edit preferences</button><button type="button" className="text-button" onClick={onStartOver}>Use a different resume</button></div></div></div>;
+  return <div className="resume-page resume-upload-page advisor-page"><div className="resume-upload-container"><header className="advisor-page-header"><h1>Job recommendations</h1><p>Active roles matched to your resume and saved preferences.</p></header><AdvisorWorkflow currentStep="results" />{children}<div className="recommendation-footer"><button type="button" className="text-button" onClick={onBack}>Edit preferences</button><button type="button" className="text-button" onClick={onStartOver}>Use a different resume</button></div></div></div>;
 }
 
 const formatJevFit = (score) => `${((Number(score) / 4) * 10).toFixed(1)}/10`;

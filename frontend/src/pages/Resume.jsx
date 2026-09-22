@@ -1,20 +1,35 @@
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import axios from "axios";
 import "./Resume.css";
 
+const EMPTY_PREFERENCES = {
+  target_job_titles: "",
+  preferred_locations: "",
+  remote_preference: "no_preference",
+  work_authorization: "no_preference",
+  employment_type: "no_preference",
+  minimum_salary: "",
+  salary_type: "yearly",
+};
+
+function splitPreferenceList(value) {
+  return [...new Set(value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean))];
+}
+
 export function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [savingText, setSavingText] = useState(false);
-  const [resumeDocument, setResumeDocument] = useState(null);
+  const [document, setDocument] = useState(null);
   const [resumeText, setResumeText] = useState("");
-  const [workflowStep, setWorkflowStep] = useState("review");
+  const [step, setStep] = useState("upload");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const API_BASE = import.meta.env.VITE_API_URL || "";
 
-  const upload = async () => {
-    if (!file) return setError("Please select a PDF file first.");
+  const uploadResume = async () => {
+    if (!file) {
+      setError("Please select a PDF file first.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -23,202 +38,124 @@ export function ResumeAnalyzer() {
       const response = await axios.post(`${API_BASE}/resume_documents`, body, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setResumeDocument(response.data);
+      setDocument(response.data);
       setResumeText(response.data.raw_text);
-      setWorkflowStep("review");
-    } catch (err) {
-      setError(err.response?.data?.detail || "Upload failed. Try again.");
+      setStep("review");
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || "Upload failed. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const saveExtractedText = async () => {
-    if (!resumeDocument) return;
-    if (!resumeText.trim()) return setError("Resume text cannot be empty.");
-    setSavingText(true);
+  const reset = () => {
+    setFile(null);
+    setDocument(null);
+    setResumeText("");
     setError(null);
-    try {
-      const response = await axios.put(`${API_BASE}/resume_documents/${resumeDocument.id}`, {
-        raw_text: resumeText,
-      });
-      setResumeDocument(response.data);
-      setResumeText(response.data.raw_text);
-      setWorkflowStep("preferences");
-    } catch (err) {
-      setError(err.response?.data?.detail || "Could not save your resume text. Try again.");
-    } finally {
-      setSavingText(false);
-    }
+    setStep("upload");
   };
 
-  if (resumeDocument && workflowStep === "review")
+  if (step === "review" && document) {
     return <ResumeTextReview
-      document={resumeDocument}
+      document={document}
       resumeText={resumeText}
       setResumeText={setResumeText}
-      error={error}
-      saving={savingText}
-      onSave={saveExtractedText}
-      onStartOver={() => {
-        setResumeDocument(null);
-        setResumeText("");
-        setFile(null);
-        setError(null);
-      }}
-    />;
-  if (resumeDocument)
-    return <JobPreferencesForm
-      documentId={resumeDocument.id}
       apiBase={API_BASE}
-      onBack={() => setWorkflowStep("review")}
+      onContinue={() => setStep("preferences")}
+      onStartOver={reset}
     />;
+  }
+
+  if (step === "preferences" && document) {
+    return <JobPreferencesForm
+      documentId={document.id}
+      apiBase={API_BASE}
+      onBack={() => setStep("review")}
+    />;
+  }
+
   return (
     <div className="resume-page resume-upload-page advisor-page">
       <div className="resume-upload-container">
         <header className="advisor-page-header">
-          <h1>Career Advisor</h1>
-          <p>Use your resume and current market data to identify matching roles and high-value skill gaps.</p>
+          <h1>Job recommendations from your resume</h1>
+          <p>Upload a PDF, review the extracted text, then set the roles and conditions that matter to you.</p>
         </header>
-        <section className="upload-hero legacy-upload-hero">
-          <div className="upload-hero-copy">
-            <span className="upload-eyebrow">
-              <i /> Resume match
-            </span>
-            <h1>See how your resume lines up with current roles.</h1>
-            <p>
-              Upload your resume to see where it fits, which skills are missing,
-              and which roles may be worth looking at.
-            </p>
-            <div className="upload-proof">
-              <span className="proof-avatars">
-                <b>J</b>
-                <b>M</b>
-                <b>A</b>
-              </span>
-              Based on current job-posting data.
-            </div>
-          </div>
-          <div
-            className="report-preview"
-            aria-label="Preview of your career fit report"
-          >
-            <div className="preview-topline">
-              <span>Your career fit report</span>
-              <b>Live market data</b>
-            </div>
-            <div className="preview-score">
-              <div>
-                <small>Strongest role match</small>
-                <h3>Senior Product Designer</h3>
-                <p>Based on your experience</p>
-              </div>
-              <strong>
-                86<small>%</small>
-              </strong>
-            </div>
-            <div className="preview-meter">
-              <span />
-            </div>
-            <div className="preview-insight">
-              <em>↗</em>
-              <div>
-                <small>Your edge</small>
-                <b>Product strategy + research</b>
-                <p>Skills employers are actively seeking</p>
-              </div>
-            </div>
-            <div className="preview-stats">
-              <div>
-                <strong>12</strong>
-                <span>skills found</span>
-              </div>
-              <div>
-                <strong>28</strong>
-                <span>matching roles</span>
-              </div>
-              <div>
-                <strong>4</strong>
-                <span>growth moves</span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <div className="card resume-card upload-panel" id="resume-upload">
+        <section className="resume-card upload-panel" aria-labelledby="resume-upload-heading">
           <div className="page-header resume-page-header">
-            <span>Resume analysis</span>
-            <h2>Upload your resume</h2>
-            <p>PDF only. Your report uses live job-posting data.</p>
+            <span>Step 1 of 3</span>
+            <h2 id="resume-upload-heading">Upload your resume</h2>
+            <p>PDF only. We will extract the text for you to review before matching.</p>
           </div>
           <div className="upload-section">
             <label htmlFor="file-input" className="upload-box upload-label">
-              <div className="upload-icon">📄</div>
+              <div className="upload-icon" aria-hidden="true">PDF</div>
               <p>Drop your resume here or click to browse</p>
-              <span className="upload-hint">PDF only</span>
+              <span className="upload-hint">PDF, up to 10 MB</span>
             </label>
             <input
+              id="file-input"
               type="file"
-              accept=".pdf"
+              accept="application/pdf,.pdf"
               onChange={(event) => {
                 const selected = event.target.files[0];
-                if (selected?.type === "application/pdf") {
+                if (selected?.type === "application/pdf" || selected?.name?.toLowerCase().endsWith(".pdf")) {
                   setFile(selected);
                   setError(null);
-                } else setError("Please select a PDF file.");
+                } else {
+                  setFile(null);
+                  setError("Please select a PDF file.");
+                }
               }}
-              id="file-input"
               style={{ display: "none" }}
             />
-            {file && <p className="selected-file">✓ {file.name}</p>}
+            {file && <p className="selected-file">Selected: {file.name}</p>}
             {error && <p className="error-message">{error}</p>}
-            <button
-              onClick={upload}
-              disabled={!file || loading}
-              className="upload-button"
-            >
+            <button type="button" onClick={uploadResume} disabled={!file || loading} className="upload-button">
               {loading ? "Extracting resume text…" : "Upload and review text"}
             </button>
           </div>
-        </div>
-        <div className="three-boxes-row">
-          <InfoCard
-            label="Missing"
-            title="Top Missing Skills"
-            copy="See the valuable skills you can build next."
-            icon="↗"
-          />
-          <InfoCard
-            label="Matches"
-            title="Matched Jobs"
-            copy="See roles where your current experience already fits."
-            icon="◎"
-            accent
-          />
-          <InfoCard
-            label="Signals"
-            title="Job Matches Per Skill"
-            copy="Connect your existing skills to real market demand."
-            icon="⌁"
-          />
-        </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function ResumeTextReview({ document, resumeText, setResumeText, error, saving, onSave, onStartOver }) {
+function ResumeTextReview({ document, resumeText, setResumeText, apiBase, onContinue, onStartOver }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  const saveText = async () => {
+    if (!resumeText.trim()) {
+      setError("Resume text cannot be empty.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await axios.put(`${apiBase}/resume_documents/${document.id}`, { raw_text: resumeText });
+      setResumeText(response.data.raw_text);
+      onContinue();
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || "Could not save your resume text. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="resume-page resume-upload-page advisor-page">
       <div className="resume-upload-container">
         <header className="advisor-page-header">
           <h1>Review your resume text</h1>
-          <p>We extracted the text from <strong>{document.filename}</strong>. Correct anything that did not transfer cleanly before continuing.</p>
+          <p>We extracted the text from <strong>{document.filename}</strong>. Correct anything that did not transfer cleanly.</p>
         </header>
         <section className="resume-card resume-text-review" aria-labelledby="resume-text-heading">
           <div className="page-header resume-page-header">
             <span>Step 1 of 3</span>
             <h2 id="resume-text-heading">Extracted resume text</h2>
-            <p>This text is stored for your recommendation request. No AI parsing is used.</p>
+            <p>Your saved text—not a generated summary—will be used for matching.</p>
           </div>
           <textarea
             className="resume-text-area"
@@ -229,8 +166,8 @@ function ResumeTextReview({ document, resumeText, setResumeText, error, saving, 
           {error && <p className="error-message">{error}</p>}
           <div className="resume-text-actions">
             <button type="button" className="text-button" onClick={onStartOver}>Upload a different PDF</button>
-            <button type="button" className="upload-button" onClick={onSave} disabled={saving || !resumeText.trim()}>
-              {saving ? "Saving text…" : "Save extracted text"}
+            <button type="button" className="upload-button" onClick={saveText} disabled={saving || !resumeText.trim()}>
+              {saving ? "Saving text…" : "Save text and continue"}
             </button>
           </div>
         </section>
@@ -239,359 +176,98 @@ function ResumeTextReview({ document, resumeText, setResumeText, error, saving, 
   );
 }
 
-function AdvisorCompanion({ targetRole, setTargetRole, selectedSkills, setSelectedSkills, trackedSkills, trackedSkillsStatus }) {
-  const [showAllSkills, setShowAllSkills] = useState(false);
-  const roles = ["Software engineer", "Data engineer", "Machine learning engineer", "Data scientist", "Data analyst"];
-  const skills = trackedSkills;
-  const visibleSkills = showAllSkills ? skills : skills.slice(0, 6);
-  const toggleSkill = (skill) => setSelectedSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
-  const continueToUpload = () => document.getElementById("resume-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
+function JobPreferencesForm({ documentId, apiBase, onBack }) {
+  const [form, setForm] = useState(EMPTY_PREFERENCES);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [saved, setSaved] = useState(false);
 
-  return <section className={`advisor-companion${showAllSkills ? " advisor-companion-expanded" : ""}`} aria-labelledby="advisor-companion-title">
-    <div className="advisor-companion-copy"><span>Career advisor</span><h2 id="advisor-companion-title">Set your direction, then verify it with your resume.</h2><p>Choose a role and note the skills you want to emphasize. Your uploaded resume remains the source for live matches, gaps, and recommendations.</p></div>
-    <div className="advisor-companion-form"><label htmlFor="advisor-role">Target role</label><select id="advisor-role" value={targetRole} onChange={(event) => setTargetRole(event.target.value)}><option value="">Choose a role</option>{roles.map((role) => <option key={role}>{role}</option>)}</select><span className="advisor-label">Skills you want to emphasize</span><div className="advisor-skill-options">{trackedSkillsStatus === "loading" ? <span className="advisor-skills-loading">Loading tracked skills…</span> : trackedSkillsStatus === "error" ? <span className="advisor-skills-error">Skills are unavailable. Please refresh and try again.</span> : visibleSkills.map((skill) => <button type="button" key={skill} className={selectedSkills.includes(skill) ? "selected" : ""} onClick={() => toggleSkill(skill)}>{skill}</button>)}</div>{trackedSkillsStatus === "ready" && skills.length > 6 && <button type="button" className="advisor-skills-toggle" onClick={() => setShowAllSkills((visible) => !visible)}>{showAllSkills ? "Show fewer skills" : `Select more skills (${skills.length})`}</button>}<button type="button" className="advisor-continue" onClick={continueToUpload}>Continue with my resume</button></div>
-  </section>;
-}
+  const updateField = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+    setSaved(false);
+  };
 
-function InfoCard({ label, title, copy, icon, accent }) {
+  const savePreferences = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await axios.put(`${apiBase}/resume_documents/${documentId}/preferences`, {
+        target_job_titles: splitPreferenceList(form.target_job_titles),
+        preferred_locations: splitPreferenceList(form.preferred_locations),
+        remote_preference: form.remote_preference,
+        work_authorization: form.work_authorization,
+        employment_type: form.employment_type,
+        minimum_salary: form.minimum_salary === "" ? null : Number(form.minimum_salary),
+        salary_type: form.salary_type,
+      });
+      setSaved(true);
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || "Could not save your preferences. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="three-box">
-      <div className="box-topline">
-        <span className={`box-badge ${accent ? "accent" : ""}`}>{label}</span>
-      </div>
-      <h4>{title}</h4>
-      <p>{copy}</p>
-      <div className="box-microstats">
-        <span>Career signal</span>
-        <span className="box-icon">{icon}</span>
+    <div className="resume-page resume-upload-page advisor-page">
+      <div className="resume-upload-container">
+        <header className="advisor-page-header">
+          <h1>Set your job preferences</h1>
+          <p>Your resume text is saved. These preferences determine which jobs are eligible for recommendations.</p>
+        </header>
+        <form className="resume-card preferences-form" onSubmit={savePreferences}>
+          <div className="page-header resume-page-header">
+            <span>Step 2 of 3</span>
+            <h2>What should we look for?</h2>
+            <p>Leave a field open if it should not limit your search.</p>
+          </div>
+          <div className="preferences-grid">
+            <label className="preferences-field preferences-field-wide">
+              <span>Target job titles</span>
+              <input name="target_job_titles" value={form.target_job_titles} onChange={updateField} placeholder="e.g. Data analyst, Business intelligence analyst" />
+              <small>Separate multiple titles with commas.</small>
+            </label>
+            <label className="preferences-field preferences-field-wide">
+              <span>Preferred locations</span>
+              <input name="preferred_locations" value={form.preferred_locations} onChange={updateField} placeholder="e.g. Toronto, Ontario, Canada" />
+              <small>Separate multiple locations with commas.</small>
+            </label>
+            <SelectField label="Work arrangement" name="remote_preference" value={form.remote_preference} onChange={updateField} options={[["no_preference", "No preference"], ["remote", "Remote"], ["hybrid", "Hybrid"], ["on_site", "On-site"]]} />
+            <SelectField label="Work authorization" name="work_authorization" value={form.work_authorization} onChange={updateField} options={[["no_preference", "No preference"], ["authorized", "Authorized to work"], ["requires_sponsorship", "Require sponsorship"]]} />
+            <SelectField label="Employment type" name="employment_type" value={form.employment_type} onChange={updateField} options={[["no_preference", "No preference"], ["full_time", "Full-time"], ["part_time", "Part-time"], ["contract", "Contract"], ["internship", "Internship"], ["temporary", "Temporary"]]} />
+            <label className="preferences-field">
+              <span>Minimum acceptable salary</span>
+              <div className="salary-preference-inputs">
+                <input name="minimum_salary" type="number" min="0" step="1000" value={form.minimum_salary} onChange={updateField} placeholder="e.g. 80000" />
+                <select name="salary_type" value={form.salary_type} onChange={updateField} aria-label="Salary period">
+                  <option value="yearly">per year</option>
+                  <option value="hourly">per hour</option>
+                  <option value="no_preference">period unknown</option>
+                </select>
+              </div>
+            </label>
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          {saved && <p className="save-confirmation" role="status">Preferences saved. Recommendations will be enabled in the next step.</p>}
+          <div className="resume-text-actions">
+            <button type="button" className="text-button" onClick={onBack}>Back to resume text</button>
+            <button type="submit" className="upload-button" disabled={saving}>{saving ? "Saving preferences…" : "Save preferences"}</button>
+          </div>
+        </form>
       </div>
     </div>
   );
 }
 
-function ResumeResults({ results, onReset }) {
-  const {
-    resume_skills = [],
-    matched_jobs = [],
-    top_missing_skills = {},
-    skill_opportunities = {},
-    market_snapshot = {},
-    focus = {},
-  } = results;
-  const gaps = Object.entries(top_missing_skills);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const top = matched_jobs[0];
-  const fit = top
-    ? Number(top.fit_score ?? Math.round((top.matched_skills / top.total_skills) * 100))
-    : 0;
+function SelectField({ label, name, value, onChange, options }) {
   return (
-    <div className="resume-page resume-results-page">
-      <div className="resume-results-container">
-        <section className="resume-report-hero">
-          <div className="report-hero-copy">
-            <span className="report-eyebrow">Your career fit report</span>
-            <h1>How your resume compares with current roles.</h1>
-            <p>
-              We compared your experience with the roles we’re tracking and
-              pulled out the main matches and gaps.
-            </p>
-          </div>
-          <div className="report-hero-score">
-            <span>Highest salary role you qualify for</span>
-            <strong>{fit}%</strong>
-            <p>{top?.title || "Your top opportunity"}</p>
-          </div>
-          <div className="report-stat-grid">
-            <div>
-              <strong>{resume_skills.length}</strong>
-              <span>skills recognized</span>
-            </div>
-            <div>
-              <strong>{matched_jobs.length}</strong>
-              <span>roles to explore</span>
-            </div>
-            <div>
-              <strong>{gaps.length}</strong>
-              <span>high-value missing skills</span>
-            </div>
-          </div>
-        </section>
-        {(focus.target_role || focus.emphasis_skills?.length) && <div className="report-focus"><span>Your focus</span>{focus.target_role && <strong>{focus.target_role}</strong>}{focus.emphasis_skills?.length ? <small>{focus.emphasis_skills.map((skill) => skill.toUpperCase()).join(" · ")}</small> : null}</div>}
-        <MarketSnapshot snapshot={market_snapshot} />
-        <div className="resume-report-layout">
-          <div className="resume-report-main">
-            <section className="report-section">
-              <div className="report-section-heading">
-                <div>
-                  <span className="report-eyebrow">Ready now</span>
-                  <h2>Roles where you already have momentum</h2>
-                </div>
-                <span className="report-count">
-                  Top {Math.min(matched_jobs.length, 6)} matches
-                </span>
-              </div>
-              <div className="job-cards report-job-cards">
-                {matched_jobs.slice(0, 6).map((job, index) => (
-                  <JobCard
-                    job={job}
-                    index={index}
-                    key={`${job.title}-${index}`}
-                    onSelect={() => setSelectedJob(job)}
-                  />
-                ))}
-              </div>
-            </section>
-            <section className="report-section">
-              <div className="report-section-heading">
-                <div>
-                  <span className="report-eyebrow">Growth plan</span>
-                  <h2>Skills with the highest return</h2>
-                </div>
-                <p>
-                  Focus your learning where the market is already signaling
-                  demand.
-                </p>
-              </div>
-              <div className="gap-skills report-gap-skills">
-                {gaps.slice(0, 8).map(([skill, count], index) => (
-                  <article className="gap-item report-gap-item" key={skill}>
-                    <span className="gap-priority">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="skill-name">{skill}</span>
-                    <span className="skill-count">{count} roles</span>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </div>
-          <aside className="resume-report-rail">
-            <section className="report-rail-card skill-inventory">
-              <span className="report-eyebrow">Your advantage</span>
-              <h2>Skills already on your side</h2>
-              <div className="skill-tags">
-                {resume_skills.slice(0, 18).map((skill) => (
-                  <span key={skill} className="skill-tag-yours">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </section>
-            <section className="report-rail-card next-step-card">
-              <span className="report-eyebrow">What you should do next</span>
-              <h2>Build a shortlist of three roles.</h2>
-              <p>
-                Choose high-fit roles, then tailor one strong proof point for
-                each application.
-              </p>
-              <button
-                onClick={onReset}
-                className="report-reset-button"
-                data-tooltip="Upload a new PDF to create another report"
-              >
-                Analyze another resume
-              </button>
-            </section>
-            {Object.keys(skill_opportunities).length > 0 && (
-              <section className="report-rail-card opportunity-card">
-                <span className="report-eyebrow">Market connection</span>
-                <h2>Where your skills lead</h2>
-                {Object.entries(skill_opportunities)
-                  .slice(0, 3)
-                  .map(([skill, jobs]) => (
-                    <div className="skill-opportunity" key={skill}>
-                      <h4>{skill}</h4>
-                      <ul>
-                        {jobs.slice(0, 2).map((job) => <li key={`${job.title}-${job.company}`}>- {job.title} · {job.company}</li>)}
-                      </ul>
-                    </div>
-                  ))}
-              </section>
-            )}
-          </aside>
-        </div>
-        {selectedJob && (
-          <JobDetailsModal
-            job={selectedJob}
-            onClose={() => setSelectedJob(null)}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function MarketSnapshot({ snapshot }) {
-  const {
-    market_total = 0,
-    matching_job_count = 0,
-    top_gap: topGap,
-    salary,
-  } = snapshot;
-  const matchRate = market_total
-    ? ((matching_job_count / market_total) * 100).toFixed(1)
-    : null;
-
-  return (
-    <section className="market-snapshot" aria-label="Your market snapshot">
-      <div className="market-snapshot-heading">
-        <span className="report-eyebrow">Your market snapshot</span>
-        <h2>Where you stand, and what to do next.</h2>
-      </div>
-      <div className="market-snapshot-grid">
-        <article>
-          <span>Matching roles</span>
-          <strong>{matching_job_count.toLocaleString()}</strong>
-          <p>
-            {matchRate
-              ? `${matchRate}% of ${market_total.toLocaleString()} tracked roles match at least three of your skills.`
-              : "No matching roles are available yet."}
-          </p>
-        </article>
-        <article>
-          <span>Highest-impact gap</span>
-          <strong>{topGap?.skill?.toUpperCase() || "No clear gap"}</strong>
-          <p>
-            {topGap
-              ? `It appears in ${topGap.matching_roles.toLocaleString()} roles that otherwise fit your profile.`
-              : "Your current skills cover the available matched roles well."}
-          </p>
-        </article>
-        <article>
-          <span>Listed pay in matching roles</span>
-          <strong>
-            {salary
-              ? `$${formatCompensation(salary.median_min)}–${formatCompensation(salary.median_max)}`
-              : "Not enough data"}
-          </strong>
-          <p>
-            {salary
-              ? `Median listed range across ${salary.sample_size.toLocaleString()} matching roles with salary data.`
-              : "Shown once at least five matching roles include both salary bounds."}
-          </p>
-        </article>
-      </div>
-      {topGap && (
-        <div className="market-snapshot-action">
-          <span className="market-snapshot-action-label">Best next move</span>
-          <p>
-            Prioritize <strong>{topGap.skill.toUpperCase()}</strong>, it could expand the roles you can target most quickly.
-          </p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function formatCompensation(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "—";
-  if (amount >= 1_000_000) {
-    return `${Number((amount / 1_000_000).toFixed(1))}M`;
-  }
-  return `${Math.round(amount / 1000)}k`;
-}
-
-function JobCard({ job, index, onSelect }) {
-  const fit = Number(job.fit_score ?? Math.round((job.matched_skills / job.total_skills) * 100));
-  return (
-    <article
-      className="job-card-result report-job-card"
-      onClick={onSelect}
-      onKeyDown={(event) => event.key === "Enter" && onSelect()}
-      role="button"
-      tabIndex="0"
-      aria-label={`View details for ${job.title} at ${job.company}`}
-    >
-      <div className="job-header">
-        <div>
-          <span className="job-rank">Best fit #{index + 1}</span>
-          <h4>{job.title}</h4>
-        </div>
-        <span className="match-score">{fit}% fit</span>
-      </div>
-      <p className="company">{job.company}</p>
-      <div className="match-meter">
-        <span style={{ width: `${fit}%` }} />
-      </div>
-      <div className="job-card-footer">
-        <span>
-          {job.matched_skills} of {job.total_skills} skills matched
-        </span>
-        {job.priority_matches > 0 && <span>{job.priority_matches} priority match{job.priority_matches === 1 ? "" : "es"}</span>}
-        {job.salary_min && job.salary_max && (
-          <strong>
-            {formatCompensation(job.salary_min)} –{" "}
-            {formatCompensation(job.salary_max)}
-          </strong>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function JobDetailsModal({ job, onClose }) {
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const postedDate = job.date_posted ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(job.date_posted)) : "Recent";
-  const salary = job.salary_min && job.salary_max
-    ? `$${formatCompensation(job.salary_min)} – $${formatCompensation(job.salary_max)}${job.salary_type ? ` ${job.salary_type}` : ""}`
-    : "Salary not listed";
-  const description = job.description || "A description was not provided for this posting.";
-  const descriptionIsLong = description.length > 700;
-  const displayedDescription = showFullDescription || !descriptionIsLong
-    ? description
-    : `${description.slice(0, 700).trim()}…`;
-
-  useEffect(() => {
-    const closeOnEscape = (event) => event.key === "Escape" && onClose();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [onClose]);
-
-  return createPortal(
-    <div className="job-details-backdrop" onMouseDown={onClose} role="presentation">
-      <section
-        className="job-details-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="job-details-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <button className="job-details-close" onClick={onClose} aria-label="Close job details">×</button>
-        <div className="job-details-content">
-          <span className="job-details-eyebrow">Job details</span>
-          <h2 id="job-details-title">{job.title}</h2>
-          <p className="job-details-company">{job.company || "Company not listed"}</p>
-          <div className="job-details-meta">
-            <div><span>Location</span><strong>{job.location || "Location not listed"}</strong></div>
-            <div><span>Posted</span><strong>{postedDate}</strong></div>
-            <div><span>Salary</span><strong>{salary}</strong></div>
-          </div>
-          <div className="job-details-description">
-            <h3>About this role</h3>
-            <p>{displayedDescription}</p>
-            {descriptionIsLong && (
-              <button className="job-description-toggle" onClick={() => setShowFullDescription((visible) => !visible)}>
-                {showFullDescription ? "View less ↑" : "View more ↓"}
-              </button>
-            )}
-          </div>
-          {job.posting_url ? (
-            <a className="job-details-link" href={job.posting_url} target="_blank" rel="noreferrer">
-              View job posting <span aria-hidden="true">↗</span>
-            </a>
-          ) : (
-            <span className="job-details-link job-details-link-disabled">Job link not available</span>
-          )}
-        </div>
-      </section>
-    </div>
-    ,
-    document.body
+    <label className="preferences-field">
+      <span>{label}</span>
+      <select name={name} value={value} onChange={onChange}>
+        {options.map(([optionValue, optionLabel]) => <option value={optionValue} key={optionValue}>{optionLabel}</option>)}
+      </select>
+    </label>
   );
 }

@@ -338,10 +338,13 @@ function RecommendationShell({ children, onBack, onStartOver }) {
   return <div className="resume-page resume-upload-page advisor-page"><div className="resume-upload-container"><header className="advisor-page-header"><h1>Job recommendations</h1><p>Active roles matched to your resume and saved preferences.</p></header>{children}<div className="recommendation-footer"><button type="button" className="text-button" onClick={onBack}>Edit preferences</button><button type="button" className="text-button" onClick={onStartOver}>Use a different resume</button></div></div></div>;
 }
 
+const formatJevFit = (score) => `${((Number(score) / 4) * 10).toFixed(1)}/10`;
+const formatJevConfidence = (confidence) => typeof confidence === "number" ? `${(confidence * 10).toFixed(1)}/10 confidence` : "Confidence unavailable";
+
 function RecommendationCard({ job, index, onSelect }) {
-  const confidence = typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "Confidence unavailable";
+  const confidence = formatJevConfidence(job.confidence);
   return <article className="recommendation-card">
-    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{Number(job.fit_score).toFixed(1)}/4 fit</strong></div>
+    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{formatJevFit(job.fit_score)} fit</strong></div>
     <h2>{job.title}</h2>
     <p className="recommendation-company">{job.company || "Company not listed"}</p>
     <dl className="recommendation-meta">
@@ -349,7 +352,7 @@ function RecommendationCard({ job, index, onSelect }) {
       <div><dt>Salary</dt><dd>{formatSalary(job)}</dd></div>
     </dl>
     <div className="recommendation-card-footer"><span className={job.match_label === "possible match" ? "possible-match" : "confirmed-match"}>{job.match_label}</span><span>{confidence}</span></div>
-    <button type="button" className="job-details-link recommendation-details-button" onClick={onSelect}>Apply / view details</button>
+    <button type="button" className="job-details-link recommendation-details-button" onClick={onSelect}>View details</button>
   </article>;
 }
 
@@ -390,7 +393,7 @@ function RecommendationDetailsModal({ job, onClose }) {
           <div className="posting-details-meta">
             <div><span>Location</span><strong>{job.location || "Not listed"}</strong></div>
             <div><span>Salary</span><strong>{formatSalary(job)}</strong></div>
-            <div><span>Jev fit</span><strong>{Number(job.fit_score).toFixed(1)}/4 · {typeof job.confidence === "number" ? `${Math.round(job.confidence * 100)}% confidence` : "confidence unavailable"}</strong></div>
+            <div><span>Jev fit</span><strong>{formatJevFit(job.fit_score)} · {formatJevConfidence(job.confidence)}</strong></div>
           </div>
           <div className="posting-details-description">
             <h3>About this role</h3>

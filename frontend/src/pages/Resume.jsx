@@ -6,26 +6,12 @@ import "./Resume.css";
 export function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [savingText, setSavingText] = useState(false);
+  const [resumeDocument, setResumeDocument] = useState(null);
+  const [resumeText, setResumeText] = useState("");
+  const [workflowStep, setWorkflowStep] = useState("review");
   const [error, setError] = useState(null);
-  const [targetRole, setTargetRole] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState([]);
-  const [trackedSkills, setTrackedSkills] = useState([]);
-  const [trackedSkillsStatus, setTrackedSkillsStatus] = useState("loading");
   const API_BASE = import.meta.env.VITE_API_URL || "";
-
-  useEffect(() => {
-    axios.get(`${API_BASE}/resume_skills`)
-      .then((response) => {
-        setTrackedSkills(response.data?.skills || []);
-        setTrackedSkillsStatus("ready");
-      })
-      .catch(() => setTrackedSkillsStatus("error"));
-  }, [API_BASE]);
-
-  useEffect(() => {
-    if (results) window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, [results]);
 
   const upload = async () => {
     if (!file) return setError("Please select a PDF file first.");
@@ -34,12 +20,12 @@ export function ResumeAnalyzer() {
     try {
       const body = new FormData();
       body.append("file", file);
-      if (targetRole) body.append("target_role", targetRole);
-      selectedSkills.forEach((skill) => body.append("emphasis_skills", skill));
-      const response = await axios.post(`${API_BASE}/resume_upload`, body, {
+      const response = await axios.post(`${API_BASE}/resume_documents`, body, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setResults(response.data);
+      setResumeDocument(response.data);
+      setResumeText(response.data.raw_text);
+      setWorkflowStep("review");
     } catch (err) {
       setError(err.response?.data?.detail || "Upload failed. Try again.");
     } finally {
@@ -47,8 +33,46 @@ export function ResumeAnalyzer() {
     }
   };
 
-  if (results)
-    return <ResumeResults results={results} onReset={() => setResults(null)} />;
+  const saveExtractedText = async () => {
+    if (!resumeDocument) return;
+    if (!resumeText.trim()) return setError("Resume text cannot be empty.");
+    setSavingText(true);
+    setError(null);
+    try {
+      const response = await axios.put(`${API_BASE}/resume_documents/${resumeDocument.id}`, {
+        raw_text: resumeText,
+      });
+      setResumeDocument(response.data);
+      setResumeText(response.data.raw_text);
+      setWorkflowStep("preferences");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Could not save your resume text. Try again.");
+    } finally {
+      setSavingText(false);
+    }
+  };
+
+  if (resumeDocument && workflowStep === "review")
+    return <ResumeTextReview
+      document={resumeDocument}
+      resumeText={resumeText}
+      setResumeText={setResumeText}
+      error={error}
+      saving={savingText}
+      onSave={saveExtractedText}
+      onStartOver={() => {
+        setResumeDocument(null);
+        setResumeText("");
+        setFile(null);
+        setError(null);
+      }}
+    />;
+  if (resumeDocument)
+    return <JobPreferencesForm
+      documentId={resumeDocument.id}
+      apiBase={API_BASE}
+      onBack={() => setWorkflowStep("review")}
+    />;
   return (
     <div className="resume-page resume-upload-page advisor-page">
       <div className="resume-upload-container">
@@ -120,7 +144,6 @@ export function ResumeAnalyzer() {
             </div>
           </div>
         </section>
-        <AdvisorCompanion targetRole={targetRole} setTargetRole={setTargetRole} selectedSkills={selectedSkills} setSelectedSkills={setSelectedSkills} trackedSkills={trackedSkills} trackedSkillsStatus={trackedSkillsStatus} />
         <div className="card resume-card upload-panel" id="resume-upload">
           <div className="page-header resume-page-header">
             <span>Resume analysis</span>
@@ -153,7 +176,7 @@ export function ResumeAnalyzer() {
               disabled={!file || loading}
               className="upload-button"
             >
-              {loading ? "Building your career fit report…" : "Analyze Resume"}
+              {loading ? "Extracting resume text…" : "Upload and review text"}
             </button>
           </div>
         </div>
@@ -178,6 +201,39 @@ export function ResumeAnalyzer() {
             icon="⌁"
           />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ResumeTextReview({ document, resumeText, setResumeText, error, saving, onSave, onStartOver }) {
+  return (
+    <div className="resume-page resume-upload-page advisor-page">
+      <div className="resume-upload-container">
+        <header className="advisor-page-header">
+          <h1>Review your resume text</h1>
+          <p>We extracted the text from <strong>{document.filename}</strong>. Correct anything that did not transfer cleanly before continuing.</p>
+        </header>
+        <section className="resume-card resume-text-review" aria-labelledby="resume-text-heading">
+          <div className="page-header resume-page-header">
+            <span>Step 1 of 3</span>
+            <h2 id="resume-text-heading">Extracted resume text</h2>
+            <p>This text is stored for your recommendation request. No AI parsing is used.</p>
+          </div>
+          <textarea
+            className="resume-text-area"
+            value={resumeText}
+            onChange={(event) => setResumeText(event.target.value)}
+            aria-label="Extracted resume text"
+          />
+          {error && <p className="error-message">{error}</p>}
+          <div className="resume-text-actions">
+            <button type="button" className="text-button" onClick={onStartOver}>Upload a different PDF</button>
+            <button type="button" className="upload-button" onClick={onSave} disabled={saving || !resumeText.trim()}>
+              {saving ? "Saving text…" : "Save extracted text"}
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   );

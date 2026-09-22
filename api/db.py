@@ -29,7 +29,9 @@ def query(sql, params=None):
             
         with conn.cursor() as cur:
             cur.execute(sql, params)
-            result = cur.fetchall()
+            # DDL and writes without RETURNING do not produce a result set.
+            # This keeps small schema setup operations inside the pool helper.
+            result = cur.fetchall() if cur.description else []
             conn.commit() 
             return result
         

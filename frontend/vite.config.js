@@ -13,6 +13,7 @@ export default defineConfig({
       '/metadata': 'http://localhost:8000',
       '/resume_upload': 'http://localhost:8000',
       '/resume_skills': 'http://localhost:8000',
+      '/resume_documents': 'http://localhost:8000',
     }
   }
 })

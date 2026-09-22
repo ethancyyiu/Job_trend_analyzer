@@ -1,12 +1,61 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from pydantic import BaseModel, Field
 import PyPDF2
 import os
 import re
+import uuid
+from typing import Literal
+from psycopg2.extras import Json
 from api.db import query
 from analysis.skill_extractor import extract_skills
 from io import BytesIO
 
 router = APIRouter()
+
+
+class ResumeDocumentResponse(BaseModel):
+    id: str
+    filename: str
+    raw_text: str
+
+
+class ResumeTextUpdate(BaseModel):
+    raw_text: str = Field(min_length=1, max_length=200_000)
+
+
+class JobPreferences(BaseModel):
+    target_job_titles: list[str] = Field(default_factory=list, max_length=10)
+    preferred_locations: list[str] = Field(default_factory=list, max_length=10)
+    remote_preference: Literal["remote", "hybrid", "on_site", "no_preference"] = "no_preference"
+    work_authorization: Literal["authorized", "requires_sponsorship", "no_preference"] = "no_preference"
+    employment_type: Literal["full_time", "part_time", "contract", "internship", "temporary", "no_preference"] = "no_preference"
+    minimum_salary: float | None = Field(default=None, ge=0, le=10_000_000)
+    salary_type: Literal["yearly", "hourly", "no_preference"] = "yearly"
+
+
+class ResumePreferencesResponse(BaseModel):
+    id: str
+    preferences: JobPreferences
+
+
+def ensure_resume_documents_table():
+    """Create resume-text storage in deployments without a migration runner."""
+    query("""
+        CREATE TABLE IF NOT EXISTS resume_documents (
+            id UUID PRIMARY KEY,
+            filename TEXT NOT NULL,
+            raw_text TEXT NOT NULL,
+            preferences JSONB NOT NULL DEFAULT '{}'::jsonb,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    # Existing local and deployed databases may have been created before
+    # preferences were introduced.
+    query("""
+        ALTER TABLE resume_documents
+        ADD COLUMN IF NOT EXISTS preferences JSONB NOT NULL DEFAULT '{}'::jsonb
+    """)
 
 @router.get("/resume_skills")
 def get_resume_skills():
@@ -30,15 +79,97 @@ def get_resume_skills():
 
     return {"skills": sorted(skills_by_key.values(), key=str.casefold)}
 
-def extract_text_from_pdf(file_bytes):
+def extract_text_from_pdf(file_bytes: bytes) -> str:
     try:
         pdf_reader = PyPDF2.PdfReader(BytesIO(file_bytes))
         text = ""
         for page in pdf_reader.pages:
-            text += page.extract_text()
+            text += page.extract_text() or ""
         return text
     except Exception as failure:
         raise HTTPException(status_code = 400, detail = f"Failed to parse PDF because of {str(failure)}")
+
+
+@router.post("/resume_documents", response_model=ResumeDocumentResponse, status_code=201)
+async def create_resume_document(file: UploadFile = File(...)):
+    """Extract a PDF and persist its text for user review before matching."""
+    is_pdf = file.content_type == "application/pdf" or (file.filename or "").lower().endswith(".pdf")
+    if not is_pdf:
+        raise HTTPException(status_code=400, detail="Only PDF resumes are supported.")
+
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="The uploaded PDF is empty.")
+    if len(file_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Resume PDFs must be 10 MB or smaller.")
+
+    raw_text = extract_text_from_pdf(file_bytes).strip()
+    if not raw_text:
+        raise HTTPException(
+            status_code=400,
+            detail="No readable text was found in this PDF. Please upload a text-based PDF.",
+        )
+
+    ensure_resume_documents_table()
+    document_id = uuid.uuid4()
+    filename = (file.filename or "resume.pdf").strip()[:255]
+    query(
+        """
+        INSERT INTO resume_documents (id, filename, raw_text)
+        VALUES (%s, %s, %s)
+        """,
+        (str(document_id), filename, raw_text),
+    )
+    return ResumeDocumentResponse(id=str(document_id), filename=filename, raw_text=raw_text)
+
+
+@router.put("/resume_documents/{document_id}", response_model=ResumeDocumentResponse)
+def update_resume_document(document_id: uuid.UUID, update: ResumeTextUpdate):
+    """Persist edits made after reviewing the PDF extraction."""
+    ensure_resume_documents_table()
+    raw_text = update.raw_text.strip()
+    if not raw_text:
+        raise HTTPException(status_code=400, detail="Resume text cannot be empty.")
+
+    rows = query(
+        """
+        UPDATE resume_documents
+        SET raw_text = %s, updated_at = NOW()
+        WHERE id = %s
+        RETURNING id, filename, raw_text
+        """,
+        (raw_text, str(document_id)),
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="Resume document was not found.")
+    row = rows[0]
+    return ResumeDocumentResponse(id=str(row[0]), filename=row[1], raw_text=row[2])
+
+
+@router.put("/resume_documents/{document_id}/preferences", response_model=ResumePreferencesResponse)
+def update_resume_preferences(document_id: uuid.UUID, preferences: JobPreferences):
+    """Store the candidate's stated search preferences with their resume."""
+    ensure_resume_documents_table()
+    cleaned_preferences = preferences.model_dump()
+    cleaned_preferences["target_job_titles"] = [
+        title.strip() for title in cleaned_preferences["target_job_titles"] if title.strip()
+    ]
+    cleaned_preferences["preferred_locations"] = [
+        location.strip() for location in cleaned_preferences["preferred_locations"] if location.strip()
+    ]
+    rows = query(
+        """
+        UPDATE resume_documents
+        SET preferences = %s, updated_at = NOW()
+        WHERE id = %s
+        RETURNING id, preferences
+        """,
+        (Json(cleaned_preferences), str(document_id)),
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="Resume document was not found.")
+    row = rows[0]
+    return ResumePreferencesResponse(id=str(row[0]), preferences=row[1])
 
     
 @router.post("/resume_upload")

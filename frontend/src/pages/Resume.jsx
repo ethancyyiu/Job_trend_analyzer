@@ -5,9 +5,9 @@ import "./Resume.css";
 const EMPTY_PREFERENCES = {
   target_job_titles: "",
   preferred_locations: "",
+  prioritized_skills: "",
   remote_preference: "no_preference",
   work_authorization: "no_preference",
-  employment_type: "no_preference",
   minimum_salary: "",
   salary_type: "yearly",
 };
@@ -196,9 +196,9 @@ function JobPreferencesForm({ documentId, apiBase, onBack }) {
       await axios.put(`${apiBase}/resume_documents/${documentId}/preferences`, {
         target_job_titles: splitPreferenceList(form.target_job_titles),
         preferred_locations: splitPreferenceList(form.preferred_locations),
+        prioritized_skills: splitPreferenceList(form.prioritized_skills),
         remote_preference: form.remote_preference,
         work_authorization: form.work_authorization,
-        employment_type: form.employment_type,
         minimum_salary: form.minimum_salary === "" ? null : Number(form.minimum_salary),
         salary_type: form.salary_type,
       });
@@ -234,9 +234,13 @@ function JobPreferencesForm({ documentId, apiBase, onBack }) {
               <input name="preferred_locations" value={form.preferred_locations} onChange={updateField} placeholder="e.g. Toronto, Ontario, Canada" />
               <small>Separate multiple locations with commas.</small>
             </label>
+            <label className="preferences-field preferences-field-wide">
+              <span>Skills to prioritize</span>
+              <input name="prioritized_skills" value={form.prioritized_skills} onChange={updateField} placeholder="e.g. Python, SQL, AWS" />
+              <small>Optional. Separate multiple skills with commas; they break otherwise equal matches.</small>
+            </label>
             <SelectField label="Work arrangement" name="remote_preference" value={form.remote_preference} onChange={updateField} options={[["no_preference", "No preference"], ["remote", "Remote"], ["hybrid", "Hybrid"], ["on_site", "On-site"]]} />
             <SelectField label="Work authorization" name="work_authorization" value={form.work_authorization} onChange={updateField} options={[["no_preference", "No preference"], ["authorized", "Authorized to work"], ["requires_sponsorship", "Require sponsorship"]]} />
-            <SelectField label="Employment type" name="employment_type" value={form.employment_type} onChange={updateField} options={[["no_preference", "No preference"], ["full_time", "Full-time"], ["part_time", "Part-time"], ["contract", "Contract"], ["internship", "Internship"], ["temporary", "Temporary"]]} />
             <label className="preferences-field">
               <span>Minimum acceptable salary</span>
               <div className="salary-preference-inputs">

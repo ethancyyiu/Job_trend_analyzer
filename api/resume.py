@@ -26,9 +26,9 @@ class ResumeTextUpdate(BaseModel):
 class JobPreferences(BaseModel):
     target_job_titles: list[str] = Field(default_factory=list, max_length=10)
     preferred_locations: list[str] = Field(default_factory=list, max_length=10)
+    prioritized_skills: list[str] = Field(default_factory=list, max_length=20)
     remote_preference: Literal["remote", "hybrid", "on_site", "no_preference"] = "no_preference"
     work_authorization: Literal["authorized", "requires_sponsorship", "no_preference"] = "no_preference"
-    employment_type: Literal["full_time", "part_time", "contract", "internship", "temporary", "no_preference"] = "no_preference"
     minimum_salary: float | None = Field(default=None, ge=0, le=10_000_000)
     salary_type: Literal["yearly", "hourly", "no_preference"] = "yearly"
 
@@ -156,6 +156,9 @@ def update_resume_preferences(document_id: uuid.UUID, preferences: JobPreference
     ]
     cleaned_preferences["preferred_locations"] = [
         location.strip() for location in cleaned_preferences["preferred_locations"] if location.strip()
+    ]
+    cleaned_preferences["prioritized_skills"] = [
+        skill.strip() for skill in cleaned_preferences["prioritized_skills"] if skill.strip()
     ]
     rows = query(
         """

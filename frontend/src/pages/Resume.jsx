@@ -375,7 +375,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
 
   if (status === "loading") {
     return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
-      <section className="resume-card recommendation-state"><span className="recommendation-spinner" aria-hidden="true" /><h2>Scoring your best active matches</h2><p>We are comparing the strongest catalog candidates against your saved resume and preferences.</p></section>
+      <section className="resume-card recommendation-state"><span className="recommendation-spinner" aria-hidden="true" /><h2>Jev is ranking your best active matches</h2><p>Jev is evaluating the strongest catalog candidates against your saved resume and preferences.</p></section>
     </RecommendationShell>;
   }
   if (status === "error") {
@@ -393,9 +393,9 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
 
   return <RecommendationShell onBack={onBack} onStartOver={onStartOver}>
     <section className="recommendation-heading">
-      <span>Step 3 of 3</span>
+      <div className="recommendation-heading-kicker"><span>Step 3 of 3</span><span className="jev-ranking-badge">JEV final ranking</span></div>
       <h1>Your best job matches</h1>
-      <p>Ranked by Jev fit score, then confidence, from {data.candidate_count} eligible active jobs.</p>
+      <p>Ranked by Jev fit score, then confidence, from thousands of eligible active jobs.</p>
     </section>
     {data.batch_errors?.length > 0 && <p className="recommendation-warning">Some jobs could not be scored, so this list may be incomplete. Please try again later.</p>}
     <div className="recommendation-grid">
@@ -410,12 +410,12 @@ function RecommendationShell({ children, onBack, onStartOver }) {
 }
 
 const formatJevFit = (score) => `${((Number(score) / 4) * 10).toFixed(1)}/10`;
-const formatJevConfidence = (confidence) => typeof confidence === "number" ? `${(confidence * 100).toFixed(0)}% confidence` : "Confidence unavailable";
+const formatJevConfidence = (confidence) => typeof confidence === "number" ? `${(confidence * 100).toFixed(0)}% confidence` : "Jev confidence unavailable";
 
 function RecommendationCard({ job, index, onSelect }) {
   const confidence = formatJevConfidence(job.confidence);
   return <article className="recommendation-card">
-    <div className="recommendation-card-topline"><span>Match {String(index + 1).padStart(2, "0")}</span><strong>{formatJevFit(job.fit_score)} fit</strong></div>
+    <div className="recommendation-card-topline"><span>Jev rank {String(index + 1).padStart(2, "0")}</span><strong>{formatJevFit(job.fit_score)}</strong></div>
     <h2>{job.title}</h2>
     <p className="recommendation-company">{job.company || "Company not listed"}</p>
     <dl className="recommendation-meta">
@@ -423,7 +423,7 @@ function RecommendationCard({ job, index, onSelect }) {
       <div><dt>Salary</dt><dd>{formatSalary(job)}</dd></div>
     </dl>
     <div className="recommendation-card-footer"><span className={job.match_label === "possible match" ? "possible-match" : "confirmed-match"}>{job.match_label}</span><span>{confidence}</span></div>
-    <button type="button" className="job-details-link recommendation-details-button" onClick={onSelect}>View details</button>
+    <button type="button" className="job-details-link recommendation-details-button" onClick={onSelect}>View role</button>
   </article>;
 }
 
@@ -458,13 +458,13 @@ function RecommendationDetailsModal({ job, onClose }) {
       <section className="posting-details-modal" role="dialog" aria-modal="true" aria-labelledby="recommendation-details-title" onMouseDown={(event) => event.stopPropagation()}>
         <button className="posting-details-close" onClick={onClose} aria-label="Close job details">×</button>
         <div className="posting-details-content">
-          <span className="posting-details-eyebrow">Job details · {job.match_label}</span>
+          <span className="posting-details-eyebrow">Jev-ranked match · {job.match_label}</span>
           <h2 id="recommendation-details-title">{job.title}</h2>
           <p className="posting-details-company">{job.company || "Company not listed"}</p>
           <div className="posting-details-meta">
             <div><span>Location</span><strong>{job.location || "Not listed"}</strong></div>
             <div><span>Salary</span><strong>{formatSalary(job)}</strong></div>
-            <div><span>Jev fit</span><strong>{formatJevFit(job.fit_score)} · {formatJevConfidence(job.confidence)}</strong></div>
+            <div><span>fit</span><strong>{formatJevFit(job.fit_score)} · {formatJevConfidence(job.confidence)}</strong></div>
           </div>
           <div className="posting-details-description">
             <h3>About this role</h3>

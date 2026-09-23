@@ -429,11 +429,25 @@
 .recommendation-heading {
   margin-bottom: 20px;
 }
-.recommendation-heading > span,
+.recommendation-heading-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.recommendation-heading-kicker > span:first-child,
 .recommendation-card-topline span {
   color: #d97706;
   font: 500 11px "JetBrains Mono", monospace;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.jev-ranking-badge {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: #fef3c7;
+  color: #92400e;
+  font: 600 10px "JetBrains Mono", monospace;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .recommendation-heading h1 {

@@ -8,7 +8,7 @@ export function Salary({ cachedData }) {
     title: item.title || "Uncategorized",
     min: Number(item.median_minimum) || 0,
     max: Number(item.median_maximum) || 0,
-  })).filter((item) => item.min || item.max).sort((a, b) => b.max - a.max);
+  })).filter((item) => (item.min || item.max) && item.title !== "Uncategorized").sort((a, b) => b.max - a.max);
   const maximum = Math.max(...ranges.map((item) => item.max), Number(data.median_max) || 1);
   const coverage = Number(data.coverage_percentage) || 0;
   const salaryMix = Number(data.yearly_percentage) || 0;

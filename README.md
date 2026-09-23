@@ -102,10 +102,11 @@ Copy `.env.example` to `.env` and add your database connection:
 ```env
 DATABASE_URL=postgresql://user:password@host:port/database
 VITE_API_URL=http://localhost:8000
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY_PRIMARY=your_primary_gemini_api_key_here
+GEMINI_API_KEY_SECONDARY=your_secondary_gemini_api_key_here
 ```
 
-`GEMINI_API_KEY` is needed when the pipeline has to classify job titles that do not match one of the built-in categories.
+The Gemini keys are used when the pipeline has to classify job titles that do not match one of the built-in categories or extract salary data. If the primary key is rate-limited, the scraper automatically switches to the secondary key.
 
 ### Run the scraper
 

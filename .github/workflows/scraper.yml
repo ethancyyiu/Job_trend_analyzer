@@ -41,5 +41,6 @@ jobs:
       - name: Run scraper
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_PRIMARY: ${{ secrets.GEMINI_API_KEY_PRIMARY }}
+          GEMINI_API_KEY_SECONDARY: ${{ secrets.GEMINI_API_KEY_SECONDARY }}
         run: python -m scraper.scraper

@@ -8,15 +8,39 @@ import time
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_CLIENTS = [
+    genai.Client(api_key=api_key)
+    for api_key in (
+        os.getenv("GEMINI_API_KEY_PRIMARY"),
+        os.getenv("GEMINI_API_KEY_SECONDARY"),
+    )
+    if api_key
+]
+
+
+def _is_rate_limited(error):
+    status_code = getattr(error, "status_code", None)
+    status = getattr(error, "status", None)
+    message = str(error).lower()
+    return (
+        status_code == 429
+        or status == "RESOURCE_EXHAUSTED"
+        or "429" in message
+        or "resource exhausted" in message
+    )
 
 EMPTY_SALARY = {"salary_min": None, "salary_max": None, "salary_type": None}
 
 
-def call_gemini_api_with_retry(client, prompt, max_retries = 5, delay = 60):
+def call_gemini_api_with_retry(prompt, max_retries = 5, delay = 60):
+    if not GEMINI_CLIENTS:
+        print("Gemini is not configured; set GEMINI_API_KEY_PRIMARY.")
+        return None
+
+    client_index = 0
     for attempt in range(1, max_retries + 1):
         try:
-            return client.models.generate_content(
+            return GEMINI_CLIENTS[client_index].models.generate_content(
                 model="gemini-3.1-flash-lite",
                 contents=prompt,
                 config={
@@ -27,6 +51,11 @@ def call_gemini_api_with_retry(client, prompt, max_retries = 5, delay = 60):
             status_code = getattr(e, "status_code", None)
             status = getattr(e, "status", None)
             msg = str(e).lower()
+
+            if _is_rate_limited(e) and client_index + 1 < len(GEMINI_CLIENTS):
+                client_index += 1
+                print("Gemini rate limit reached; switching to the secondary API key.")
+                continue
 
             if status_code in (429, 503) or status in ("UNAVAILABLE", "RESOURCE_EXHAUSTED") or "high demand" in msg or "503" in msg:
                 if attempt == max_retries:
@@ -107,7 +136,7 @@ Rules
     # A salary is optional metadata. Never let an unavailable or malformed
     # model response discard the otherwise valid posting in the scraper.
     try:
-        response = call_gemini_api_with_retry(client, prompt)
+        response = call_gemini_api_with_retry(prompt)
         if response is None:
             return EMPTY_SALARY.copy()
 

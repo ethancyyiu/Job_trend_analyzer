@@ -5,12 +5,15 @@ import os
 import re
 import uuid
 from typing import Literal
+from functools import lru_cache
 from psycopg2.extras import Json
 from api.db import query
 from analysis.skill_extractor import extract_skills
 from io import BytesIO
 
 router = APIRouter()
+
+ANNUAL_WORK_HOURS = 2_080
 
 
 class ResumeDocumentResponse(BaseModel):
@@ -38,6 +41,7 @@ class ResumePreferencesResponse(BaseModel):
     preferences: JobPreferences
 
 
+@lru_cache(maxsize=1)
 def ensure_resume_documents_table():
     """Create resume-text storage in deployments without a migration runner."""
     query("""
@@ -160,6 +164,11 @@ def update_resume_preferences(document_id: uuid.UUID, preferences: JobPreference
     cleaned_preferences["prioritized_skills"] = [
         skill.strip() for skill in cleaned_preferences["prioritized_skills"] if skill.strip()
     ]
+    if cleaned_preferences["minimum_salary"] is not None and cleaned_preferences["salary_type"] == "hourly":
+        # Store a single annual compensation value so recommendation matching
+        # can compare it directly with annual job salaries.
+        cleaned_preferences["minimum_salary"] *= ANNUAL_WORK_HOURS
+        cleaned_preferences["salary_type"] = "yearly"
     rows = query(
         """
         UPDATE resume_documents

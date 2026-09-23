@@ -105,29 +105,48 @@ def derive_work_authorization(description: str | None) -> str | None:
 
 
 def load_active_job_catalog() -> list[JobRecord]:
-    """Load only jobs posted within the last seven days from the catalog."""
+    """Load lightweight active-job records for deterministic retrieval."""
     ensure_job_catalog_schema()
     rows = query("""
         SELECT id, title, company, job_category, location, salary_type,
                salary_min, salary_max, requirements, nice_to_haves,
-               responsibilities, description, date_posted, posting_url, skills
+               date_posted, posting_url, skills
         FROM postings
         WHERE date_posted >= CURRENT_DATE - INTERVAL '7 days'
         ORDER BY date_posted DESC, id DESC
     """)
     jobs: list[JobRecord] = []
     for row in rows:
-        description = row[11]
         jobs.append(JobRecord(
             id=row[0], title=row[1], company=row[2], job_category=row[3], location=row[4],
             salary_type=row[5], salary_min=float(row[6]) if row[6] is not None else None,
             salary_max=float(row[7]) if row[7] is not None else None,
-            requirements=row[8] or [], nice_to_haves=row[9] or [], responsibilities=row[10],
-            description=description, date_posted=row[12], posting_url=row[13], skills=row[14] or [],
-            remote_policy=derive_remote_policy(description, row[4]),
-            work_authorization=derive_work_authorization(description),
+            requirements=row[8] or [], nice_to_haves=row[9] or [], date_posted=row[10],
+            posting_url=row[11], skills=row[12] or [],
         ))
     return jobs
+
+
+def hydrate_candidate_jobs(candidates: list[CandidateJob]) -> list[CandidateJob]:
+    """Fetch verbose fields only for the small set that Jev will score."""
+    if not candidates:
+        return []
+    candidate_ids = [candidate.job.id for candidate in candidates]
+    rows = query("""
+        SELECT id, responsibilities, description
+        FROM postings
+        WHERE id = ANY(%s)
+        """, (candidate_ids,))
+    details_by_id = {
+        row[0]: {"responsibilities": row[1], "description": row[2]}
+        for row in rows
+    }
+    return [
+        candidate.model_copy(update={
+            "job": candidate.job.model_copy(update=details_by_id.get(candidate.job.id, {})),
+        })
+        for candidate in candidates
+    ]
 
 
 def _title_similarity(target_titles: list[str], job: JobRecord) -> float:
@@ -250,8 +269,14 @@ def _required_skills(job: JobRecord) -> set[str]:
     return explicit_requirements or normalized_skills(job.skills, job.description or "")
 
 
-def score_candidate_job(resume_text: str, preferences: JobPreferences, job: JobRecord) -> CandidateJob:
-    candidate_skills = skills_from_text(resume_text)
+def score_candidate_job(
+    resume_text: str,
+    preferences: JobPreferences,
+    job: JobRecord,
+    candidate_skills: set[str] | None = None,
+    priority_skills: set[str] | None = None,
+) -> CandidateJob:
+    candidate_skills = candidate_skills if candidate_skills is not None else skills_from_text(resume_text)
     required_skills = _required_skills(job)
     overlap = len(candidate_skills & required_skills) / len(required_skills) if required_skills else 0.0
     job_skills = (
@@ -259,7 +284,7 @@ def score_candidate_job(resume_text: str, preferences: JobPreferences, job: JobR
         | normalized_skills(job.skills, job.description or "")
         | normalized_skills(job.nice_to_haves, job.description or "")
     )
-    priority_skills = normalized_skills(preferences.prioritized_skills)
+    priority_skills = priority_skills if priority_skills is not None else normalized_skills(preferences.prioritized_skills)
     priority_matches = len(priority_skills & job_skills)
     breakdown = RetrievalBreakdown(
         required_skill_overlap=overlap,
@@ -293,8 +318,11 @@ def retrieve_candidate_jobs(
     if not 40 <= limit <= 80:
         raise ValueError("Candidate retrieval limit must be between 40 and 80.")
 
+    candidate_skills = skills_from_text(resume_text)
+    priority_skills = normalized_skills(preferences.prioritized_skills)
+
     ranked = [
-        score_candidate_job(resume_text, preferences, job)
+        score_candidate_job(resume_text, preferences, job, candidate_skills, priority_skills)
         for job in jobs
         if job.is_active and not _clearly_fails_preferences(job, preferences)
     ]

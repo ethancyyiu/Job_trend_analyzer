@@ -2,18 +2,27 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 from psycopg2 import pool, OperationalError
+from threading import Lock
 
 load_dotenv()
 
 _pool = None
+_pool_lock = Lock()
 
 def _get_pool():
     global _pool
     if _pool is None:
-        dsn = os.environ.get("DATABASE_URL")
-        if not dsn:
-            raise RuntimeError("DATABASE_URL environment variable is not set")
-        _pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=10, dsn=dsn, connect_timeout=5)
+        with _pool_lock:
+            if _pool is None:
+                dsn = os.environ.get("DATABASE_URL")
+                if not dsn:
+                    raise RuntimeError("DATABASE_URL environment variable is not set")
+                _pool = psycopg2.pool.ThreadedConnectionPool(
+                    minconn=1,
+                    maxconn=10,
+                    dsn=dsn,
+                    connect_timeout=5,
+                )
     return _pool
 
 def query(sql, params=None):

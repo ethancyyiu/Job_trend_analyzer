@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from functools import lru_cache
 from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field
@@ -39,6 +40,7 @@ class JobRecord(BaseModel):
         return self.date_posted is not None and self.date_posted >= date.today() - timedelta(days=7)
 
 
+@lru_cache(maxsize=1)
 def ensure_job_catalog_schema() -> None:
     """Make the posting catalog compatible with typed recommendation records."""
     query("""

@@ -23,6 +23,14 @@ function splitPreferenceList(value) {
   return [...new Set(value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean))];
 }
 
+const ANNUAL_WORK_HOURS = 2_080;
+
+function annualizeMinimumSalary(value, salaryType) {
+  if (value === "") return null;
+  const salary = Number(value);
+  return salaryType === "hourly" ? salary * ANNUAL_WORK_HOURS : salary;
+}
+
 function AdvisorWorkflow({ currentStep }) {
   const activeIndex = currentStep === "preferences" ? 1 : currentStep === "results" ? 2 : 0;
 
@@ -273,8 +281,8 @@ function JobPreferencesForm({ documentId, apiBase, onBack, onViewRecommendations
         prioritized_skills: splitPreferenceList(form.prioritized_skills),
         remote_preference: form.remote_preference,
         work_authorization: form.work_authorization,
-        minimum_salary: form.minimum_salary === "" ? null : Number(form.minimum_salary),
-        salary_type: form.salary_type,
+        minimum_salary: annualizeMinimumSalary(form.minimum_salary, form.salary_type),
+        salary_type: "yearly",
       });
       setSaved(true);
     } catch (requestError) {
@@ -319,11 +327,10 @@ function JobPreferencesForm({ documentId, apiBase, onBack, onViewRecommendations
             <label className="preferences-field">
               <span>Minimum acceptable salary (USD)</span>
               <div className="salary-preference-inputs">
-                <input name="minimum_salary" type="number" min="0" step="1000" value={form.minimum_salary} onChange={updateField} placeholder="e.g. 80000 — leave blank if none" />
+                <input name="minimum_salary" type="number" min="0" step={form.salary_type === "hourly" ? "0.01" : "1000"} value={form.minimum_salary} onChange={updateField} placeholder={form.salary_type === "hourly" ? "e.g. 30 — leave blank if none" : "e.g. 80000 — leave blank if none"} />
                 <select name="salary_type" value={form.salary_type} onChange={updateField} aria-label="Salary period">
                   <option value="yearly">per year</option>
                   <option value="hourly">per hour</option>
-                  <option value="no_preference">period unknown</option>
                 </select>
               </div>
             </label>

@@ -2,19 +2,23 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
+from time import perf_counter
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from api.db import query
-from api.job_retrieval import CandidateJob, load_active_job_catalog, retrieve_candidate_jobs
+from api.job_retrieval import CandidateJob, hydrate_candidate_jobs, load_active_job_catalog, retrieve_candidate_jobs
 from api.resume import JobPreferences, ensure_resume_documents_table
 from api.typesafe_jev import JevBatchResult, JevConfigurationError, JevScoreResult, TypeSafeJevClient
 
 
 router = APIRouter()
 POSSIBLE_MATCH_CONFIDENCE = 0.65
+logger = logging.getLogger(__name__)
 
 
 class JobRecommendation(BaseModel):
@@ -118,14 +122,20 @@ def _merge_ranked_results(
 
 
 @router.post("/resume_documents/{document_id}/recommendations", response_model=RecommendationResponse)
-async def get_recommendations(document_id: uuid.UUID):
+async def get_recommendations(document_id: uuid.UUID, response: Response):
     """Return the top six Jev-scored active jobs for one saved resume."""
-    resume_text, preferences = _load_resume_context(document_id)
-    jobs = load_active_job_catalog()
+    started_at = perf_counter()
+    (resume_text, preferences), jobs = await asyncio.gather(
+        asyncio.to_thread(_load_resume_context, document_id),
+        asyncio.to_thread(load_active_job_catalog),
+    )
+    catalog_loaded_at = perf_counter()
     if not jobs:
         return RecommendationResponse(candidate_count=0, scored_count=0, input_tokens=0)
 
-    candidates = retrieve_candidate_jobs(resume_text, preferences, jobs)
+    candidates = await asyncio.to_thread(retrieve_candidate_jobs, resume_text, preferences, jobs)
+    candidates = await asyncio.to_thread(hydrate_candidate_jobs, candidates)
+    candidates_selected_at = perf_counter()
     if not candidates:
         return RecommendationResponse(candidate_count=0, scored_count=0, input_tokens=0)
 
@@ -137,6 +147,18 @@ async def get_recommendations(document_id: uuid.UUID):
     recommendations, input_tokens, batch_errors = _merge_ranked_results(candidates, batch_results)
     if not recommendations and batch_errors:
         raise HTTPException(status_code=502, detail="Job scoring is temporarily unavailable. Please try again.")
+    response.headers["Server-Timing"] = (
+        f"catalog;dur={(catalog_loaded_at - started_at) * 1000:.0f}, "
+        f"shortlist;dur={(candidates_selected_at - catalog_loaded_at) * 1000:.0f}, "
+        f"jev;dur={(perf_counter() - candidates_selected_at) * 1000:.0f}"
+    )
+    logger.info(
+        "Recommendation timings: catalog=%.0fms shortlist=%.0fms jev=%.0fms candidates=%d",
+        (catalog_loaded_at - started_at) * 1000,
+        (candidates_selected_at - catalog_loaded_at) * 1000,
+        (perf_counter() - candidates_selected_at) * 1000,
+        len(candidates),
+    )
     return RecommendationResponse(
         recommendations=recommendations,
         candidate_count=len(candidates),

@@ -137,16 +137,20 @@ def hydrate_candidate_jobs(candidates: list[CandidateJob]) -> list[CandidateJob]
         FROM postings
         WHERE id = ANY(%s)
         """, (candidate_ids,))
-    details_by_id = {
-        row[0]: {"responsibilities": row[1], "description": row[2]}
-        for row in rows
-    }
-    return [
-        candidate.model_copy(update={
-            "job": candidate.job.model_copy(update=details_by_id.get(candidate.job.id, {})),
-        })
-        for candidate in candidates
-    ]
+    details_by_id = {row[0]: (row[1], row[2]) for row in rows}
+    hydrated_candidates: list[CandidateJob] = []
+    for candidate in candidates:
+        responsibilities, description = details_by_id.get(candidate.job.id, (None, None))
+        job_updates = {
+            "responsibilities": responsibilities,
+            "description": description,
+            "remote_policy": derive_remote_policy(description, candidate.job.location),
+            "work_authorization": derive_work_authorization(description),
+        }
+        hydrated_candidates.append(candidate.model_copy(update={
+            "job": candidate.job.model_copy(update=job_updates),
+        }))
+    return hydrated_candidates
 
 
 def _title_similarity(target_titles: list[str], job: JobRecord) -> float:

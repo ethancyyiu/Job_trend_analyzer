@@ -6,11 +6,13 @@ const categories = ["software engineer", "data engineer", "machine learning engi
 const colors = { "software engineer": "#D97706", "data engineer": "#71717A", "machine learning engineer": "#A16207", "data scientist": "#52525B", "data analyst": "#A1A1AA", others: "#D4D4D8" };
 const label = (category) => category.replace(/\b\w/g, (letter) => letter.toUpperCase());
 const formatDate = (value) => { const date = new Date(value); return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(date); };
+const categoryPredictionKey = (category) => `category-prediction-${category}`;
 
 export function DailyTrends({ cachedData, forecastData }) {
   const [active, setActive] = useState(categories.slice(0, 3));
   const data = useMemo(() => [...(Array.isArray(cachedData) ? cachedData : [])].sort((a, b) => new Date(a.date) - new Date(b.date)).map((row) => ({ ...row, label: formatDate(row.date), actual: Number(row.count) || 0 })), [cachedData]);
   const forecast = Array.isArray(forecastData?.forecast) ? forecastData.forecast : [];
+  const categoryForecasts = forecastData?.category_forecasts && typeof forecastData.category_forecasts === "object" ? forecastData.category_forecasts : {};
   const forecastReady = forecast.length > 0;
   const forecastChartData = forecast.map((row) => ({ label: formatDate(row.ds || row.date), prediction: Number(row.yhat) || 0 }));
   const last = data.at(-1);
@@ -21,7 +23,35 @@ export function DailyTrends({ cachedData, forecastData }) {
   const weekChange = priorWeek ? ((latestWeek - priorWeek) / priorWeek) * 100 : null;
   const forecastSummary = forecastData?.summary;
   const forecastStatus = forecastReady ? `${forecastSummary?.trend || "Forecast ready"} - ${forecastSummary?.confidence || "Model"} confidence` : "Forecast is being generated";
-  const chartData = [...data.map((row, index) => ({ ...row, forecast: index === data.length - 1 ? row.actual : null })), ...forecast.map((row) => ({ label: formatDate(row.ds || row.date), actual: null, forecast: row.yhat == null ? null : Number(row.yhat) }))];
+  const chartData = useMemo(() => {
+    const lastHistoricalIndex = data.length - 1;
+    const historical = data.map((row, index) => {
+      const point = { ...row, forecast: index === lastHistoricalIndex ? row.actual : null };
+      categories.forEach((category) => {
+        if (Array.isArray(categoryForecasts[category]) && categoryForecasts[category].length) {
+          point[categoryPredictionKey(category)] = index === lastHistoricalIndex ? Number(row[category]) || 0 : null;
+        }
+      });
+      return point;
+    });
+    const futureByDate = new Map();
+    const addFuturePoint = (row, key, value) => {
+      const date = row.ds || row.date;
+      if (!date) return;
+      const point = futureByDate.get(date) || { label: formatDate(date), actual: null };
+      point[key] = value;
+      futureByDate.set(date, point);
+    };
+
+    forecast.forEach((row) => addFuturePoint(row, "forecast", row.yhat == null ? null : Number(row.yhat)));
+    categories.forEach((category) => {
+      const categoryForecast = categoryForecasts[category];
+      if (!Array.isArray(categoryForecast)) return;
+      categoryForecast.forEach((row) => addFuturePoint(row, categoryPredictionKey(category), row.yhat == null ? null : Number(row.yhat)));
+    });
+
+    return [...historical, ...[...futureByDate.entries()].sort(([left], [right]) => new Date(left) - new Date(right)).map(([, point]) => point)];
+  }, [data, forecast, categoryForecasts]);
   const toggleCategory = (category) => setActive((current) => current.includes(category) ? current.filter((item) => item !== category) : [...current, category]);
 
   if (cachedData === undefined || forecastData === undefined) return <TrendsLoading />;
@@ -29,10 +59,10 @@ export function DailyTrends({ cachedData, forecastData }) {
   return <main className="trends-page">
     <header className="trends-header"><h1>Trends</h1><p>Hiring activity and the near-term outlook from your tracked postings.</p></header>
     <section className="trends-summary" aria-label="Trend summary"><Summary label="Latest activity" value={last ? last.actual.toLocaleString() : "-"} note="new postings in the latest period" /><Summary label="Momentum" value={change == null ? "-" : `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`} note="compared with the prior period" accent /><Summary label="History" value={data.length || "-"} note="days of available activity" /></section>
-    <section className="trends-chart-section"><Heading title="Hiring activity" caption="Daily posting totals, with a directional forecast" />
+    <section className="trends-chart-section"><Heading title="Hiring activity" caption="Daily posting totals and category forecasts" />
       <div className="trends-filters" aria-label="Visible role categories">{categories.map((category) => <button key={category} className={active.includes(category) ? "active" : ""} onClick={() => toggleCategory(category)}>{label(category)}</button>)}</div>
-      <div className="trends-chart">{data.length ? <ResponsiveContainer width="100%" height="100%"><LineChart data={chartData} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}><CartesianGrid vertical={false} stroke="#E4E4E7" /><XAxis dataKey="label" axisLine={false} tickLine={false} minTickGap={26} /><YAxis axisLine={false} tickLine={false} allowDecimals={false} /><Tooltip /><Line type="monotone" dataKey="actual" name="Total postings" stroke="#111" strokeWidth={1.6} dot={false} connectNulls />{forecastReady && <Line type="monotone" dataKey="forecast" name="Forecast" stroke="#D97706" strokeWidth={1.5} strokeDasharray="5 4" dot={false} connectNulls />}{active.map((category) => <Line key={category} type="monotone" dataKey={category} name={label(category)} stroke={colors[category]} strokeWidth={1.35} dot={false} />)}</LineChart></ResponsiveContainer> : <div className="trends-state">No trend data is available yet.</div>}</div>
-      <div className="trends-legend"><span><i className="actual" />Actual activity</span>{forecastReady ? <span><i className="forecast" />Forecast for total postings</span> : <span className="trends-forecast-status">Forecast is being generated</span>}</div>
+      <div className="trends-chart">{data.length ? <ResponsiveContainer width="100%" height="100%"><LineChart data={chartData} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}><CartesianGrid vertical={false} stroke="#E4E4E7" /><XAxis dataKey="label" axisLine={false} tickLine={false} minTickGap={26} /><YAxis axisLine={false} tickLine={false} allowDecimals={false} /><Tooltip /><Line type="monotone" dataKey="actual" name="Total postings" stroke="#111" strokeWidth={1.6} dot={false} connectNulls />{forecastReady && <Line type="monotone" dataKey="forecast" name="Total forecast" stroke="#D97706" strokeWidth={1.5} strokeDasharray="5 4" dot={false} connectNulls />}{active.map((category) => <Line key={category} type="monotone" dataKey={category} name={label(category)} stroke={colors[category]} strokeWidth={1.35} dot={false} />)}{active.map((category) => Array.isArray(categoryForecasts[category]) && categoryForecasts[category].length ? <Line key={`${category}-prediction`} type="monotone" dataKey={categoryPredictionKey(category)} name={`${label(category)} forecast`} stroke={colors[category]} strokeWidth={1.35} strokeDasharray="5 4" dot={false} connectNulls /> : null)}</LineChart></ResponsiveContainer> : <div className="trends-state">No trend data is available yet.</div>}</div>
+      <div className="trends-legend"><span><i className="actual" />Observed activity</span>{forecastReady ? <span><i className="forecast" />Dotted lines show forecasts, including selected categories</span> : <span className="trends-forecast-status">Forecast is being generated</span>}</div>
     </section>
     <section className="trends-comparison" aria-label="Period comparison">
       <article><span>Latest 7 days</span><strong>{latestWeek.toLocaleString()}</strong><small>postings recorded</small></article>

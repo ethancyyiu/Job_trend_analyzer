@@ -7,7 +7,7 @@ const EMPTY_PREFERENCES = {
   target_job_titles: "",
   preferred_locations: "",
   prioritized_skills: "",
-  remote_preference: "no_preference",
+  remote_preference: "no_preference", 
   work_authorization: "no_preference",
   minimum_salary: "",
   salary_type: "yearly",

@@ -23,6 +23,15 @@ DB_URL = os.environ["DATABASE_URL"]
 def get_db():
     return psycopg2.connect(DB_URL)
 
+def load_visible_jobs_for_one_minute(page):
+    """Load LinkedIn's infinite-scroll search results before scanning cards."""
+    end_time = time.time() + 60
+    print("  Scrolling search results for 60 seconds...")
+
+    while time.time() < end_time:
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(1000)
+
 def save(db, posting):
     try: 
         with db.cursor() as cur:
@@ -84,6 +93,7 @@ def scrape(keyword, location, pages, batch_number):
             page.keyboard.press("Escape")
             page.wait_for_timeout(random.randint(7000, 10000))
 
+            load_visible_jobs_for_one_minute(page)
             cards = page.query_selector_all("a.base-card__full-link")
             page.wait_for_timeout(random.randint(10000, 15000))
             print(f"  Found {len(cards)} job cards")
@@ -176,21 +186,20 @@ def scrape(keyword, location, pages, batch_number):
 
 
 if __name__ == "__main__":
-    scrape("software engineer intern", "canada", 2, 1)
-    scrape("software developer intern", "canada", 1, 3)
-    scrape("software engineering co-op", "canada", 2, 4)
-    scrape("frontend developer intern", "canada", 1, 6)
-    scrape("backend developer intern", "canada", 1, 7)
-    scrape("full stack developer intern", "canada", 1, 9)
+    scrape("software engineer intern", "canada", 1, 1)
+    scrape("software developer intern", "canada", 1, 2)
+    scrape("software engineering co-op", "canada", 1, 3)
+    scrape("software developer co-op", "canada", 1, 4)
+    scrape("data analyst intern", "canada", 1, 5)
+    scrape("data analyst co-op", "canada", 1, 6)
+    scrape("data science intern", "canada", 1, 7)
+    scrape("data engineer intern", "canada", 1, 8)
+    scrape("machine learning engineer intern", "canada", 1, 9)
+    scrape("AI intern", "canada", 1, 10)
+    # scrape("frontend developer intern", "canada", 1, 5)
+    # scrape("backend developer intern", "canada", 1, 6)
+    # scrape("full stack developer intern", "canada", 1, 7)
 
-    scrape("data analyst intern", "canada", 2, 10)
-    scrape("data science intern", "canada", 2, 12)
-    scrape("data engineer intern", "canada", 1, 14)
-    scrape("data analytics co-op", "canada", 1, 16)
-    scrape("machine learning intern", "canada", 1, 17)
-    scrape("AI intern", "canada", 2, 19)
-    scrape("data engineer intern", "canada", 1, 19)
-    scrape("software developer co-cp", "canada", 1, 19)
     run()
     category_extractor()
     generate_and_save_forecast()

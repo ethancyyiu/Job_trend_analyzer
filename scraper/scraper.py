@@ -25,8 +25,8 @@ def get_db():
 
 def load_visible_jobs_for_one_minute(page):
     """Load LinkedIn's infinite-scroll search results before scanning cards."""
-    end_time = time.time() + 60
-    print("  Scrolling search results for 60 seconds...")
+    end_time = time.time() + 10
+    print("  Scrolling search results for 10 seconds...")
 
     while time.time() < end_time:
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -74,10 +74,11 @@ def scrape(keyword, location, pages, batch_number):
     db = get_db()
     ensure_posting_detail_columns(db)
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless = True)
+        browser = p.chromium.launch(headless = False)
         AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         context = browser.new_context(user_agent=AGENT)
         page = context.new_page()
+        time.sleep(3)
 
         for page_num in range(pages):
             url = (

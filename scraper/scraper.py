@@ -73,7 +73,7 @@ def scrape(keyword, location, pages, batch_number):
         for page_num in range(pages):
             url = (
                 f"https://www.linkedin.com/jobs/search/"
-                f"?keywords={keyword}&location={location}&start={page_num * 25}"
+                f"?keywords={keyword}&location={location}&f_TPR=r604800&start={page_num * 25}"
             )
             print(f"\n--- Loading page {page_num + 1} ---")
             page.goto(url, timeout = 8000)
@@ -185,10 +185,12 @@ if __name__ == "__main__":
 
     scrape("data analyst intern", "canada", 2, 10)
     scrape("data science intern", "canada", 2, 12)
-    scrape("data engineer intern", "canada", 2, 14)
+    scrape("data engineer intern", "canada", 1, 14)
     scrape("data analytics co-op", "canada", 1, 16)
     scrape("machine learning intern", "canada", 1, 17)
     scrape("AI intern", "canada", 2, 19)
+    scrape("data engineer intern", "canada", 1, 19)
+    scrape("software developer co-cp", "canada", 1, 19)
     run()
     category_extractor()
     generate_and_save_forecast()

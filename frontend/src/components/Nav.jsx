@@ -1,11 +1,11 @@
 export default function Nav({ page, setPage }) {
   const items = [
     { key: "Overview", label: "Overview" },
+    { key: "ResumeAnalyzer", label: "Career Advisor" },
     { key: "Postings", label: "Job Postings" },
     { key: "SkillsView", label: "Skills" },
     { key: "Salary", label: "Salaries" },
     { key: "DailyTrends", label: "Trends" },
-    { key: "ResumeAnalyzer", label: "Career Advisor" },
   ];
 
   return (

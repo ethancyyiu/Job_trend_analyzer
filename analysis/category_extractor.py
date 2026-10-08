@@ -96,7 +96,7 @@ Job title: {text}
     """
     response = call_gemini_api_with_retry(prompt)
     if response is None:
-        return "others"
+        return None
 
     answer = response.text.strip().lower()
     return answer
@@ -130,6 +130,11 @@ def category_extractor():
             else:
                 time.sleep(10)
                 category = get_gemini(title)
+
+                # Leave NULL if Gemini failed so it can be retried on the next scrape.
+                if category is None:
+                    print("Skipping due to Gemini API failure - will retry next run")
+                    continue
 
             print(category)
             cur.execute(

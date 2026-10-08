@@ -441,6 +441,21 @@ function formatAnnualSalaryRange(salary) {
   return `${amount(salary.median_min)}–${amount(salary.median_max)} USD / yearly`;
 }
 
+const SKILL_DISPLAY_NAMES = {
+  api: "API", aws: "AWS", css: "CSS", gcp: "GCP", html: "HTML", sql: "SQL", ui: "UI", ux: "UX",
+  "c#": "C#", "c++": "C++", cicd: "CI/CD", "ci/cd": "CI/CD",
+  javascript: "JavaScript", typescript: "TypeScript", nodejs: "Node.js", "node.js": "Node.js",
+  powerbi: "Power BI", "power bi": "Power BI", postgresql: "PostgreSQL", mysql: "MySQL", mongodb: "MongoDB",
+  restapi: "REST API", "rest api": "REST API",
+};
+
+function formatSkillName(skill) {
+  const normalized = String(skill || "").trim();
+  const knownName = SKILL_DISPLAY_NAMES[normalized.toLowerCase()];
+  if (knownName) return knownName;
+  return normalized.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+}
+
 function MarketInsights({ insights }) {
   const topSkills = insights?.top_missing_skills || [];
   const topGap = insights?.most_common_skill_gap;
@@ -455,22 +470,22 @@ function MarketInsights({ insights }) {
       </div>
       <p>Based on {insights.role_count} active roles shortlisted for your resume and preferences.</p>
     </div>
-    <div className="market-insights-summary">
+    <div className={`market-insights-summary ${topGap && !salaryRange ? "market-insights-summary-single" : ""}`}>
       {topGap && <article>
         <span>Most common skill gap</span>
-        <strong>{topGap.skill}</strong>
-        <p>Appears in {topGap.matching_roles} shortlisted roles you do not yet match.</p>
+        <strong>{formatSkillName(topGap.skill)}</strong>
+        {/*<p>Appears in {topGap.matching_roles} shortlisted roles you do not yet match.</p>*/}
       </article>}
       {salaryRange && <article>
         <span>Median listed salary range</span>
         <strong>{salaryRange}</strong>
-        <p>Across {insights.median_salary.sample_size} roles with complete annual salary ranges.</p>
+        {/*<p>Across {insights.median_salary.sample_size} roles with complete annual salary ranges.</p>*/}
       </article>}
     </div>
     {topSkills.length > 0 && <div className="missing-skills-panel">
       <div><h3>Top missing skills to learn</h3><p>Commonly requested skills not found in your resume.</p></div>
       <div className="missing-skills-list">
-        {topSkills.map((skill) => <span key={skill.skill}>{skill.skill}<small>{skill.matching_roles} roles</small></span>)}
+        {topSkills.map((skill) => <span key={skill.skill}>{formatSkillName(skill.skill)}<small>{skill.matching_roles} roles</small></span>)}
       </div>
     </div>}
   </section>;

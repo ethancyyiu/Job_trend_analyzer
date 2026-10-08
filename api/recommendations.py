@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections import Counter
+from statistics import median
 from time import perf_counter
 import uuid
 
@@ -11,7 +13,14 @@ from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from api.db import query
-from api.job_retrieval import CandidateJob, hydrate_candidate_jobs, load_active_job_catalog, retrieve_candidate_jobs
+from api.job_retrieval import (
+    CandidateJob,
+    hydrate_candidate_jobs,
+    load_active_job_catalog,
+    normalize_skill,
+    retrieve_candidate_jobs,
+    skills_from_text,
+)
 from api.resume import JobPreferences, ensure_resume_documents_table
 from api.typesafe_jev import JevBatchResult, JevConfigurationError, JevScoreResult, TypeSafeJevClient
 
@@ -39,12 +48,31 @@ class JobRecommendation(BaseModel):
     match_label: str
 
 
+class SkillGap(BaseModel):
+    skill: str
+    matching_roles: int
+
+
+class SalaryRange(BaseModel):
+    sample_size: int
+    median_min: float
+    median_max: float
+
+
+class MarketInsights(BaseModel):
+    role_count: int
+    top_missing_skills: list[SkillGap] = Field(default_factory=list, max_length=14)
+    most_common_skill_gap: SkillGap | None = None
+    median_salary: SalaryRange | None = None
+
+
 class RecommendationResponse(BaseModel):
     recommendations: list[JobRecommendation] = Field(default_factory=list, max_length=6)
     candidate_count: int
     scored_count: int
     input_tokens: int
     batch_errors: list[str] = Field(default_factory=list)
+    market_insights: MarketInsights
 
 
 def _load_resume_context(document_id: uuid.UUID) -> tuple[str, JobPreferences]:
@@ -121,6 +149,63 @@ def _merge_ranked_results(
     return recommendations, input_tokens, errors
 
 
+def _build_market_insights(resume_text: str, candidates: list[CandidateJob]) -> MarketInsights:
+    """Summarize skill gaps and comparable pay across the Jev candidate pool."""
+    resume_skills = skills_from_text(resume_text)
+    missing_skill_counts: Counter[str] = Counter()
+    skill_labels: dict[str, str] = {}
+    salary_mins: list[float] = []
+    salary_maxes: list[float] = []
+
+    for candidate in candidates:
+        job = candidate.job
+        # `skills` contains the posting's user-facing skill labels, which lets
+        # the UI recommend readable labels while matching aliases consistently.
+        for skill in job.skills:
+            label = skill.strip()
+            normalized = normalize_skill(label)
+            if not normalized or normalized in resume_skills:
+                continue
+            missing_skill_counts[normalized] += 1
+            existing_label = skill_labels.get(normalized)
+            if existing_label is None or len(label) < len(existing_label):
+                skill_labels[normalized] = label
+
+        # A median only makes sense for comparable annual salary ranges. Keep
+        # the old five-posting minimum so a handful of listings cannot imply a
+        # misleading market range.
+        if (
+            job.salary_type == "yearly"
+            and job.salary_min is not None
+            and job.salary_max is not None
+        ):
+            salary_mins.append(job.salary_min)
+            salary_maxes.append(job.salary_max)
+
+    ranked_gaps = sorted(
+        missing_skill_counts,
+        key=lambda skill: (-missing_skill_counts[skill], skill_labels[skill].casefold()),
+    )
+    top_missing_skills = [
+        SkillGap(skill=skill_labels[skill], matching_roles=missing_skill_counts[skill])
+        for skill in ranked_gaps[:14]
+    ]
+    median_salary = None
+    if len(salary_mins) >= 5:
+        median_salary = SalaryRange(
+            sample_size=len(salary_mins),
+            median_min=round(median(salary_mins), 2),
+            median_max=round(median(salary_maxes), 2),
+        )
+
+    return MarketInsights(
+        role_count=len(candidates),
+        top_missing_skills=top_missing_skills,
+        most_common_skill_gap=top_missing_skills[0] if top_missing_skills else None,
+        median_salary=median_salary,
+    )
+
+
 @router.post("/resume_documents/{document_id}/recommendations", response_model=RecommendationResponse)
 async def get_recommendations(document_id: uuid.UUID, response: Response):
     """Return the top six Jev-scored active jobs for one saved resume."""
@@ -131,13 +216,25 @@ async def get_recommendations(document_id: uuid.UUID, response: Response):
     )
     catalog_loaded_at = perf_counter()
     if not jobs:
-        return RecommendationResponse(candidate_count=0, scored_count=0, input_tokens=0)
+        return RecommendationResponse(
+            candidate_count=0,
+            scored_count=0,
+            input_tokens=0,
+            market_insights=MarketInsights(role_count=0),
+        )
 
     candidates = await asyncio.to_thread(retrieve_candidate_jobs, resume_text, preferences, jobs)
     candidates = await asyncio.to_thread(hydrate_candidate_jobs, candidates)
     candidates_selected_at = perf_counter()
     if not candidates:
-        return RecommendationResponse(candidate_count=0, scored_count=0, input_tokens=0)
+        return RecommendationResponse(
+            candidate_count=0,
+            scored_count=0,
+            input_tokens=0,
+            market_insights=MarketInsights(role_count=0),
+        )
+
+    market_insights = await asyncio.to_thread(_build_market_insights, resume_text, candidates)
 
     try:
         batch_results = await TypeSafeJevClient().score_candidates(resume_text, preferences, candidates)
@@ -165,4 +262,5 @@ async def get_recommendations(document_id: uuid.UUID, response: Response):
         scored_count=sum(len(batch.scores) for batch in batch_results),
         input_tokens=input_tokens,
         batch_errors=batch_errors,
+        market_insights=market_insights,
     )

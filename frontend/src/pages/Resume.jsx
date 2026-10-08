@@ -401,6 +401,7 @@ function RecommendationResults({ documentId, apiBase, onBack, onStartOver }) {
     <div className="recommendation-grid">
       {recommendations.map((job, index) => <RecommendationCard key={job.job_id} job={job} index={index} onSelect={() => setSelectedJob(job)} />)}
     </div>
+    <MarketInsights insights={data?.market_insights} />
     {selectedJob && <RecommendationDetailsModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
   </RecommendationShell>;
 }
@@ -432,6 +433,47 @@ function formatSalary(job) {
   const amount = (value) => `$${Math.round(Number(value)).toLocaleString()}`;
   const range = job.salary_min != null && job.salary_max != null ? `${amount(job.salary_min)}–${amount(job.salary_max)}` : amount(job.salary_min ?? job.salary_max);
   return `${range} USD${job.salary_type ? ` / ${job.salary_type}` : ""}`;
+}
+
+function formatAnnualSalaryRange(salary) {
+  if (!salary) return null;
+  const amount = (value) => `$${Math.round(Number(value)).toLocaleString()}`;
+  return `${amount(salary.median_min)}–${amount(salary.median_max)} USD / yearly`;
+}
+
+function MarketInsights({ insights }) {
+  const topSkills = insights?.top_missing_skills || [];
+  const topGap = insights?.most_common_skill_gap;
+  const salaryRange = formatAnnualSalaryRange(insights?.median_salary);
+  if (!topSkills.length && !topGap && !salaryRange) return null;
+
+  return <section className="market-insights" aria-labelledby="market-insights-title">
+    <div className="market-insights-heading">
+      <div>
+        <span>Shortlist signals</span>
+        <h2 id="market-insights-title">What to learn and what the roles pay</h2>
+      </div>
+      <p>Based on {insights.role_count} active roles shortlisted for your resume and preferences.</p>
+    </div>
+    <div className="market-insights-summary">
+      {topGap && <article>
+        <span>Most common skill gap</span>
+        <strong>{topGap.skill}</strong>
+        <p>Appears in {topGap.matching_roles} shortlisted roles you do not yet match.</p>
+      </article>}
+      {salaryRange && <article>
+        <span>Median listed salary range</span>
+        <strong>{salaryRange}</strong>
+        <p>Across {insights.median_salary.sample_size} roles with complete annual salary ranges.</p>
+      </article>}
+    </div>
+    {topSkills.length > 0 && <div className="missing-skills-panel">
+      <div><h3>Top missing skills to learn</h3><p>Commonly requested skills not found in your resume.</p></div>
+      <div className="missing-skills-list">
+        {topSkills.map((skill) => <span key={skill.skill}>{skill.skill}<small>{skill.matching_roles} roles</small></span>)}
+      </div>
+    </div>}
+  </section>;
 }
 
 function RecommendationDetailsModal({ job, onClose }) {

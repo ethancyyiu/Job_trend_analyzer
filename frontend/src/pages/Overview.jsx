@@ -13,7 +13,19 @@ function formatNumber(value) {
   return Number(value || 0).toLocaleString()
 }
 
-export default function Overview({ trends, skills, postings }) {
+function formatLastUpdated(value) {
+  if (!value) return 'Last updated: Loading…'
+
+  const timestamp = new Date(value)
+  if (Number.isNaN(timestamp.getTime())) return 'Last updated unavailable'
+
+  return `Last updated ${new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(timestamp)}`
+}
+
+export default function Overview({ trends, skills, postings, lastScrapedAt }) {
   const [days, setDays] = useState(60)
   const chartData = useMemo(() => {
     const allRows = Array.isArray(trends) ? trends : []
@@ -40,8 +52,11 @@ export default function Overview({ trends, skills, postings }) {
           <h1>Overview</h1>
           <p>Live snapshot of the job market from your tracked listings.</p>
         </div>
-        <div className="overview-range" aria-label="Trend date range">
-          {ranges.map((range) => <button key={range} className={days === range ? 'active' : ''} onClick={() => setDays(range)}>Last {range} days</button>)}
+        <div className="overview-header-actions">
+          <p className="overview-last-updated" title="Time the most recent scraper run completed">{formatLastUpdated(lastScrapedAt)}</p>
+          <div className="overview-range" aria-label="Trend date range">
+            {ranges.map((range) => <button key={range} className={days === range ? 'active' : ''} onClick={() => setDays(range)}>Last {range} days</button>)}
+          </div>
         </div>
       </header>
 

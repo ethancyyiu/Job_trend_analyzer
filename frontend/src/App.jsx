@@ -84,7 +84,7 @@ export default function App() {
   }, [page])
 
   let showing_page
-  if (page === "Overview") showing_page = <Overview trends={cache['/trends']} skills={cache['/skills']} postings={cache['/postings']} />
+  if (page === "Overview") showing_page = <Overview trends={cache['/trends']} skills={cache['/skills']} postings={cache['/postings']} lastScrapedAt={cache['/metadata']?.last_scraped_at} />
   else if (page === "DailyTrends") showing_page = <DailyTrends cachedData={cache['/trends']} forecastData={cache['/trends/forecast']} />
   else if (page === "SkillsView") showing_page = <SkillsView cachedData={cache['/skills']} />
   else if (page === "Salary") showing_page = <Salary cachedData={cache['/salary']} />
